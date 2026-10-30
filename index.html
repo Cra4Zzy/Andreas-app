@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5ef">
+  <meta name="robots" content="noindex">
+  <title>Abbate · Dein Lernbegleiter</title>
+  <script>
+    const app = new URL("./dist/", window.location.href);
+    app.search = window.location.search;
+    app.hash = window.location.hash;
+    window.location.replace(app.href);
+  </script>
+  <meta http-equiv="refresh" content="0; url=./dist/">
+  <style>
+    body { margin:0; min-height:100vh; display:grid; place-items:center; background:#f7f5ef; color:#1c3942; font:20px/1.5 system-ui,sans-serif; }
+    main { max-width:32rem; padding:2rem; }
+    h1 { font-size:2rem; line-height:1.15; }
+    a { display:inline-block; padding:.8rem 1.2rem; border-radius:.6rem; color:white; background:#1c3942; font-weight:600; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Dein Lernbegleiter startet.</h1>
+    <p>Falls die App nicht automatisch öffnet, kannst du hier direkt starten.</p>
+    <a href="./dist/">App öffnen</a>
+  </main>
+</body>
+</html>
