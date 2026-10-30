@@ -29,6 +29,8 @@ Keine echte Authentifizierung, Datenbank, Zahlungsanbindung oder serverseitige R
 - https://gabelstaplerfahrschule-andreas.de/ — originales Logo, Markenfarben und Schulungsbilder.
 - https://publikationen.dguv.de/regelwerk/dguv-vorschriften/1123/flurfoerderzeuge — fachliche Orientierung der Beispiele an DGUV Vorschrift 68, besonders §§ 7, 9, 11, 12, 15 und 16. Keine amtlichen Prüfungsfragen übernommen.
 
+Startmotiv: Originalfoto der Kundenwebsite, `assets/img/gallery-new-02.webp`, unverändert als `dist/assets/stapler-schulung.webp` übernommen.
+
 Fontlizenzen liegen in `dist/assets/fonts/`.
 
 ## Validierung

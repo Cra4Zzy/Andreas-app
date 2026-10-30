@@ -8,4 +8,4 @@
 @media(display-mode:standalone){.install-strip{display:none}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 
 /* Contrast for supporting copy; body text remains 18–20 px. */
-.hero-proof,.route-step small,.topic-row small,.progress-count,.lesson-meta,.question-note,.question-meta,.admin-note,.student-info small,.form-caption,.person-option small,.install-step p,.install-preview-note{color:#68745f}.progress-note p{color:#736d56}.feedback p{color:#637b50}.feedback.again p{color:#806d40}.page-footer,.page-footer a,.page-footer button{color:#738069}.hero-photo>img{object-position:50% 18%}
+.hero-proof,.route-step small,.topic-row small,.progress-count,.lesson-meta,.question-note,.question-meta,.admin-note,.student-info small,.form-caption,.person-option small,.install-step p,.install-preview-note{color:#68745f}.progress-note p{color:#736d56}.feedback p{color:#637b50}.feedback.again p{color:#806d40}.page-footer,.page-footer a,.page-footer button{color:#738069}.hero-photo>img{object-position:50% 50%}
