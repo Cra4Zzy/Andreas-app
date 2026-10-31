@@ -15,11 +15,12 @@ Teilnehmerorientierter Einstieg statt Admin-Dashboard. Warmes Papierweiß, Abbat
 - Ergebnisverlauf und tatsächlicher, lokal gespeicherter Lernfortschritt.
 - Teilnehmer anlegen/bearbeiten, Suche, Monatsverlängerung und Demo-Sperre abgelaufener Zugänge.
 - Manifest-Identität und Abbate-App-Icons erhalten; Installationshilfe für Windows, Mac, iPhone und Android.
+- Europäische Spracharchitektur mit automatischer Browsererkennung, gespeicherter Auswahl und allen 24 EU-Amtssprachen. Navigation und Sprachstatus reagieren auf die Auswahl; fachlich geprüfte Fragenübersetzungen werden später pro Sprache ergänzt.
 - Vorhandene lokale v1-Demodaten werden übernommen; alte Bedienungsdemorunden als solche gekennzeichnet.
 
 ## Grenzen
 
-Keine echte Authentifizierung, Datenbank, Zahlungsanbindung oder serverseitige Rechteprüfung. Die Beispielfragen ersetzen keinen verbindlichen Fragenkatalog und keinen Prüfungsnachweis; fachliche Freigabe und Originalfragen durch den Auftraggeber fehlen. Daten bleiben im Browser. Installation auf echten Mobilgeräten nicht durchgeführt.
+Keine echte Authentifizierung, Datenbank, Zahlungsanbindung oder serverseitige Rechteprüfung. Die Beispielfragen ersetzen keinen verbindlichen Fragenkatalog und keinen Prüfungsnachweis; fachliche Freigabe, Originalfragen und geprüfte Fachübersetzungen durch den Auftraggeber fehlen. Daten und Sprachauswahl bleiben im Browser. Installation auf echten Mobilgeräten nicht durchgeführt.
 
 ## Referenzen
 
