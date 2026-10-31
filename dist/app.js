@@ -4,10 +4,18 @@ const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&
 const icon = name => `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const STORE = 'abbate-lernraum-v5';
 const LEGACY_STORE = 'andreas-demo-v1';
+const LANGUAGE_STORE = 'abbate-language-v1';
+const I18N = globalThis.ABBATE_I18N;
+const supportedLanguage = code => I18N.languages.some(language=>language.code===code);
+const browserLanguage = (navigator.languages||[navigator.language||'de']).map(value=>String(value).toLowerCase().split('-')[0]).find(supportedLanguage)||'de';
+let selectedLanguage = localStorage.getItem(LANGUAGE_STORE)||browserLanguage;
+if(!supportedLanguage(selectedLanguage))selectedLanguage='de';
+const languageConfig = () => I18N.languages.find(language=>language.code===selectedLanguage)||I18N.languages.find(language=>language.code==='de');
+const tr = key => I18N.copy[selectedLanguage]?.[key]||I18N.copy.de[key]||key;
 const uid = () => globalThis.crypto?.randomUUID?.() || 'demo-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
 const dateISO = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const offsetDate = days => { const d = new Date(); d.setDate(d.getDate()+days); return dateISO(d); };
-const fmtDate = date => new Date(date+'T12:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
+const fmtDate = date => new Date(date+'T12:00:00').toLocaleDateString(languageConfig().locale,{day:'2-digit',month:'2-digit',year:'numeric'});
 const endOfDay = date => new Date(date+'T23:59:59.999');
 const active = person => endOfDay(person.until) >= new Date();
 const daysLeft = date => Math.max(0,Math.ceil((endOfDay(date)-new Date())/86400000));
@@ -58,17 +66,24 @@ const routeMap={start:'Start',lernen:'Lernen',pruefung:'Prüfung',ergebnisse:'Er
 function accessLine() { const s=student(); return `<span class="access-line ${active(s)?'':'expired'}">${icon(active(s)?'check':'lock')}${active(s)?`Zugang aktiv · ${daysLeft(s.until)} Tage`:'Zugang abgelaufen'}</span>`; }
 function heading(label,title,description='',action='') { return `<div class="page-heading"><div><div class="overline">${icon('book')}${label}</div><h1>${title}</h1>${description?`<p>${description}</p>`:''}</div>${action}</div>`; }
 function navigation() {
-  const nav=[['start','home','Start'],['lernen','book','Lernen'],['pruefung','file','Prüfung'],['ergebnisse','chart','Ergebnisse']];
+  const nav=[['start','home',tr('home')],['lernen','book',tr('learn')],['pruefung','file',tr('exam')],['ergebnisse','chart',tr('results')]];
   const current=route==='uebung'?(run?.mode==='learn'?'lernen':'pruefung'):route==='ergebnis'?'ergebnisse':route;
   $('#desktop-nav').innerHTML=nav.map(([id,,name])=>`<a href="#${id}" class="${current===id?'active':''}" ${current===id?'aria-current="page"':''}>${name}</a>`).join('');
   $('#mobile-nav').innerHTML=nav.map(([id,i,name])=>`<a href="#${id}" class="${current===id?'active':''}" ${current===id?'aria-current="page"':''}>${icon(i)}${name}</a>`).join('');
+  document.documentElement.lang=selectedLanguage;
+  $('#language-code').textContent=selectedLanguage.toUpperCase();
+  $('#language-button').setAttribute('aria-label',`${tr('change')}: ${languageConfig().name}`);
   $('#profile-name').textContent=student().name.split(' ')[0]; $('#avatar').textContent=initials(student().name);
+}
+function languageStatus() {
+  if(selectedLanguage==='de')return '';
+  return `<aside class="language-status"><span class="language-status-icon" aria-hidden="true">🌐</span><div><strong>${esc(tr('readyTitle'))}</strong><p>${esc(tr('readyBody'))}</p></div><button class="text-link" data-action="language">${esc(tr('change'))}</button></aside>`;
 }
 function topicRows() { return TOPICS.map(t=>`<button class="topic-row" data-action="topic" data-topic="${t.id}"><span class="topic-symbol ${t.color}">${icon(t.icon)}</span><span><strong class="topic-title">${t.name}</strong><small>${t.short}</small></span>${icon('arrow')}</button>`).join(''); }
 function installStrip() { return isAppMode()?'':`<aside class="install-strip"><img src="./icon-192.png?v=6" alt="" width="47" height="47"><div><strong>Dein Lernbegleiter. Auch unterwegs.</strong><p>Einmal hinzufügen, direkt vom App-Symbol starten.</p></div><button class="secondary" data-action="install">App hinzufügen ${icon('plus')}</button></aside>`; }
 function home() {
   const name=esc(student().name.split(' ')[0]), learned=mastered().length, total=QUESTIONS.length, ok=active(student());
-  return heading('Schön, dass du da bist',`Heute ein Stück sicherer, ${name}.`,'',accessLine())+`
+  return heading('Schön, dass du da bist',`Heute ein Stück sicherer, ${name}.`,'',accessLine())+languageStatus()+`
   <section class="home-hero"><div class="hero-text"><div class="course-label"><span></span>Gabelstapler · Dein Theorietraining</div><h2>Aus Wissen wird<br><span class="marker">Sicherheit.</span></h2><p>Eine kleine Lernrunde bringt dich weiter. Verstehe die Antworten – damit du sie im Arbeitsalltag sicher anwenden kannst.</p><div class="hero-actions"><button class="primary" data-action="${ok?'start-learn':'access'}">${ok?(learned?'Weiterlernen':'Lernrunde starten'):'Zugang ansehen'} ${icon(ok?'arrow':'lock')}</button><a class="text-link" href="#pruefung">Prüfung vorbereiten ${icon('arrow')}</a></div><div class="hero-proof">${icon('clock')}In deinem Tempo. Ohne Zeitdruck.</div></div><div class="hero-photo"><img src="./assets/stapler-schulung.webp" alt="Gelbes Flurförderzeug und Gabelstapler auf dem Schulungsgelände" width="1920" height="1080"><div class="photo-caption">${icon('shield')}<div><strong>Für deinen echten Arbeitsalltag.</strong><small>Aus der Praxis. Schritt für Schritt.</small></div></div></div></section>
   <section class="learning-route" aria-label="Dein Lernweg"><a class="route-step" href="#lernen"><span class="route-number">01</span><span><strong>Verstehen</strong><small>Themen in Ruhe durchgehen</small></span>${icon('arrow')}</a><button class="route-step" data-action="start-learn"><span class="route-number">02</span><span><strong>Wissen festigen</strong><small>Üben mit direkter Rückmeldung</small></span>${icon('arrow')}</button><a class="route-step" href="#pruefung"><span class="route-number">03</span><span><strong>Bereit werden</strong><small>Den Prüfungsablauf kennenlernen</small></span>${icon('arrow')}</a></section>
   <div class="home-lower"><section><div class="section-topline"><h2>Dein Kurs. In kleinen Schritten.</h2><a class="text-link" href="#lernen">Alle Themen ${icon('arrow')}</a></div><div class="topic-list">${topicRows()}</div></section><aside class="progress-note"><div class="note-label">${icon('chart')}Dein persönlicher Lernweg</div><h3>${learned?'Das wächst mit jeder Runde.':'Du musst nicht alles auf einmal können.'}</h3><p>${learned?`${learned} von ${total} Beispielfragen hast du bereits richtig beantwortet. Wiederholen hilft, dein Wissen zu festigen.`:'Fang mit einer kurzen Runde an. Zu jeder Antwort bekommst du eine Erklärung, die dich weiterbringt.'}</p><div class="progress-meter" role="progressbar" aria-label="Richtig beantwortete Beispielfragen" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${learned}"><span style="width:${learned/total*100}%"></span></div><div class="progress-count">${learned} von ${total} Fragen richtig beantwortet</div><a class="text-link" href="#ergebnisse">Deine bisherigen Runden ${icon('arrow')}</a></aside></div>${installStrip()}`;
@@ -115,7 +130,10 @@ window.addEventListener('hashchange',()=>{let next=location.hash.slice(1);if(nex
 function profile() {
   if(run) { toast('Beende zuerst deine laufende Runde.');return; }
   const s=student();
-  modal('Dein Profil & Zugang',`<div class="profile-summary"><span class="profile-avatar">${esc(initials(s.name))}</span><div><strong>${esc(s.name)}</strong><p>${esc(s.email)}</p></div></div><p>${active(s)?'Dein Zugang ist freigeschaltet':'Dein Zugang ist abgelaufen'} bis einschließlich <strong>${fmtDate(s.until)}</strong>.</p><button class="secondary" data-action="install">App auf deinem Gerät hinzufügen ${icon('phone')}</button><p class="form-caption">Teilnehmeransicht für die Vorschau wechseln:</p><div class="profile-options">${data.students.map(p=>`<button class="person-option" data-action="select-person" data-id="${esc(p.id)}"><span><strong>${esc(p.name)}</strong><small>${active(p)?'Zugang aktiv':'Zugang abgelaufen'}</small></span>${icon(p.id===s.id?'check':'arrow')}</button>`).join('')}</div><div class="profile-footer"><button class="text-link" data-action="admin">Zur Verwaltung ${icon('users')}</button><button class="text-link" data-action="about">Über die Vorschau ${icon('help')}</button></div>`);
+  modal('Dein Profil & Zugang',`<div class="profile-summary"><span class="profile-avatar">${esc(initials(s.name))}</span><div><strong>${esc(s.name)}</strong><p>${esc(s.email)}</p></div></div><p>${active(s)?'Dein Zugang ist freigeschaltet':'Dein Zugang ist abgelaufen'} bis einschließlich <strong>${fmtDate(s.until)}</strong>.</p><div class="profile-actions"><button class="secondary" data-action="language">🌐 ${esc(languageConfig().name)}</button><button class="secondary" data-action="install">App auf deinem Gerät hinzufügen ${icon('phone')}</button></div><p class="form-caption">Teilnehmeransicht für die Vorschau wechseln:</p><div class="profile-options">${data.students.map(p=>`<button class="person-option" data-action="select-person" data-id="${esc(p.id)}"><span><strong>${esc(p.name)}</strong><small>${active(p)?'Zugang aktiv':'Zugang abgelaufen'}</small></span>${icon(p.id===s.id?'check':'arrow')}</button>`).join('')}</div><div class="profile-footer"><button class="text-link" data-action="admin">Zur Verwaltung ${icon('users')}</button><button class="text-link" data-action="about">Über die Vorschau ${icon('help')}</button></div>`);
+}
+function languagePicker() {
+  modal(esc(tr('title')),`<p>${esc(tr('intro'))}</p><div class="language-grid">${I18N.languages.map(language=>`<button class="language-option ${language.code===selectedLanguage?'active':''}" data-action="set-language" data-language="${language.code}" aria-pressed="${language.code===selectedLanguage}"><span class="language-abbr">${language.code.toUpperCase()}</span><span>${esc(language.name)}</span>${language.code===selectedLanguage?`<small>${esc(tr('selected'))}</small>`:''}</button>`).join('')}</div><div class="language-review-note">${icon('shield')}<span>Die App-Struktur unterstützt alle 24 EU-Amtssprachen. Sicherheitsrelevante Fragen werden pro Sprache erst nach fachlicher Freigabe veröffentlicht.</span></div>`);
 }
 function access() { const s=student();modal('Dein Lernzugang',`<div class="notice ${active(s)?'':'warning'}">${icon(active(s)?'check':'lock')}<span>${active(s)?'Dein Zugang ist aktiv':'Dein Zugang ist abgelaufen'}. Gültig bis einschließlich <strong>${fmtDate(s.until)}</strong>.</span></div><p>${active(s)?'Du kannst die freigeschalteten Themen und Übungsrunden nutzen.':'Melde dich bei deiner Fahrschule, wenn du weiterlernen möchtest. Dein bisheriger Lernstand bleibt erhalten.'}</p><button class="primary" data-action="close">Verstanden ${icon('check')}</button>`); }
 function topicInfo(id) { const t=topic(id);if(!t)return;modal(t.name,`<p>${t.description}</p><p>In dieser Lernrunde beantwortest du ${QUESTIONS.filter(q=>q.topic===id).length} Beispielfragen. Nach jeder Frage erfährst du, worauf es ankommt.</p><button class="primary" data-action="start-learn" data-topic="${id}">Mit diesem Thema starten ${icon('arrow')}</button><p class="form-caption">Die Fragen dienen zur Vorschau. Der verbindliche Katalog deiner Fahrschule folgt vor dem echten Einsatz.</p>`); }
@@ -129,6 +147,12 @@ document.addEventListener('click',event=>{
   const action=el.dataset.action;
   if(action==='close'||action==='close-modal')close();
   else if(action==='about')about();
+  else if(action==='language')languagePicker();
+  else if(action==='set-language'){
+    selectedLanguage=el.dataset.language;
+    localStorage.setItem(LANGUAGE_STORE,selectedLanguage);
+    close();render();toast(`${languageConfig().name} · ${tr('selected')}`);
+  }
   else if(action==='profile')profile();
   else if(action==='access')access();
   else if(action==='admin'){close();go('verwaltung');}
