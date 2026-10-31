@@ -1,8 +1,7 @@
 'use strict';
 
-// Complete learner-facing source catalogue. Non-German versions are generated
-// as clearly labelled machine pre-translations and cached on the device. The
-// stable German strings remain the editorial source of truth.
+// Complete learner-facing source catalogue. The stable German strings remain
+// the editorial source of truth; machine pre-translations ship as static packs.
 const ABBATE_SOURCE = `Start
 Lernen
 Prüfung
@@ -255,60 +254,22 @@ const ABBATE_LANGUAGES = [
   ['sl','Slovenščina','sl-SI'],['es','Español','es-ES'],['sv','Svenska','sv-SE']
 ].map(([code,name,locale])=>({code,name,locale}));
 
-const ABBATE_CACHE_VERSION = 'v8';
-const packs = new Map([['de',ABBATE_SOURCE]]);
+const suppliedPacks = globalThis.ABBATE_I18N_PACKS||{};
+const repairPack = (code,pack) => pack.map((value,index)=>{
+  let repaired=String(value);
+  const variables=[...ABBATE_SOURCE[index].matchAll(/\{([a-z]+)\}/gi)].map(match=>match[1]);
+  for(const name of variables){
+    if(new RegExp(`\\{${name}\\}`,'i').test(repaired))continue;
+    if(code==='pl'&&index===100&&name==='count')repaired=repaired.replace('na przykładowe pytania','na {count} przykładowe pytania');
+    else repaired=`{${name}} ${repaired}`;
+  }
+  return repaired;
+});
+const packs = new Map([['de',ABBATE_SOURCE],...Object.entries(suppliedPacks).map(([code,pack])=>[code,repairPack(code,pack)])]);
 const textSources = new WeakMap();
 const attributeSources = new WeakMap();
 let activeCode = 'de';
 let activePack = ABBATE_SOURCE;
-
-const protect = value => {
-  const variables=[];
-  const text=String(value).replace(/\{([a-z]+)\}/gi,(_,name)=>{variables.push(name);return `ZXQVAR${variables.length-1}QXZ`;});
-  return {text,variables};
-};
-
-const restore = (value,variables) => {
-  let text=String(value);
-  variables.forEach((name,index)=>{text=text.replace(new RegExp(`ZXQ\\s*VAR\\s*${index}\\s*QXZ`,'gi'),`{${name}}`);});
-  return text;
-};
-
-async function requestChunk(code,entries){
-  const protectedEntries=entries.map(({index,value})=>{const item=protect(value);return {...item,index};});
-  const query=protectedEntries.map(item=>`ZXQ${String(item.index).padStart(3,'0')}QXZ ${item.text}`).join('\n');
-  const endpoint=new URL('https://translate.googleapis.com/translate_a/single');
-  endpoint.search=new URLSearchParams({client:'gtx',sl:'de',tl:code,dt:'t',q:query}).toString();
-  const response=await fetch(endpoint,{mode:'cors',credentials:'omit'});
-  if(!response.ok)throw new Error(`Translation service ${response.status}`);
-  const payload=await response.json();
-  const output=(payload?.[0]||[]).map(part=>part?.[0]||'').join('');
-  const results=[];
-  const matches=[...output.matchAll(/ZXQ(\d{3})QXZ\s*([\s\S]*?)(?=ZXQ\d{3}QXZ|$)/g)];
-  for(const match of matches){
-    const index=Number(match[1]);
-    const source=protectedEntries.find(item=>item.index===index);
-    if(source)results.push({index,value:restore(match[2].replace(/\s*\n\s*/g,' ').trim(),source.variables)});
-  }
-  return results;
-}
-
-async function translatePack(code){
-  const pack=[];
-  for(let start=0;start<ABBATE_SOURCE.length;start+=36){
-    const group=ABBATE_SOURCE.slice(start,start+36).map((value,offset)=>({index:start+offset,value}));
-    const translated=await requestChunk(code,group);
-    translated.forEach(item=>{pack[item.index]=item.value;});
-  }
-  for(let index=0;index<ABBATE_SOURCE.length;index++){
-    if(!pack[index]){
-      const translated=await requestChunk(code,[{index,value:ABBATE_SOURCE[index]}]);
-      pack[index]=translated[0]?.value||'';
-    }
-  }
-  if(pack.length!==ABBATE_SOURCE.length||Array.from({length:ABBATE_SOURCE.length},(_,index)=>pack[index]).some(value=>!value))throw new Error('Incomplete translation pack');
-  return pack;
-}
 
 const templateMatchers=ABBATE_SOURCE.map((source,index)=>{
   if(!/\{[a-z]+\}/i.test(source))return null;
@@ -367,17 +328,8 @@ function syncCopy(code,pack){
 
 async function load(code){
   if(!ABBATE_LANGUAGES.some(language=>language.code===code))code='de';
-  let pack=packs.get(code);
-  if(!pack&&code!=='de'){
-    try{
-      const cached=JSON.parse(localStorage.getItem(`abbate-i18n-${ABBATE_CACHE_VERSION}-${code}`));
-      if(Array.isArray(cached)&&cached.length===ABBATE_SOURCE.length&&cached.every(Boolean))pack=cached;
-    }catch{}
-  }
-  if(!pack){
-    pack=await translatePack(code);
-    try{localStorage.setItem(`abbate-i18n-${ABBATE_CACHE_VERSION}-${code}`,JSON.stringify(pack));}catch{}
-  }
+  const pack=packs.get(code);
+  if(!Array.isArray(pack)||pack.length!==ABBATE_SOURCE.length||pack.some(value=>!value))throw new Error(`Incomplete translation pack: ${code}`);
   packs.set(code,pack);activeCode=code;activePack=pack;syncCopy(code,pack);return pack;
 }
 
