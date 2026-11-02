@@ -1,0 +1,67 @@
+name: Prepare signed Google Play bundle
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_internal_test:
+        description: "Build a signed AAB for internal testing only; do not publish to Play"
+        required: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  android-play:
+    if: inputs.confirm_internal_test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: "21"
+      - run: npm ci
+      - run: npm test
+      - name: Require agreed permanent store app identifier
+        run: node scripts/check-mobile-release-id.cjs
+      - name: Restore upload keystore from GitHub Actions secrets
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ABBATE_ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ABBATE_ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ABBATE_ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ABBATE_ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$KEYSTORE_BASE64"
+          test -n "$KEYSTORE_PASSWORD"
+          test -n "$KEY_ALIAS"
+          test -n "$KEY_PASSWORD"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/abbate-upload.jks"
+          chmod 600 "$RUNNER_TEMP/abbate-upload.jks"
+          test -s "$RUNNER_TEMP/abbate-upload.jks"
+      - name: Sync native Android assets
+        run: npm run native:sync
+      - name: Build signed release AAB (upload manually to Play internal testing)
+        working-directory: android
+        env:
+          ABBATE_ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/abbate-upload.jks
+          ABBATE_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ABBATE_ANDROID_KEYSTORE_PASSWORD }}
+          ABBATE_ANDROID_KEY_ALIAS: ${{ secrets.ABBATE_ANDROID_KEY_ALIAS }}
+          ABBATE_ANDROID_KEY_PASSWORD: ${{ secrets.ABBATE_ANDROID_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon bundleRelease
+          test -s app/build/outputs/bundle/release/app-release.aab
+      - name: Provide internal upload bundle
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: abbate-play-internal-signed-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 7
