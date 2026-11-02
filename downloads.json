@@ -1,6 +1,7 @@
 {
-  "note": "Only publish reviewed, signed/notarized production installers and official store listings. Leave empty until approved.",
+  "note": "Only publish reviewed, signed/notarized production installers and official store listings. Pilot downloads are explicitly labeled and kept separate.",
   "windows": "",
+  "windowsPreview": "https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-pilot/Abbate-Lernraum-Windows-Setup.exe",
   "macos": "",
   "ios": "",
   "android": ""
