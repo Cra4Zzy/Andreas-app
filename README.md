@@ -1,5 +1,14 @@
 # Abbate · Dein Lernbegleiter
 
+## Nächste Entwicklungsstufe
+
+Separate [Schulungspass-Vorschau](dist/nachweise.html) mit QR-Freigaben und ausschließlich fiktiven Daten. Ein lokal getestetes Datenbankmodell und native Android-/iOS-Projekte sind vorbereitet, aber noch nicht mit einer produktiven Datenbank verbunden oder als Store-Binaries gebaut.
+
+- [Nachweise und noch offene Backend-Anbindung](docs/schulungspass.md)
+- [Store-Vorbereitung und offene Freigaben](docs/app-stores.md)
+
+Entwicklung: `npm ci`, `npm run build`, `npm test`, `npm run native:sync`.
+
 Mobile-first Produktvorschau für die Gabelstapler-Theorie. Buildloses HTML/CSS/JavaScript in `dist/`. Vorführlink ohne Anmeldung; ausschließlich lokale Beispieldaten.
 
 ## Gestaltung
