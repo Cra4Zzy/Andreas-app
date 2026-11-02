@@ -19,6 +19,38 @@ Android verwendet `compileSdkVersion/targetSdkVersion 36`. Apple verlangt seit 2
 
 Aktionsversionen sind auf konkrete SHAs festgeschrieben. Es werden keine Signing-Secrets benötigt oder in der Quelle hinterlegt. Native Geräte-/Emulatortests sind dadurch nicht ersetzt.
 
+
+## Release-Pipelines vorbereitet (noch nicht freigeschaltet)
+
+Am 2. November 2026 wurden zwei **manuell startbare** GitHub-Actions-Workflows vorbereitet. **Es wird nichts automatisch bei Google oder Apple veröffentlicht.** Die Debug- und Simulator-Builds bleiben zum Entwickeln erhalten.
+
+### Google Play – signiertes Android App Bundle
+
+Workflow: [Prepare signed Google Play bundle](../.github/workflows/prepare-play-release.yml).
+
+- Das Android-Gradle-Projekt liest eine Upload-Signatur nur aus Umgebungsvariablen. Keine privaten Schlüssel im Quellcode.
+- Der manuelle Workflow baut bei korrekter Konfiguration ein signiertes Android App Bundle (AAB). Nach erfolgreichem Lauf steht es als GitHub-Actions-Artefakt **abbate-play-internal-signed-aab** für 7 Tage bereit. Noch **kein Upload** in die Google Play Console.
+- Vorher muss die **endgültige App-ID** vom Kunden festgelegt, in Capacitor / Android / iOS konsistent eingetragen und mit dem Skript scripts/check-mobile-release-id.cjs geprüft werden. Der bisherige Paketname mit .preview wird für Release-Builds absichtlich zurückgewiesen.
+- Erforderliche GitHub **Actions Secrets**: ABBATE_ANDROID_KEYSTORE_BASE64 (Base64-Datei des Upload-Keystores), ABBATE_ANDROID_KEYSTORE_PASSWORD, ABBATE_ANDROID_KEY_ALIAS, ABBATE_ANDROID_KEY_PASSWORD. Niemals private Schlüssel im Chat oder Repository hinterlegen.
+- Google Play Console und Play App Signing unter einem autorisierten Kundenkonto einrichten. Danach das geprüfte AAB in die interne Testspur hochladen und auf realen Android-Geräten testen.
+
+### TestFlight – signiertes iOS-Archiv und IPA
+
+Workflow: [Prepare signed TestFlight IPA](../.github/workflows/prepare-testflight.yml).
+
+- Auf macos-26 wird ein signiertes iOS-Archiv erzeugt und als IPA exportiert. Nach erfolgreichem Lauf liegt es für 7 Tage als Artefakt **abbate-signed-ios-testflight-ipa** bereit. **Kein automatischer TestFlight-Upload**.
+- Erforderliche GitHub **Actions Variables**: ABBATE_APPLE_TEAM_ID und ABBATE_APPLE_PROFILE_NAME.
+- Erforderliche GitHub **Actions Secrets**: ABBATE_IOS_DISTRIBUTION_P12_BASE64 (Base64-P12 mit privatem Distribution-Schlüssel), ABBATE_IOS_DISTRIBUTION_P12_PASSWORD, ABBATE_IOS_APPSTORE_PROFILE_BASE64 (Base64-Provisioning-Profil).
+- Die endgültige Bundle-ID muss im Apple Developer Portal registriert sein, mit dem Profil übereinstimmen und in App Store Connect als App existieren. Teamzugang und Signing gehören zu Andreas als Betreiber.
+- Alternative am autorisierten Mac: APPLE_TEAM_ID in der Umgebung setzen und den Befehl **bash scripts/prepare-testflight.sh** ausführen. Das signierte Archiv lässt sich anschließend über Xcode Organizer zu App Store Connect hochladen.
+- **TestFlight freigeben** ist ein zusätzlicher Schritt. Der signierte Build ist noch keine für Tester zugängliche Version.
+
+### Release-Vorprüfung im bestehenden Build
+
+native-builds.yml prüft zusätzlich einen **unsignierten Android-Release-Bundle-Build** und ein **unsigniertes iOS-Release-Gerätearchiv**. Diese Vorprüfungen ersetzen keine Signatur, keinen Store-Upload und keine Endgerätetests. Die Kompilierung gilt erst als bestätigt, wenn der jeweilige GitHub-Actions-Lauf erfolgreich abgeschlossen wurde.
+
+**Weiterhin offen:** Produkt-IDs, Apple-/Play-Zugänge und Zertifikate, echte End-to-End-Tests, SMTP, abschließende Rechtstexte, geprüfte Lerninhalte und Klärung des Zahlungsmodells.
+
 ## Vor TestFlight und Play-Testspur
 
 1. Kundenkonten in Apple Developer/App Store Connect und Google Play Console festlegen, idealerweise Andreas als rechtlichen Inhaber. Kaiser Webdesign erhält Entwicklerzugriff. Vorhandene Konten nutzen; keine kostenpflichtige Anmeldung ohne Auftrag.
