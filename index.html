@@ -2,29 +2,246 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f7f5ef">
-  <meta name="robots" content="noindex">
-  <title>Abbate · Dein Lernbegleiter</title>
-  <script>
-    const app = new URL("./dist/", window.location.href);
-    app.search = window.location.search;
-    app.hash = window.location.hash;
-    window.location.replace(app.href);
-  </script>
-  <meta http-equiv="refresh" content="0; url=./dist/">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#193942">
+  <meta name="description" content="Abbate Lernraum: Lernen, Schulungen und persönliche Nachweise – im Browser sowie bald als App für Windows, Mac, iPhone und Android.">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Abbate Lernraum – Deine App für jedes Gerät</title>
+  <link rel="icon" type="image/png" href="./dist/favicon.png">
+  <link rel="apple-touch-icon" href="./dist/apple-touch-icon.png">
   <style>
-    body { margin:0; min-height:100vh; display:grid; place-items:center; background:#f7f5ef; color:#1c3942; font:20px/1.5 system-ui,sans-serif; }
-    main { max-width:32rem; padding:2rem; }
-    h1 { font-size:2rem; line-height:1.15; }
-    a { display:inline-block; padding:.8rem 1.2rem; border-radius:.6rem; color:white; background:#1c3942; font-weight:600; text-decoration:none; }
+    @font-face{font-family:Barlow;src:url("./dist/assets/fonts/barlow-700.woff") format("woff");font-weight:700;font-display:swap}
+    @font-face{font-family:Barlow;src:url("./dist/assets/fonts/barlow-800.woff") format("woff");font-weight:800;font-display:swap}
+    @font-face{font-family:SourceSans;src:url("./dist/assets/fonts/source-sans-400.woff") format("woff");font-weight:400;font-display:swap}
+    @font-face{font-family:SourceSans;src:url("./dist/assets/fonts/source-sans-600.woff") format("woff");font-weight:600;font-display:swap}
+    @font-face{font-family:SourceSans;src:url("./dist/assets/fonts/source-sans-700.woff") format("woff");font-weight:700;font-display:swap}
+    :root{--ink:#193942;--ink-dark:#112d35;--gold:#f2c744;--cream:#faf8f1;--muted:#68767a;--card:#fffefa;--radius:24px}
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--cream);color:var(--ink);font:400 18px/1.5 SourceSans,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:inherit}
+    a:focus-visible{outline:3px solid #cf9d14;outline-offset:4px}
+    .shell{max-width:1320px;margin-inline:auto;padding-inline:clamp(22px,4.6vw,64px)}
+    .top{background:var(--cream)}
+    .top .shell{height:96px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+    .brand{display:inline-flex;align-items:center;gap:13px;text-decoration:none;min-width:0}
+    .brand img{width:44px;height:57px;object-fit:contain;background:var(--gold);border-radius:9px;padding:3px}
+    .brand-wordmark{display:grid;gap:1px}
+    .brand strong{font:800 34px/.96 Barlow,sans-serif;letter-spacing:-.045em}
+    .brand small{color:#667774;font-size:13px;letter-spacing:.025em}
+    .top-actions{display:flex;align-items:center;gap:clamp(12px,2.3vw,28px)}
+    .top-actions a{text-decoration:none;font-weight:700;font-size:15px;white-space:nowrap}
+    .top-actions .nav-download{color:#4f6a6d}
+    .nav-enter{padding:13px 21px;border-radius:11px;background:var(--ink);color:white!important;transition:transform .2s,background .2s}
+    .nav-enter:hover{background:#265360;transform:translateY(-2px)}
+    .hero{overflow:hidden;background:var(--ink-dark);color:#fff}
+    .hero .shell{min-height:423px;display:grid;grid-template-columns:1.08fr .92fr;align-items:stretch;gap:45px}
+    .hero-copy{position:relative;z-index:1;padding:67px 0 63px}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;font-weight:700;font-size:13px;letter-spacing:.11em;text-transform:uppercase}
+    .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--gold)}
+    h1,h2,h3,p{margin-top:0}
+    h1,h2,h3{font-family:Barlow,system-ui,sans-serif;letter-spacing:-.038em}
+    h1{font-size:clamp(53px,5.6vw,80px);line-height:1.01;margin:22px 0 19px;font-weight:800;max-width:720px}
+    h1 span{color:var(--gold)}
+    .hero-copy>p{color:#d4e0df;font-size:20px;line-height:1.55;max-width:540px}
+    .hero-buttons{display:flex;flex-wrap:wrap;gap:13px;margin-top:29px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:11px;text-decoration:none;font-weight:700;font-size:16px;border-radius:12px;min-height:52px;padding:14px 22px;transition:transform .2s,background .2s}
+    .btn:hover{transform:translateY(-2px)}
+    .btn-gold{background:var(--gold);color:#1f3438}
+    .btn-gold:hover{background:#ffe086}
+    .btn-outline{color:white;border:1px solid rgba(255,255,255,.32)}
+    .btn-outline:hover{background:rgba(255,255,255,.09)}
+    .hero-visual{position:relative;min-width:0;align-self:stretch;isolation:isolate}
+    .hero-visual:before{content:"";position:absolute;z-index:1;inset:0;pointer-events:none;background:linear-gradient(90deg,var(--ink-dark),transparent 40%),linear-gradient(0deg,var(--ink-dark),transparent 42%)}
+    .hero-visual img{position:absolute;inset:0;width:calc(100% + 80px);height:100%;object-fit:cover;object-position:50% center;filter:saturate(.77) contrast(1.08)}
+    .floating-note{position:absolute;z-index:2;right:10px;bottom:42px;display:flex;align-items:center;gap:13px;background:#f9f7ef;color:var(--ink);border-radius:15px;padding:13px 19px;box-shadow:0 14px 30px #071a1f5c;max-width:270px}
+    .floating-note svg{flex:0 0 26px;color:#317458}
+    .floating-note strong{display:block;font-weight:700;font-size:15px}
+    .floating-note small{display:block;font-size:13px;color:#5d706e;margin-top:1px}
+    .downloads{padding-top:56px;padding-bottom:65px;scroll-margin-top:16px}
+    .downloads-heading{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:25px}
+    .section-kicker{color:#6d7466;text-transform:uppercase;letter-spacing:.14em;font-size:13px;font-weight:700}
+    h2{font-size:clamp(35px,4vw,49px);line-height:1.07;margin:10px 0 0;font-weight:800}
+    .downloads-heading>p{color:var(--muted);font-size:16px;max-width:360px;margin:0 0 5px}
+    .platforms{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}
+    .platform{background:var(--card);border:1px solid #e7e5dd;border-radius:20px;padding:26px 22px 22px;display:flex;flex-direction:column;min-height:256px;box-shadow:0 6px 20px #18394107}
+    .platform-icon{height:54px;width:54px;display:grid;place-items:center;border-radius:15px;background:#e8eeeb;color:#1b4650;margin-bottom:19px}
+    .platform-icon svg{width:29px;height:29px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .platform h3{font-size:27px;line-height:1.1;margin:0 0 6px}
+    .platform p{font-size:15px;color:#73807c;line-height:1.4;margin:0 0 25px}
+    .platform-spacer{flex:1}
+    .availability{font-size:13px;color:#95773d;display:inline-flex;align-items:center;gap:7px;font-weight:600;margin:0 0 13px}
+    .availability:before{content:"";height:7px;width:7px;background:#d8b35c;border-radius:50%}
+    .platform.ready{border-color:#c8d7cc}
+    .platform.ready .availability{color:#2b7153}
+    .platform.ready .availability:before{background:#3a9b6b}
+    .platform-action{display:flex;align-items:center;justify-content:space-between;gap:6px;text-decoration:none;padding:13px 14px;border-radius:10px;background:#ecece7;color:#747c79;font-size:15px;font-weight:700;min-height:48px}
+    .platform-action[aria-disabled="true"]{cursor:not-allowed}
+    .platform.ready .platform-action{color:#fff;background:var(--ink);cursor:pointer;transition:background .2s}
+    .platform.ready .platform-action:hover{background:#31616a}
+    .platform-action svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none}
+    .note{display:flex;align-items:start;gap:12px;margin-top:22px;padding:16px 18px;border-radius:14px;background:#f0e9d7;color:#635d4c;font-size:15px;line-height:1.5}
+    .note svg{width:22px;height:22px;flex:0 0 22px}
+    .browser{padding-top:0;padding-bottom:80px}
+    .browser-box{border-radius:24px;background:#e7eee8;padding:32px 36px;display:flex;justify-content:space-between;align-items:center;gap:30px}
+    .browser-box h2{font-size:32px;margin:0 0 8px}
+    .browser-box p{color:#566e68;font-size:17px;margin:0}
+    .btn-dark{background:var(--ink);color:#fff;white-space:nowrap}
+    .btn-dark:hover{background:#2a5862}
+    .footer{padding:26px 0 35px;border-top:1px solid #dfdfd7;font-size:14px;color:#718079}
+    .footer .shell{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+    .footer a{font-weight:600;text-decoration:none}
+    .footer a:hover{text-decoration:underline}
+    @media(max-width:1000px){
+      .hero .shell{gap:18px}
+      h1{font-size:clamp(52px,6vw,70px)}
+      .platforms{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .platform{min-height:224px}
+    }
+    @media(max-width:680px){
+      .top .shell{height:80px}
+      .brand img{width:34px;height:46px}
+      .brand strong{font-size:28px}
+      .brand small{font-size:11px}
+      .top-actions{gap:10px}
+      .top-actions .nav-download{display:none}
+      .nav-enter{padding:11px 12px;font-size:13px!important}
+      .hero .shell{grid-template-columns:1fr;gap:0}
+      .hero-copy{padding:55px 0 46px}
+      .hero-copy>p{font-size:18px}
+      h1{font-size:clamp(49px,11vw,66px);max-width:480px}
+      .hero-visual{height:155px;margin:0 -22px}
+      .hero-visual img{width:100%;object-position:center 53%}
+      .hero-visual:before{background:linear-gradient(180deg,var(--ink-dark),transparent 50%),linear-gradient(0deg,#112d3540,transparent 80%)}
+      .floating-note{bottom:14px;right:22px;padding:8px 13px}
+      .floating-note small{display:none}
+      .floating-note strong{font-size:12px}
+      .downloads{padding-top:43px;padding-bottom:46px}
+      .downloads-heading{display:block}
+      .downloads-heading>p{margin-top:12px}
+      h2{font-size:38px}
+      .platforms{gap:11px}
+      .platform{padding:19px 16px;min-height:238px;border-radius:16px}
+      .platform h3{font-size:24px}
+      .platform-icon{height:45px;width:45px;border-radius:12px;margin-bottom:14px}
+      .platform-icon svg{height:25px;width:25px}
+      .platform-action{font-size:14px;padding:11px}
+      .browser{padding-bottom:45px}
+      .browser-box{padding:26px 23px;display:grid}
+      .browser-box h2{font-size:29px}
+      .btn-dark{justify-self:start}
+    }
+    @media(max-width:390px){.platforms{grid-template-columns:1fr}.platform{min-height:0}.platform p{margin-bottom:15px}.availability{margin-top:8px}h1{font-size:46px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.nav-enter,.platform-action{transition:none}}
   </style>
 </head>
 <body>
+  <header class="top">
+    <div class="shell">
+      <a class="brand" href="./" aria-label="Abbate Lernraum – Startseite">
+        <img src="./dist/assets/logo-abbate.png" width="44" height="57" alt="">
+        <span class="brand-wordmark"><strong>Abbate.</strong><small>Mit Wissen wächst Sicherheit.</small></span>
+      </a>
+      <nav class="top-actions" aria-label="Schnellzugriff">
+        <a class="nav-download" href="#downloads">App herunterladen</a>
+        <a class="nav-enter" href="./dist/">Zum Lernraum &nbsp;↗</a>
+      </nav>
+    </div>
+  </header>
   <main>
-    <h1>Dein Lernbegleiter startet.</h1>
-    <p>Falls die App nicht automatisch öffnet, kannst du hier direkt starten.</p>
-    <a href="./dist/">App öffnen</a>
+    <section class="hero">
+      <div class="shell">
+        <div class="hero-copy">
+          <span class="eyebrow"><span class="dot"></span>Abbate Lernraum · Pilotbetrieb</span>
+          <h1>Dein Lernraum.<br><span>Überall dabei.</span></h1>
+          <p>Ob am Schreibtisch oder unterwegs: Übe für deine Schulung, behalte deine Nachweise im Blick und melde dich mit demselben Konto an.</p>
+          <div class="hero-buttons">
+            <a href="#downloads" class="btn btn-gold">App herunterladen <span aria-hidden="true">↓</span></a>
+            <a href="./dist/" class="btn btn-outline">Im Browser starten <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <img src="./dist/assets/stapler-schulung.webp" alt="">
+          <div class="floating-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12l5 5L20 6"/></svg>
+            <div><strong>Ein Konto. Alle Geräte.</strong><small>Deine Daten bleiben synchron.</small></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="downloads" class="downloads shell" aria-labelledby="downloads-title">
+      <div class="downloads-heading">
+        <div><span class="section-kicker">Die Abbate App</span><h2 id="downloads-title">Wähle dein Gerät.</h2></div>
+        <p>Installiere den Lernraum wie eine ganz normale App. Hier findest du die offiziellen Downloads, sobald sie freigegeben sind.</p>
+      </div>
+      <div class="platforms" role="list">
+        <article class="platform" data-platform="windows" role="listitem">
+          <div class="platform-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M3 7l11-2v11H3zM17 4l12-2v14H17zM3 18h11v11L3 27zM17 18h12v13l-12-2z" fill="currentColor" stroke="none"/></svg></div>
+          <h3>Windows</h3><p>Für deinen PC oder Laptop</p><div class="platform-spacer"></div>
+          <span class="availability" data-status>Veröffentlichung folgt</span>
+          <a class="platform-action" data-download="windows" aria-disabled="true" tabindex="-1"><span>In Vorbereitung</span><svg viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M4 20h16"/></svg></a>
+        </article>
+        <article class="platform" data-platform="macos" role="listitem">
+          <div class="platform-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="3" y="5" width="26" height="18" rx="2"/><path d="M12 27h8M16 23v4"/></svg></div>
+          <h3>Mac</h3><p>Für MacBook, iMac &amp; Mac mini</p><div class="platform-spacer"></div>
+          <span class="availability" data-status>Veröffentlichung folgt</span>
+          <a class="platform-action" data-download="macos" aria-disabled="true" tabindex="-1"><span>In Vorbereitung</span><svg viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M4 20h16"/></svg></a>
+        </article>
+        <article class="platform" data-platform="ios" role="listitem">
+          <div class="platform-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="8" y="2" width="16" height="28" rx="3"/><path d="M13 6h6M15 26h2"/></svg></div>
+          <h3>iPhone &amp; iPad</h3><p>Download über den App Store</p><div class="platform-spacer"></div>
+          <span class="availability" data-status>Veröffentlichung folgt</span>
+          <a class="platform-action" data-download="ios" aria-disabled="true" tabindex="-1"><span>In Vorbereitung</span><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+        </article>
+        <article class="platform" data-platform="android" role="listitem">
+          <div class="platform-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="6" y="9" width="20" height="19" rx="4"/><path d="M10 9l-2-5m14 5 2-5M12 15h.01M20 15h.01M10 28v2m12-2v2"/></svg></div>
+          <h3>Android</h3><p>Download über Google Play</p><div class="platform-spacer"></div>
+          <span class="availability" data-status>Veröffentlichung folgt</span>
+          <a class="platform-action" data-download="android" aria-disabled="true" tabindex="-1"><span>In Vorbereitung</span><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+        </article>
+      </div>
+      <div class="note" role="status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg>
+        <span><strong>Aktuell im Pilotbetrieb:</strong> Der Lernraum funktioniert bereits im Browser. Die installierbaren Versionen werden nach Test, Signierung und Freigabe hier verlinkt. Du kannst mit demselben Konto später auch die App verwenden.</span>
+      </div>
+    </section>
+    <section class="browser shell" aria-labelledby="browser-title">
+      <div class="browser-box">
+        <div><h2 id="browser-title">Du möchtest direkt loslegen?</h2><p>Starte den Lernraum ohne Installation und melde dich mit deinem Konto an.</p></div>
+        <a class="btn btn-dark" href="./dist/">Lernraum jetzt öffnen <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
   </main>
+  <footer class="footer">
+    <div class="shell">
+      <span>© Abbate Lernraum · Ein Lernangebot der Gabelstaplerfahrschule Abbate</span>
+      <span><a href="./dist/datenschutz.html">Datenschutzhinweise</a> · <a href="https://gabelstaplerfahrschule-andreas.de/" rel="noopener">Zur Fahrschule</a></span>
+    </div>
+  </footer>
+  <script>
+    (async function() {
+      try {
+        const response = await fetch("./downloads.json", { cache: "no-store" });
+        if (!response.ok) return;
+        const links = await response.json();
+        for (const platform of ["windows","macos","ios","android"]) {
+          const url = links[platform];
+          if (typeof url !== "string" || !/^https:\/\/[^/\s]+/i.test(url)) continue;
+          const card = document.querySelector('[data-platform="' + platform + '"]');
+          const action = card && card.querySelector("[data-download]");
+          if (!card || !action) continue;
+          card.classList.add("ready");
+          card.querySelector("[data-status]").textContent = "Jetzt verfügbar";
+          action.href = url;
+          action.removeAttribute("aria-disabled");
+          action.removeAttribute("tabindex");
+          action.querySelector("span").textContent = platform === "ios" ? "Zum App Store" : platform === "android" ? "Zu Google Play" : "Jetzt herunterladen";
+          if (platform === "ios" || platform === "android") action.rel = "noopener";
+        }
+      } catch (error) {
+        // Never present a placeholder as an active download.
+      }
+    })();
+  </script>
 </body>
 </html>
