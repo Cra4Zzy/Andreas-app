@@ -1,0 +1,103 @@
+name: Deploy Abbate website to ALL-INKL (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: abbate-allinkl-website-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: abbate-pilot
+    steps:
+      - name: Check out website source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Install Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies and test
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Assemble public website only
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p website
+          cp index.html downloads.json website/
+          cp -a dist website/dist
+          test -s website/index.html
+          test -s website/dist/konto.html
+          test -s website/dist/portal.js
+          test -s website/dist/backend-config.js
+          test -s website/dist/vendor/supabase.js
+
+      - name: Upload distributable bundle for manual fallback
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: abbate-allinkl-webspace-package
+          path: website/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Verify hosting secrets and isolated target path
+        shell: bash
+        env:
+          FTP_HOST: ${{ secrets.ABBATE_FTPS_HOST }}
+          FTP_USER: ${{ secrets.ABBATE_FTPS_USER }}
+          FTP_PASSWORD: ${{ secrets.ABBATE_FTPS_PASSWORD }}
+          REMOTE_DIR: ${{ vars.ABBATE_FTPS_REMOTE_DIR }}
+        run: |
+          set -euo pipefail
+          test -n "$FTP_HOST"
+          test -n "$FTP_USER"
+          test -n "$FTP_PASSWORD"
+          test -n "$REMOTE_DIR"
+          case "$FTP_HOST" in *[!a-zA-Z0-9.-]*|'') echo 'Invalid FTP hostname' >&2; exit 1;; esac
+          # This deployment must never target a website root, home directory,
+          # or any folder other than the separate Abbate application folder.
+          case "$REMOTE_DIR" in
+            */gabelstaplerfahrschule-andreas.de/abbate-app/|gabelstaplerfahrschule-andreas.de/abbate-app/)
+              ;;
+            *) echo 'Refusing deployment: remote dir must end in /gabelstaplerfahrschule-andreas.de/abbate-app/' >&2; exit 1;;
+          esac
+
+      - name: Secure FTPS upload to ALL-INKL (explicit TLS, no remote delete)
+        shell: bash
+        env:
+          FTP_HOST: ${{ secrets.ABBATE_FTPS_HOST }}
+          FTP_USER: ${{ secrets.ABBATE_FTPS_USER }}
+          FTP_PASSWORD: ${{ secrets.ABBATE_FTPS_PASSWORD }}
+          REMOTE_DIR: ${{ vars.ABBATE_FTPS_REMOTE_DIR }}
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+          # Credentials are passed using environment variables, never interpolated
+          # directly into shell commands or committed to the repository.
+          lftp <<'LFTP_SCRIPT'
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate yes
+          set ftp:passive-mode true
+          set cmd:fail-exit true
+          set net:max-retries 3
+          set net:timeout 25
+          open --env-password --user "$FTP_USER" "ftp://$FTP_HOST"
+          mirror --reverse --verbose=1 --only-newer --no-perms --parallel=2 website "$REMOTE_DIR"
+          bye
+          LFTP_SCRIPT
+
+      - name: Deployment reminder
+        run: echo 'FTP transfer completed. Verify HTTPS root and /dist/konto.html separately before changing Supabase Site URL.'
