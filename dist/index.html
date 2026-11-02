@@ -6,7 +6,7 @@
 <title>Abbate Lernbegleiter · Gabelstapler</title>
 <link rel="manifest" href="./manifest.webmanifest?v=9"><link rel="icon" href="./favicon.png?v=9" type="image/png"><link rel="apple-touch-icon" href="./apple-touch-icon.png?v=9">
 <link rel="preload" href="./assets/fonts/source-sans-400.woff" as="font" type="font/woff" crossorigin><link rel="preload" href="./assets/fonts/barlow-700.woff" as="font" type="font/woff" crossorigin>
-<link rel="stylesheet" href="./styles.css?v=9"><script defer src="./i18n-packs.js?v=9"></script><script defer src="./i18n.js?v=9"></script><script defer src="./konten-model.js?v=1"></script><script defer src="./vendor/supabase.js?v=1"></script><script defer src="./backend-config.js?v=1"></script><script defer src="./backend.js?v=1"></script><script defer src="./app.js?v=12"></script>
+<link rel="stylesheet" href="./styles.css?v=9"><link rel="stylesheet" href="./download-banner.css?v=1"><script defer src="./i18n-packs.js?v=9"></script><script defer src="./i18n.js?v=9"></script><script defer src="./konten-model.js?v=1"></script><script defer src="./vendor/supabase.js?v=1"></script><script defer src="./backend-config.js?v=1"></script><script defer src="./backend.js?v=1"></script><script defer src="./app.js?v=12"></script>
 <style>html[data-loading] body{visibility:hidden}html[data-loading]:after{content:"Abbate Lernraum wird sicher verbunden …";position:fixed;inset:0;display:grid;place-items:center;font:20px sans-serif;color:#1c3942;background:#f7f5ef}</style></head><body><svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
     <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></symbol>
     <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5v16M3 3h5a5 5 0 0 1 4 2 5 5 0 0 1 4-2h5v16h-5a5 5 0 0 0-4 2 5 5 0 0 0-4-2H3Z"/></symbol>
@@ -28,7 +28,13 @@
 <nav id="desktop-nav" class="desktop-nav" aria-label="Hauptnavigation"></nav>
 <div class="header-tools"><button class="preview-label" data-action="about">Pilotbetrieb</button><button id="language-button" class="language-button" data-action="language" aria-label="Sprache wählen"><span aria-hidden="true">🌐</span><strong id="language-code">DE</strong></button><button id="profile-button" class="profile-button" data-action="profile" aria-label="Profil und Zugang"><span id="avatar"></span><span id="profile-name">Konto</span></button></div>
 </div></header>
+<aside class="download-banner" id="download-banner" aria-label="App-Downloads">
+  <div class="download-banner-inner">
+    <div class="download-banner-message"><strong>Dein Lernraum als richtige App.</strong><span>Windows, Mac, iPhone und Android – alle Downloads auf einen Blick.</span></div>
+    <a class="download-banner-link" href="../#downloads">App-Downloads ansehen <span aria-hidden="true">↓</span></a>
+  </div>
+</aside>
 <main id="main" tabindex="-1"></main>
-<footer class="page-footer"><span>Mit Wissen wächst Sicherheit.</span><div><button data-action="install">App installieren</button><button data-action="about">Über den Lernraum</button><a href="https://gabelstaplerfahrschule-andreas.de/" target="_blank" rel="noopener"><span>Zur Fahrschule</span> ↗</a></div></footer>
+<footer class="page-footer"><span>Mit Wissen wächst Sicherheit.</span><div><button data-action="install">App-Downloads</button><button data-action="about">Über den Lernraum</button><a href="https://gabelstaplerfahrschule-andreas.de/" target="_blank" rel="noopener"><span>Zur Fahrschule</span> ↗</a></div></footer>
 <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile Hauptnavigation"></nav><dialog id="modal"><div id="modal-content"></div></dialog><div id="toast" class="toast" role="status" aria-live="polite"></div>
 <noscript>Bitte aktiviere JavaScript, um dich sicher anzumelden.</noscript></body></html>
