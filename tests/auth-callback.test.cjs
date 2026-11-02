@@ -10,7 +10,8 @@ const portal=fs.readFileSync(path.join(__dirname,'../dist/portal.js'),'utf8');
 
 function evaluate(hash,hostname='cra4zzy.github.io'){
   const globals={location:{hash,search:'',hostname,protocol:'https:'}};
-  vm.runInNewContext(config,{globalThis:globals});
+  // Node vm contexts do not inherit URLSearchParams; browsers supply it natively.
+  vm.runInNewContext(config,{globalThis:globals,URLSearchParams});
   return globals;
 }
 
