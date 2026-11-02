@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#193942">
-  <meta name="description" content="Abbate Lernraum: Lernen, Schulungen und persönliche Nachweise – im Browser sowie bald als App für Windows, Mac, iPhone und Android.">
+  <meta name="description" content="Abbate Lernraum: digitales Gabelstapler-Theorietraining, Schulungsnachweise und Downloads für verschiedene Geräte.">
   <meta name="robots" content="noindex,nofollow">
   <title>Abbate Lernraum – Deine App für jedes Gerät</title>
   <link rel="icon" type="image/png" href="./dist/favicon.png">
@@ -80,6 +80,7 @@
     .platform.ready .platform-action{color:#fff;background:var(--ink);cursor:pointer;transition:background .2s}
     .platform.ready .platform-action:hover{background:#31616a}
     .platform-action svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none}
+    .platform-disclaimer{display:block;margin-top:10px;font-size:12px;line-height:1.4;color:#6f7774}
     .note{display:flex;align-items:start;gap:12px;margin-top:22px;padding:16px 18px;border-radius:14px;background:#f0e9d7;color:#635d4c;font-size:15px;line-height:1.5}
     .note svg{width:22px;height:22px;flex:0 0 22px}
     .browser{padding-top:0;padding-bottom:80px}
@@ -152,7 +153,7 @@
     <section class="hero">
       <div class="shell">
         <div class="hero-copy">
-          <span class="eyebrow"><span class="dot"></span>Abbate Lernraum · Pilotbetrieb</span>
+          <span class="eyebrow"><span class="dot"></span>Deine digitale Lernplattform</span>
           <h1>Dein Lernraum.<br><span>Überall dabei.</span></h1>
           <p>Ob am Schreibtisch oder unterwegs: Übe für deine Schulung, behalte deine Nachweise im Blick und melde dich mit demselben Konto an.</p>
           <div class="hero-buttons">
@@ -172,7 +173,7 @@
     <section id="downloads" class="downloads shell" aria-labelledby="downloads-title">
       <div class="downloads-heading">
         <div><span class="section-kicker">Die Abbate App</span><h2 id="downloads-title">Wähle dein Gerät.</h2></div>
-        <p>Installiere den Lernraum wie eine ganz normale App. Hier findest du die offiziellen Downloads, sobald sie freigegeben sind.</p>
+        <p>Lade den Lernraum für deinen Computer herunter oder melde dich direkt online an. Die mobilen Store-Versionen folgen.</p>
       </div>
       <div class="platforms" role="list">
         <article class="platform" data-platform="windows" role="listitem">
@@ -199,10 +200,6 @@
           <span class="availability" data-status>Veröffentlichung folgt</span>
           <a class="platform-action" data-download="android" aria-disabled="true" tabindex="-1"><span>In Vorbereitung</span><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
         </article>
-      </div>
-      <div class="note" role="status">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg>
-        <span><strong>Aktuell im Pilotbetrieb:</strong> Der Lernraum funktioniert bereits im Browser. Die installierbaren Versionen werden nach Test, Signierung und Freigabe hier verlinkt. Du kannst mit demselben Konto später auch die App verwenden.</span>
       </div>
     </section>
     <section class="browser shell" aria-labelledby="browser-title">
@@ -240,8 +237,8 @@
         }
         // Only explicitly marked pilot releases may activate unsigned test links.
         for (const [platform, key, label] of [
-          ["windows", "windowsPreview", "Windows-Testversion laden"],
-          ["macos", "macosPreview", "Mac-Testversion laden"]
+          ["windows", "windowsPreview", "Windows herunterladen"],
+          ["macos", "macosPreview", "Mac herunterladen"]
         ]) {
           if (links[platform]) continue; // Official signed release takes priority.
           const url = links[key];
@@ -250,16 +247,16 @@
           const action = card && card.querySelector("[data-download]");
           if (!card || !action) continue;
           card.classList.add("ready");
-          card.querySelector("[data-status]").textContent = "Testversion verfügbar";
+          card.querySelector("[data-status]").textContent = "Desktop-Installer verfügbar";
           action.href = url;
           action.rel = "noopener noreferrer";
           action.removeAttribute("aria-disabled");
           action.removeAttribute("tabindex");
           action.querySelector("span").textContent = label;
-        }
-        if (links.windowsPreview || links.macosPreview) {
-          const notice = document.querySelector(".note span");
-          if (notice) notice.innerHTML = "<strong>Desktop-Testversionen:</strong> Die Installer sind für interne Tests bestimmt. Windows kann SmartScreen anzeigen; die Mac-Testversion ist nicht Apple-notarisiert und kann durch Gatekeeper blockiert werden. App Store und Google Play folgen nach Prüfung und Freigabe.";
+          const info = document.createElement("small");
+          info.className = "platform-disclaimer";
+          info.textContent = "Noch ohne öffentliche Code-Signatur. Dein Betriebssystem kann bei der Installation einen Sicherheitshinweis anzeigen.";
+          action.insertAdjacentElement("afterend", info);
         }
       } catch (error) {
         // Never present a placeholder as an active download.
