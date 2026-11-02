@@ -240,7 +240,7 @@
         }
         // Pilot releases are kept separate from signed production downloads.
         const preview = links.windowsPreview;
-        if (!links.windows && typeof preview === "string" && /^https:\\/\\/[^/\\s]+/i.test(preview)) {
+        if (!links.windows && typeof preview === "string" && preview.startsWith("https://")) {
           const card = document.querySelector('[data-platform="windows"]');
           const action = card && card.querySelector('[data-download="windows"]');
           if (card && action) {
