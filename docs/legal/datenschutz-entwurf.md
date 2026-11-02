@@ -52,7 +52,7 @@ Für dokumentierte Schulungen oder Prüfungen können insbesondere Teilnehmerken
 
 ## 6. Zugangsabrechnung und Zahlungsdaten
 
-Im aktuell geprüften Stand besitzt die App keine integrierte Zahlungsabwicklung. Die Fahrschule prüft Zahlungen außerhalb der Anwendung und aktiviert, verlängert oder pausiert Zugänge manuell. Innerhalb der Anwendung werden dabei nur Zugangsstatus und Laufzeit angezeigt bzw. verwaltet.
+Im aktuell geprüften Stand besitzt die App keine integrierte Zahlungsabwicklung. Die Fahrschule prüft Zahlungen außerhalb der Anwendung und schaltet einen einmaligen Zugang für 30 Kalendertage manuell frei. Es gibt keine automatische Vertragsverlängerung oder wiederkehrende Abbuchung. Eine Verlängerung um weitere 30 Tage erfolgt nur nach neuer Bestellung und bestätigter Zahlung. Ein laufender Zugang endet nach Ablauf der vereinbarten Tage automatisch. Eine Pause verlängert die bereits bezahlte Frist nicht. Innerhalb der Anwendung werden dabei nur Zugangsstatus und Laufzeit angezeigt bzw. verwaltet.
 
 Soweit die Fahrschule Rechnungs-, Zahlungs- oder Buchhaltungsdaten außerhalb der App verarbeitet, gelten dafür die jeweiligen Informationspflichten und gesetzlichen Aufbewahrungsfristen. **[ERGÄNZEN: Zahlungsweg, eventueller Zahlungsdienstleister, Rechnungssoftware, Datenkategorien und konkrete Aufbewahrungsregeln. Falls später App-Store-Abrechnung oder Stripe/PayPal eingeführt wird, diesen Abschnitt aktualisieren.]**
 
