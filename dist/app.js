@@ -12,6 +12,7 @@ let selectedLanguage = localStorage.getItem(LANGUAGE_STORE)||browserLanguage;
 if(!supportedLanguage(selectedLanguage))selectedLanguage='de';
 const languageConfig = () => I18N.languages.find(language=>language.code===selectedLanguage)||I18N.languages.find(language=>language.code==='de');
 const tr = key => I18N.copy[selectedLanguage]?.[key]||I18N.copy.de[key]||key;
+const passPreviewLabel=()=>({bg:'Преглед на удостоверенията',hr:'Pregled potvrda',cs:'Náhled osvědčení',da:'Forhåndsvisning af beviser',nl:'Voorbeeld opleidingsbewijzen',en:'Training records preview',et:'Koolitustõendite eelvaade',fi:'Koulutustodistusten esikatselu',fr:'Aperçu des attestations',de:'Schulungsnachweise ansehen',el:'Προεπισκόπηση βεβαιώσεων',hu:'Képzési igazolások előnézete',ga:'Réamhamharc ar thaifid oiliúna',it:'Anteprima attestati',lv:'Apmācību apliecinājumu priekšskatījums',lt:'Mokymų pažymėjimų peržiūra',mt:'Preview taċ-ċertifikati',pl:'Podgląd zaświadczeń',pt:'Pré-visualização de certificados',ro:'Previzualizare certificate',sk:'Náhľad osvedčení',sl:'Predogled potrdil',es:'Vista previa de certificados',sv:'Förhandsvisning av utbildningsintyg'}[selectedLanguage]||'Training records preview');
 const uid = () => globalThis.crypto?.randomUUID?.() || 'demo-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
 const dateISO = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 const offsetDate = days => { const d = new Date(); d.setDate(d.getDate()+days); return dateISO(d); };
@@ -20,7 +21,8 @@ const endOfDay = date => new Date(date+'T23:59:59.999');
 const active = person => endOfDay(person.until) >= new Date();
 const daysLeft = date => Math.max(0,Math.ceil((endOfDay(date)-new Date())/86400000));
 const initials = name => name.split(' ').filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase();
-const isAppMode = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const isNativeApp = () => globalThis.Capacitor?.isNativePlatform?.() === true;
+const isAppMode = () => isNativeApp() || window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 function installPlatform() {
   const ua = navigator.userAgent;
   if (/Android/i.test(ua)) return 'android';
@@ -137,6 +139,7 @@ function profile() {
   if(run) { toast('Beende zuerst deine laufende Runde.');return; }
   const s=student();
   modal('Dein Profil & Zugang',`<div class="profile-summary"><span class="profile-avatar">${esc(initials(s.name))}</span><div><strong>${esc(s.name)}</strong><p>${esc(s.email)}</p></div></div><p>${active(s)?'Dein Zugang ist freigeschaltet':'Dein Zugang ist abgelaufen'} bis einschließlich <strong>${fmtDate(s.until)}</strong>.</p><div class="profile-actions"><button class="secondary" data-action="language">🌐 ${esc(languageConfig().name)}</button><button class="secondary" data-action="install">App auf deinem Gerät hinzufügen ${icon('phone')}</button></div><p class="form-caption">Teilnehmeransicht für die Vorschau wechseln:</p><div class="profile-options">${data.students.map(p=>`<button class="person-option" data-action="select-person" data-id="${esc(p.id)}"><span><strong>${esc(p.name)}</strong><small>${active(p)?'Zugang aktiv':'Zugang abgelaufen'}</small></span>${icon(p.id===s.id?'check':'arrow')}</button>`).join('')}</div><div class="profile-footer"><button class="text-link" data-action="admin">Zur Verwaltung ${icon('users')}</button><button class="text-link" data-action="about">Über die Vorschau ${icon('help')}</button></div>`);
+  const passLink=document.createElement('a');passLink.className='secondary';passLink.href='./nachweise.html';passLink.textContent=passPreviewLabel()+' · DE / Demo';$('#modal-content .profile-actions').append(passLink);
 }
 function languagePicker() {
   modal(esc(tr('title')),`<p>${esc(tr('intro'))}</p><div class="language-grid">${I18N.languages.map(language=>`<button class="language-option ${language.code===selectedLanguage?'active':''}" data-action="set-language" data-language="${language.code}" aria-pressed="${language.code===selectedLanguage}"><span class="language-abbr">${language.code.toUpperCase()}</span><span>${esc(language.name)}</span>${language.code===selectedLanguage?`<small>${esc(tr('selected'))}</small>`:''}</button>`).join('')}</div><div class="language-review-note">${icon('shield')}<span>${esc(I18N.t(8))}</span></div>`);
@@ -208,7 +211,7 @@ document.addEventListener('submit',event=>{
 $('#modal').addEventListener('click',event=>{if(event.target===$('#modal')){const r=$('#modal').getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)close();}});
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstall=event;});
 window.addEventListener('appinstalled',()=>{deferredInstall=null;close();render();toast('Die App wurde hinzugefügt.');});
-if('serviceWorker' in navigator&&/^https:/.test(location.protocol))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if(!isNativeApp()&&'serviceWorker' in navigator&&/^https:/.test(location.protocol))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 route=location.hash.slice(1)||'start';if(route==='verlauf')route='ergebnisse';if(!Object.hasOwn(routeMap,route)||route==='uebung'||route==='ergebnis')route='start';
 async function boot(){
   try{await I18N.load(selectedLanguage);}

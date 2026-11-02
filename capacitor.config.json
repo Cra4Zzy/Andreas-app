@@ -1,0 +1,9 @@
+{
+  "appId": "de.abbate.lernraum.preview",
+  "appName": "Abbate Lernraum Vorschau",
+  "webDir": "dist",
+  "backgroundColor": "#f7f7f2",
+  "loggingBehavior": "debug",
+  "android": { "allowMixedContent": false },
+  "ios": { "contentInset": "automatic" }
+}

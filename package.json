@@ -1,0 +1,24 @@
+{
+  "name": "abbate-lernraum",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Abbate learning app and native release preparation",
+  "scripts": {
+    "build": "node scripts/build-web.cjs",
+    "test": "node --test tests/*.test.cjs",
+    "native:sync": "npm run build && cap sync",
+    "native:android": "cap open android",
+    "native:ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/core": "8.6.0",
+    "@capacitor/ios": "8.6.0",
+    "qrcode": "1.5.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.0",
+    "@electric-sql/pglite": "0.5.14",
+    "esbuild": "0.28.2"
+  }
+}

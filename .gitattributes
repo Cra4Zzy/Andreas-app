@@ -1,0 +1,2 @@
+*.bat text eol=crlf whitespace=cr-at-eol
+dist/vendor/qrcode-LICENSE.txt whitespace=-blank-at-eof
