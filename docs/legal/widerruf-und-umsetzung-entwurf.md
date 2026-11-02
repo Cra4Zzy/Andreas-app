@@ -1,7 +1,7 @@
 # Widerrufsbelehrung, Musterformular und Button-Konzept – Abbate Lernraum (PRÜFENTWURF)
 
 **Stand:** 2. November 2026  
-**Status:** noch nicht freigegeben. Für einen kostenpflichtigen B2C-Fernabsatzvertrag müssen Vertragsart, Kaufweg und tatsächlicher Start der Leistung geklärt werden. **Nicht unverändert in der App veröffentlichen.**
+**Status:** noch nicht freigegeben. Zahlungen erfolgen bar bei Andreas oder per Überweisung; diese Zahlungsarten beantworten nicht die Frage, wie und wo ein rechtlich verbindlicher Vertrag abgeschlossen wird. Für einen kostenpflichtigen B2C-Fernabsatzvertrag müssen Vertragsart, Abschlussweg und tatsächlicher Start der Leistung geklärt werden. **Nicht unverändert in der App veröffentlichen.**
 
 ## 1. Gesetzliche Einordnung vorab
 
@@ -10,6 +10,8 @@ Dieser Entwurf setzt voraus, dass ein **Verbraucher** direkt mit Andreas Abbate 
 Der Abbate Lernraum enthält sowohl eine fortlaufend erreichbare digitale Dienstleistung als auch Lerninhalte. Bestätigt ist ein einmaliger kostenpflichtiger 30-Tage-Zugang ohne automatische Vertragsverlängerung. Die genaue vertragsrechtliche Einordnung und die gesetzlichen Voraussetzungen für ein etwaiges Erlöschen des Widerrufsrechts sind vor Verwendung dieses Mustertexts juristisch zu klären. **Sofortiger Zugang bedeutet nicht automatisch, dass Verbraucher auf Widerruf verzichten.**
 
 Die elektronische Widerrufsfunktion nach § 356a BGB gilt seit dem 19. Juni 2026 unter den dort genannten Voraussetzungen für über Online-Oberflächen geschlossene Fernabsatzverträge. Bei einem online abschließbaren entgeltlichen Dauerschuldverhältnis kann auch § 312k BGB einschlägig sein. Diese Pflichten lassen sich nicht allein mit einem Link auf eine AGB-Seite erfüllen.
+
+**Prüfung des tatsächlichen Ablaufs:** Ein Vertrag, der in den Geschäftsräumen von Andreas persönlich geschlossen und bar bezahlt wird, unterscheidet sich rechtlich von einer telefonischen oder per E-Mail angenommenen Buchung mit anschließender Überweisung. Bei Fernabsatz im Sinne von § 312c BGB kann das Widerrufsrecht unabhängig vom Zahlweg gelten; bei außerhalb von Geschäftsräumen geschlossenen Verträgen sind § 312b BGB und die einschlägigen Widerrufsregeln gesondert zu prüfen. Die neue Online-Widerrufsfunktion nach § 356a BGB greift nach ihrem Wortlaut bei Abschluss über eine Online-Benutzeroberfläche. Die Abbate-App bietet derzeit keine Online-Bestellung an. **Das beseitigt nicht ein gegebenenfalls bestehendes normales Widerrufsrecht.**
 
 ## 2. Muster-Widerrufsbelehrung für einen grundsätzlich widerruflichen Fernabsatzvertrag
 
@@ -87,7 +89,7 @@ Wenn über die Webseite ein entsprechender entgeltlicher Verbrauchervertrag übe
 
 - [ ] B2C/B2B und konkreten Vertragspartner feststellen
 - [ ] Vertragstyp (digitale Dienstleistung / Inhalte / kombiniert) rechtlich festlegen
-- [ ] Fälligkeit, Preis, Steuer, Laufzeit, Verlängerung, Leistungsbeginn transparent darstellen
+- [ ] Fälligkeit, Preis, Steuer, Laufzeit, Verlängerung, Leistungsbeginn transparent darstellen; Barzahlung oder Banküberweisung und Quittungs-/Rechnungsweg festlegen
 - [ ] Verbraucherinformationen und Widerrufsbelehrung **vor** Vertragsschluss anzeigen und dauerhaft bereitstellen
 - [ ] Verlangt der Verbraucher sofortigen Leistungsbeginn, nur rechtlich zulässige und nachweisbare Erklärungen einholen; kein vorausgewähltes Opt-in
 - [ ] Falls Online-Checkout: § 312j-Bestellübersicht und eindeutiger Zahlungspflicht-Button
