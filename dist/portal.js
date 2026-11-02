@@ -41,20 +41,34 @@
     AbbateQR.toCanvas(canvas,globalThis.ABBATE_CONFIG.portalUrl,{width:240,margin:4,errorCorrectionLevel:'M'}).catch(()=>{canvas.hidden=true;});
   }
   function failure(error){root.innerHTML=`<section class="portal-empty"><h1>Gerade nicht erreichbar.</h1><p>${safe(B.message(error))}</p><button class="primary" data-refresh>Erneut versuchen</button><a class="portal-text" href="./konto.html">Zur Anmeldung</a></section>`;}
-  let recoveryMode=location.hash.includes('type=recovery');
+  // A recovery link must be confirmed by Supabase's PASSWORD_RECOVERY event.
+  // A previously-used link can coexist with an already-signed-in browser:
+  // never treat that existing session as proof that a reset link is valid.
+  const initialAuthHash = new URLSearchParams(location.hash.slice(1));
+  const initialAuthQuery = new URLSearchParams(location.search);
+  const recoveryLinkAttempt = initialAuthHash.get('type') === 'recovery' || initialAuthQuery.get('type') === 'recovery';
+  const failedAuthLink = initialAuthHash.has('error') || initialAuthHash.has('error_code') ||
+    initialAuthQuery.has('error') || initialAuthQuery.has('error_code');
+  let recoveryMode = false;
+  function invalidResetLink(){
+    root.innerHTML=`<section class="portal-empty"><span class="portal-eyebrow">Dein Zugang</span><h1>Dieser Link ist nicht mehr gültig.</h1><p>Der Link wurde möglicherweise bereits verwendet oder ist abgelaufen. Fordere bitte einen neuen Link an, um dein Passwort sicher zurückzusetzen.</p><a class="primary" href="./konto.html#passwort">Neuen Link anfordern</a><a class="portal-text" href="./konto.html">Zur Anmeldung</a></section>`;
+  }
   async function render(){
     root.setAttribute('aria-busy','true');
     try{
       await load();
+      if(view==='login' && failedAuthLink){invalidResetLink();return;}
       if(recoveryMode){newPassword();return;}
+      if(view==='login' && recoveryLinkAttempt){invalidResetLink();return;}
       if(view==='admin'){
         if(!state.me){root.innerHTML='<section class="portal-empty"><h1>Verwaltung anmelden.</h1><p>Dieser Bereich ist nur für berechtigte Mitarbeiter zugänglich.</p><a class="primary" href="./konto.html?next=verwaltung">Zur Anmeldung</a></section>';return;}
         if(!B.isStaff(state.me)){root.innerHTML='<section class="portal-empty"><h1>Kein Verwaltungszugang.</h1><p>Dein Konto besitzt keine aktive Mitarbeiterberechtigung.</p><a class="primary" href="./nachweise.html">Zu meinen Schulungen</a></section>';return;}
         if(!state.students.some(p=>p.id===selected))selected=state.students.find(p=>p.access==='pending')?.id||state.students[0]?.id||null;
         admin();
       }else if(view==='login'){
+        if(location.hash==='#passwort'){recovery();return;}
         if(state.me){if(location.search==='?next=verwaltung'){location.replace('./verwaltung.html');return;}if(location.hash==='#einstellungen'){settings();return;}location.replace('./nachweise.html');return;}
-        if(location.hash==='#passwort')recovery();else login();
+        login();
       }else reader();
     }catch(error){failure(error);}finally{root.removeAttribute('aria-busy');}
   }
@@ -82,7 +96,16 @@
       }
       if(form.id==='password-form'||form.id==='change-password-form'){
         result=await B.client.auth.updateUser({password:values.password});if(result.error)throw result.error;
-        recoveryMode=false;location.hash='einstellungen';await render();notice('Dein neues Passwort ist gespeichert.');return;
+        recoveryMode=false;
+        if(form.id==='password-form'){
+          // A reset link creates a temporary authenticated session. End it locally
+          // so the learner confirms the new password with a fresh sign-in.
+          const signOutResult=await B.client.auth.signOut({scope:'local'});
+          if(signOutResult.error)throw signOutResult.error;
+          location.replace('./konto.html#passwort-gesetzt');
+          return;
+        }
+        location.hash='einstellungen';await render();notice('Dein neues Passwort ist gespeichert.');return;
       }
       if(form.id==='self-delete-form'){await B.deleteAccount(state.me.id,values.password);location.replace('./konto.html#konto-geloescht');return;}
       if(!B.isStaff(state.me))throw Error('Staff access required');
@@ -126,5 +149,6 @@
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&view!=='admin')render();});
   setInterval(()=>{if(!document.hidden&&view==='reader')render();},30000);
   if(location.hash==='#konto-geloescht')notice('Dein Konto und die zugehörigen Daten wurden gelöscht.');
+  if(location.hash==='#passwort-gesetzt')notice('Dein Passwort wurde geändert. Bitte melde dich mit deinem neuen Passwort an.');
   render();
 })();
