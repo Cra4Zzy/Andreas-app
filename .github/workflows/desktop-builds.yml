@@ -63,8 +63,8 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  publish_windows_preview:
-    name: Publish Windows pilot download
+  publish_desktop_previews:
+    name: Publish Windows and Mac test installers
     needs: desktop
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -72,34 +72,58 @@ jobs:
       contents: write
       actions: read
     steps:
-      - name: Download successful Windows installer
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Fetch Windows installer
         uses: actions/download-artifact@v4
         with:
           name: abbate-windows-x64-pilot-installer
           path: windows-artifact
-      - name: Give the setup a stable download name
+      - name: Fetch universal Mac installer
+        uses: actions/download-artifact@v4
+        with:
+          name: abbate-macos-universal-pilot-installer
+          path: macos-artifact
+      - name: Prepare stable asset names
         shell: bash
         run: |
           set -euo pipefail
-          setup_file="$(find windows-artifact -type f -name '*.exe' -print -quit)"
-          test -n "$setup_file"
+          win="$(find windows-artifact -type f -name '*.exe' -print -quit)"
+          mac="$(find macos-artifact -type f -name '*.dmg' -print -quit)"
+          test -s "$win"
+          test -s "$mac"
           mkdir -p release
-          cp "$setup_file" release/Abbate-Lernraum-Windows-Setup.exe
-      - name: Publish or refresh public Windows test prerelease
-        shell: bash
+          cp "$win" release/Abbate-Lernraum-Windows-Setup.exe
+          cp "$mac" release/Abbate-Lernraum-macOS-Universal.dmg
+      - name: Publish pilot assets to durable GitHub prerelease
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+        shell: bash
         run: |
           set -euo pipefail
           tag="desktop-pilot"
-          asset="release/Abbate-Lernraum-Windows-Setup.exe"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" "$asset" --clobber
+            gh release upload "$tag" release/Abbate-Lernraum-Windows-Setup.exe release/Abbate-Lernraum-macOS-Universal.dmg --clobber
           else
-            gh release create "$tag" "$asset" \
+            gh release create "$tag" release/Abbate-Lernraum-Windows-Setup.exe release/Abbate-Lernraum-macOS-Universal.dmg \
               --target "$GITHUB_SHA" \
-              --title "Abbate Lernraum – Windows-Testversion" \
-              --notes "Vorabversion zum Testen, noch nicht produktiv freigegeben oder digital signiert. Windows SmartScreen kann deshalb einen Sicherheitshinweis anzeigen. Bitte nur aus der offiziellen Abbate-Downloadseite beziehen." \
+              --title "Abbate Lernraum – Desktop-Testversionen" \
+              --notes "Interne Testversionen – noch nicht produktiv freigegeben. Windows ist nicht code-signiert. Mac ist nicht Developer-ID-signiert oder notarisiert und kann von Gatekeeper blockiert werden." \
               --prerelease
+          fi
+          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx 'Abbate-Lernraum-Windows-Setup.exe'
+          gh release view "$tag" --json assets --jq '.assets[].name' | grep -Fx 'Abbate-Lernraum-macOS-Universal.dmg'
+      - name: Enable only the verified pilot downloads on the landing page
+        shell: bash
+        env:
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          node -e "const fs=require('fs');const f='downloads.json';const j=JSON.parse(fs.readFileSync(f,'utf8'));const b='https://github.com/'+process.env.GH_REPO+'/releases/download/desktop-pilot/';j.windowsPreview=b+'Abbate-Lernraum-Windows-Setup.exe';j.macosPreview=b+'Abbate-Lernraum-macOS-Universal.dmg';fs.writeFileSync(f,JSON.stringify(j,null,2)+'\n')"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Expose verified desktop test downloads"
+            git push origin HEAD:main
           fi
