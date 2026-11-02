@@ -19,7 +19,7 @@ Drei auf den ermittelten technischen Betrieb abgestimmte, **noch nicht veröffen
 - [AGB und Nutzungsbedingungen](legal/agb-entwurf.md)
 - [Widerruf, Musterformular und Online-Funktionen](legal/widerruf-und-umsetzung-entwurf.md)
 
-**Ausstehende Entscheidungen:** Wer zahlt (B2C/B2B)? **Entschieden:** einmalig bezahlter 30-Tage-Zugang ohne automatische Verlängerung. Welche Preise und Laufzeiten? Welche Zahlungsmethode? Welche Nachweise müssen wie lange aufbewahrt werden? Welche Arbeitgeber- und Schulungsdaten verlassen die App?
+**Bestätigt:** Einmalig bezahlter 30-Tage-Zugang ohne automatische Verlängerung, Zahlung direkt bei Andreas **bar oder per Banküberweisung**, manuelle Freischaltung nach Zahlungseingang. **Noch offen:** Wer schließt den Vertrag und zahlt (B2C/B2B)? Wo und wie kommt die verbindliche Vereinbarung zustande? Preis inklusive Steuer, Beleg-/Rechnungsprozess, Zeitpunkt der Freischaltung und rechtskonforme Verbraucherinformationen. Welche Nachweise müssen wie lange aufbewahrt werden? Welche Arbeitgeber- und Schulungsdaten verlassen die App?
 
 **Bekanntes Risiko:** Das Impressum der ursprünglichen Fahrschulwebsite enthält gegenwärtig nicht ausgefüllte Platzhalter zu Steuer-/Registrierungsangaben und Verbraucherstreitbeilegung. Diese Angaben mit Andreas prüfen, bevor der App-Vertrag öffentlich angeboten wird. Seit dem 19. Juni 2026 ist bei betroffenen Online-Fernabsatzverträgen die Widerrufsfunktion nach § 356a BGB zu berücksichtigen. Bei entsprechendem Online-Dauerschuldverhältnis § 312k BGB sowie bei Online-Kauf § 312j BGB prüfen.
 
@@ -45,4 +45,4 @@ Das ist **nicht** die Freigabe für zahlende Endkunden oder Stores.
 
 ## 30-Tage-Zugang (technischer Stand)
 
-Die Serverfunktion `abbate_manage_access` ermöglicht nur autorisierten Administratoren eine Freischaltung für 30 aufeinanderfolgende Kalendertage, weitere 30 Tage bei bestätigter Folgebestellung, das Fortsetzen einer Pause und das Pausieren. Keine automatische Verlängerung oder Belastung. Das Ablaufdatum bleibt nach Pausierung unverändert. Bestehende Mitgliedschaften wurden nicht migriert/verkürzt. Vor echtem Verkauf Zahlungseingang, Vertragsbeginn, Kundenhinweis und Wiederruf im Prozess abnehmen.
+Die Barzahlung und Banküberweisung werden außerhalb der App von Andreas abgewickelt; im Programm selbst entstehen keine Zahlungsvorgänge. Die Serverfunktion `abbate_manage_access` ermöglicht nur autorisierten Administratoren eine Freischaltung für 30 aufeinanderfolgende Kalendertage, weitere 30 Tage bei bestätigter Folgebestellung, das Fortsetzen einer Pause und das Pausieren. Keine automatische Verlängerung oder Belastung. Das Ablaufdatum bleibt nach Pausierung unverändert. Bestehende Mitgliedschaften wurden nicht migriert/verkürzt. Vor echtem Verkauf Zahlungseingang, Vertragsbeginn, Kundenhinweis und Wiederruf im Prozess abnehmen.
