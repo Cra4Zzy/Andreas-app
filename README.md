@@ -10,6 +10,7 @@ Lern-App und persönlicher Schulungspass mit Supabase-Anmeldung. Teilnehmer regi
 - Schüler sehen ausschließlich ihre eigenen bestätigten Einträge. Übungsrunden werden getrennt auf dem Server gespeichert und sind keine Prüfungsnachweise.
 - Passwortwiederherstellung, Kontoeinstellungen und serverseitige Teilnehmer-Kontolöschung mit erneuter Passwortbestätigung sind implementiert.
 - Native Android-/iOS-Projekte mit Abbate-Icons und Startbildern, Android API 36, deaktivierten WebView-Logs und Android-Backup. Automatische Pilotbuilds in GitHub Actions.
+- Desktop-Pilot mit Tauri 2: GitHub Actions erstellt Windows-NSIS-Installer (.exe) und universelle macOS-DMGs (Intel/Apple Silicon). Noch keine öffentliche, signierte Distribution; siehe [Desktop-Installer](docs/desktop-installers.md).
 
 **Noch kein öffentlicher Produktstart:** eigener E-Mail-Versand und Auth-Redirects müssen konfiguriert, das erste echte Adminkonto freigegeben und Anmeldung/Verwaltung auf echten Konten und Geräten durchgetestet werden. Entwicklerkonten, Produktionsidentität, Signing und Store-Einreichung fehlen. Die sechs Beispiel-Lernfragen, Fachübersetzungen und Datenschutzhinweise benötigen die Freigabe des Betreibers.
 
