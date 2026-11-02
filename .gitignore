@@ -17,3 +17,7 @@ ios-build/
 *.apk
 *.aab
 *.ipa
+
+# Generated Tauri desktop outputs and icons
+src-tauri/target/
+src-tauri/icons/
