@@ -1,0 +1,13 @@
+/* Prominent web-only path back to the official Abbate download overview. */
+.download-banner{background:#f2c744;color:#193942;border-bottom:1px solid #d2a83e}
+.download-banner-inner{max-width:1400px;margin:auto;padding:13px 48px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.download-banner-message{display:grid;gap:1px}
+.download-banner-message strong{font:700 19px/1.25 Barlow,system-ui,sans-serif}
+.download-banner-message span{font:400 14px/1.3 SourceSans,system-ui,sans-serif;color:#4e5345}
+.download-banner-link{display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;white-space:nowrap;font:700 15px/1.2 SourceSans,system-ui,sans-serif;background:#193942;color:#fff;padding:12px 19px;border-radius:10px;transition:background .2s,transform .2s}
+.download-banner-link:hover{background:#2b5662;transform:translateY(-1px)}
+.download-banner-link:focus-visible{outline:3px solid #fff;outline-offset:3px}
+@media(max-width:850px){.download-banner-inner{padding:13px 25px}}
+@media(max-width:600px){.download-banner-inner{padding:12px 20px;gap:10px}.download-banner-message strong{font-size:16px}.download-banner-message span{font-size:12px}.download-banner-link{font-size:13px;padding:12px 11px;white-space:normal;text-align:center;flex-shrink:0}}
+@media(max-width:365px){.download-banner-inner{flex-wrap:wrap}.download-banner-link{width:100%}}
+@media(prefers-reduced-motion:reduce){.download-banner-link{transition:none}}
