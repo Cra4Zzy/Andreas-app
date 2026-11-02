@@ -28,10 +28,11 @@
      completions:records.data.map(r=>({id:r.id,student:r.participant_id,title:r.abbate_courses?.title||'Schulung',
        kind:r.kind==='refresher'?'instruction':r.kind,outcome:r.outcome,completedAt:r.completed_at,reference:r.reference,revokedAt:r.revoked_at}))};
  }
- async function setAccess(id,status,until){
-   const r=await client.from('abbate_memberships').update({access_status:status,access_until:until||null})
-     .eq('school_id',me.school).eq('user_id',id).eq('role','learner').select('user_id');fail(r.error);
-   if(r.data.length!==1)throw Error('Zugang konnte nicht geändert werden. Bitte Berechtigung prüfen.');
+ async function setAccess(id,action){
+   if(!['activate','extend','pause','resume'].includes(action))throw Error('Ungültige Zugangsaktion.');
+   const r=await client.rpc('abbate_manage_access',{p_school:me.school,p_participant:id,p_action:action});
+   fail(r.error);
+   return r.data;
  }
  async function addCompletion(input){const r=await client.rpc('abbate_record_completion',{
    school:me.school,participant:input.student,title:input.title,kind:input.kind==='instruction'?'refresher':input.kind,
