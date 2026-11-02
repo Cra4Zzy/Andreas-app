@@ -194,7 +194,7 @@ function practicePayload(input){
   return {results:results.slice(-100),mastered:Array.isArray(input?.mastered)?input.mastered.filter(id=>ids.includes(id)):[]};
 }
 async function checkAccess(){
-  try{const me=await B.identity();if(!me){location.replace('./konto.html');return false;}if(!active(me)){location.replace('./nachweise.html');return false;}data.students=[me];return true;}
+  try{const me=await B.identity();if(!me){location.replace('./konto.html');return false;}if(!await B.termsAccepted()){location.replace('./konto.html#bedingungen');return false;}if(!active(me)){location.replace('./nachweise.html');return false;}data.students=[me];return true;}
   catch{document.documentElement.dataset.loading='';$('#main').innerHTML='<section class="empty-state"><h1>Keine Serververbindung.</h1><p>Bitte prüfe deine Internetverbindung und lade die Seite erneut.</p><a class="primary" href="./index.html">Erneut verbinden</a><a class="text-link" href="./konto.html">Zur Anmeldung</a></section>';document.documentElement.removeAttribute('data-loading');run=null;return false;}
 }
 async function boot(){
