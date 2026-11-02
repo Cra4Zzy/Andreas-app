@@ -10,7 +10,7 @@ Stand: 2. November 2026. **Interner Pilot**, noch keine signierte/notarisierte �
 - Der GitHub-Workflow `.github/workflows/desktop-builds.yml` erstellt unabhängig voneinander:
   - Windows x64: `.exe` (NSIS-Installationsprogramm).
   - macOS Universal: `.dmg` (Intel + Apple Silicon).
-- Beide Dateien stehen nach **erfolgreichem** Workflow-Lauf im Bereich **Actions → Desktop pilot installers → aktueller Lauf → Artifacts**. GitHub-Artefakte sind ZIP-Dateien, in denen die Installer liegen. Artefakte verfallen nach 14 Tagen. Es gibt noch keinen freigegebenen öffentlichen Direktlink.
+- Beide Dateien stehen nach **erfolgreichem** Workflow-Lauf im Bereich **Actions → Desktop pilot installers → aktueller Lauf → Artifacts**. GitHub-Artefakte sind ZIP-Dateien und verfallen nach 14 Tagen. Zusätzlich ist jetzt ein Veröffentlichungsschritt eingerichtet: Erst wenn **Windows und Universal-Mac-Build erfolgreich** sind, werden beide Installer im GitHub-Prerelease mit dem Tag `desktop-pilot` veröffentlicht. Der Workflow trägt dann `windowsPreview` und `macosPreview` in `downloads.json` ein, sodass die Download-Seite beide ausdrücklich als **Testversionen** anzeigt. Ein bereits zuvor bestätigter Windows-Testdownload existiert. **Der neue Mac-Direktlink gilt erst nach erfolgreichem Release-Job als verfügbar; die Installation auf einem echten Mac bleibt separat zu testen.**
 
 ## Manuelle Builds
 
