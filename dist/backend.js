@@ -34,7 +34,15 @@
    fail(r.error);
    return r.data;
  }
- async function addCompletion(input){const r=await client.rpc('abbate_record_completion',{
+ async function termsAccepted(){
+   const r=await client.rpc('abbate_terms_accepted');
+   fail(r.error);return r.data===true;
+ }
+ async function acceptTerms(){
+   const r=await client.rpc('abbate_accept_terms',{p_version:'2026-11-02'});
+   fail(r.error);
+ }
+  async function addCompletion(input){const r=await client.rpc('abbate_record_completion',{
    school:me.school,participant:input.student,title:input.title,kind:input.kind==='instruction'?'refresher':input.kind,
    outcome:input.outcome,completed_on:input.completedAt});fail(r.error);return r.data;}
  async function updateRecord(id,patch){
@@ -59,7 +67,7 @@
    if(/sign in again/i.test(text))return 'Bitte melde dich zur Bestätigung erneut an.';
    return 'Die Anfrage konnte nicht abgeschlossen werden. Bitte neu laden oder die Fahrschule kontaktieren.';
  }
- globalThis.ABBATE_BACKEND={client,identity,state,setAccess,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,message,
+ globalThis.ABBATE_BACKEND={client,identity,state,setAccess,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,message,
    isStaff:p=>!!p&&['admin','trainer'].includes(p.role)&&p.access==='active'&&(!p.until||p.until>=globalThis.ABBATE_ACCOUNTS.today()),
    get me(){return me;}};
 })();
