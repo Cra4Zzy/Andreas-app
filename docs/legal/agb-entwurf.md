@@ -3,7 +3,7 @@
 **Stand des Entwurfs:** 2. November 2026  
 **Status: NICHT RECHTLICH FREIGEGEBEN – VOR VERWENDUNG VERTRAGSMODELL KLÄREN.**
 
-**Bestätigtes Geschäftsmodell:** ein einmalig bezahlter, nach Zahlungsprüfung manuell freigeschalteter Zugang für 30 Kalendertage; keine automatische Verlängerung, keine wiederkehrende Abbuchung. Die App besitzt keine Online-Kasse. **Noch zu bestimmen:** Preis, Vertragsabschluss, konkreter Zahlungsweg, Verbraucher-/Unternehmenskunden und Startzeitpunkt im Einzelfall. Die Vertragsbedingungen müssen vor Vertragsschluss zugänglich sein und wirksam einbezogen werden.
+**Bestätigtes Geschäftsmodell:** ein einmalig bezahlter, nach Zahlungsprüfung manuell freigeschalteter Zugang für 30 Kalendertage; keine automatische Verlängerung, keine wiederkehrende Abbuchung. Die App besitzt keine Online-Kasse. **Zahlungswege bestätigt:** Barzahlung direkt bei Andreas oder klassische Banküberweisung an die Fahrschule. Die App führt keine Zahlungen aus und speichert keine Bank- oder Kartendaten. **Noch zu bestimmen:** Preis inklusive Steuern, tatsächlicher Vertragsschluss (vor Ort/telefonisch/per E-Mail), Verbraucher-/Unternehmenskunden, Beleg-/Rechnungsprozess und Vertrags-/Leistungsbeginn im Einzelfall. Die Vertragsbedingungen müssen vor Vertragsschluss zugänglich sein und wirksam einbezogen werden.
 
 ## 1. Anbieter und Geltungsbereich
 
@@ -28,11 +28,13 @@
 
 ## 4. Vertragsschluss und Preise – VOR VERWENDUNG AUSFÜLLEN
 
-1. Bei einer kostenpflichtigen Freischaltung werden **Preis einschließlich anwendbarer Steuern, enthaltene Leistungen, Beginn und Ende des Nutzungszeitraums, Zahlungsweg sowie gegebenenfalls Laufzeit-/Verlängerungsbedingungen** vor Abgabe einer verbindlichen Bestellung klar mitgeteilt.
+1. Bei einer kostenpflichtigen Freischaltung werden **Preis einschließlich anwendbarer Steuern, enthaltene Leistungen, Beginn und Ende des Nutzungszeitraums, Zahlungsweg sowie die fehlende automatische Verlängerung** vor Abgabe einer verbindlichen Bestellung klar mitgeteilt. Die Zahlung erfolgt **wahlweise bar direkt bei Andreas oder per Banküberweisung** auf ein von der Fahrschule mitgeteiltes Konto. Bankdaten werden nicht über die Abbate-App erhoben oder verarbeitet.
 2. **Einmaliger 30-Tage-Zugang:** Nach gesonderter Bestellung und bestätigter Zahlung wird der Lernzugang von der Fahrschule manuell für 30 aufeinanderfolgende Kalendertage freigeschaltet. Der Freischaltungstag zählt als erster Kalendertag. Das im Konto angezeigte Ablaufdatum ist der letzte Tag mit Zugang. **[VERTRAGLICH BESTÄTIGEN: Für Zahlungen vor späterer Freischaltung müssen Beginn und gegebenenfalls Lieferfrist eindeutig vereinbart werden.]**
 3. Der Zugang endet nach Ablauf dieser 30 Tage automatisch. Es erfolgt **keine automatische Vertragsverlängerung**, keine wiederkehrende Abbuchung und kein automatischer erneuter Vertragsschluss. Für weitere 30 Tage bedarf es einer neuen bewussten Bestellung und Bezahlung. Bei vorzeitig bezahlter Verlängerung wird die neue 30-Tage-Periode an das bestehende Enddatum angehängt; bereits bezahlte Resttage bleiben erhalten.
-4. Eine Registrierung allein löst keine Zahlungspflicht aus. **[OFFEN: tatsächlichen Preis, Steuerangaben, Zahlungsart, Vertragspartner und Buchungsbestätigung ergänzen.]**
+4. Eine Registrierung allein löst keine Zahlungspflicht aus. Der Zahlungseingang wird von Andreas außerhalb der App geprüft. Eine Freischaltung ist nicht mit einem automatisch ausgeführten Zahlungsvorgang verbunden. **[OFFEN: tatsächlichen Preis, Steuerangaben, Vertragspartner, Zahlungsbeleg/Rechnung und Buchungsbestätigung ergänzen.]**
 5. Bei Bestellung durch Arbeitgeber ist zu regeln, ob Arbeitgeber oder Teilnehmer Vertragspartei ist und wer die Kosten trägt.
+
+**Wichtig zur Bestellform:** Die Bezahlung per Überweisung bedeutet nicht automatisch, dass ein Vertrag im Fernabsatz oder vor Ort geschlossen wurde. Für telefonisch/per E-Mail zustande gekommene Verträge können bei Vorliegen der Voraussetzungen insbesondere §§ 312c und 312d BGB und ein Widerrufsrecht gelten. Für im Geschäftsraum geschlossene Verträge gelten andere Voraussetzungen; auch der Abschluss außerhalb von Geschäftsräumen ist gesondert zu betrachten. **[KONKRETEN VERKAUFS-/VERTRAGSABSCHLUSSWEG BESTÄTIGEN.]**
 
 ## 5. Freischaltung, Laufzeit, Verlängerung, Kündigung
 
@@ -107,7 +109,7 @@ Telefon: 0176 43515596
 
 - [ ] Wer ist Vertragspartner und wer bezahlt – Teilnehmer privat, Arbeitgeber oder beide?
 - [ ] Bestätigt: einmalige 30-Tage-Freischaltung ohne automatische Verlängerung. Vertragsunterlagen und Adminprozess darauf abgestimmt?
-- [ ] Preise, MwSt.-Hinweis, Rechnungsstellung, Zahlungsweg und Vertragsabschluss klar definiert
+- [ ] Barzahlung und Banküberweisung bestätigt; tatsächlicher Preis, MwSt.-Hinweis, Belege/Rechnungen und Abschlussweg klar dokumentiert
 - [ ] Beginn und Ende der entgeltlichen Leistung mit Server-Logik abgestimmt
 - [ ] Widerrufsbelehrung + Musterformular und ggf. Widerrufsbutton umgesetzt
 - [ ] Bei Online-Abo: Kündigungsbutton nach § 312k BGB umgesetzt
