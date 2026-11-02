@@ -78,7 +78,7 @@ jobs:
         env:
           FTP_HOST: ${{ secrets.ABBATE_FTPS_HOST }}
           FTP_USER: ${{ secrets.ABBATE_FTPS_USER }}
-          FTP_PASSWORD: ${{ secrets.ABBATE_FTPS_PASSWORD }}
+          LFTP_PASSWORD: ${{ secrets.ABBATE_FTPS_PASSWORD }}
           REMOTE_DIR: ${{ vars.ABBATE_FTPS_REMOTE_DIR }}
         run: |
           set -euo pipefail
@@ -86,7 +86,7 @@ jobs:
           sudo apt-get install -y -qq lftp
           # Credentials are passed using environment variables, never interpolated
           # directly into shell commands or committed to the repository.
-          lftp <<'LFTP_SCRIPT'
+          lftp <<LFTP_SCRIPT
           set ftp:ssl-force true
           set ftp:ssl-protect-data true
           set ssl:verify-certificate yes
