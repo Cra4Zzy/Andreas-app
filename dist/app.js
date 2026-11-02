@@ -20,7 +20,7 @@ const endOfDay = date => new Date(date+'T23:59:59.999');
 const active = person => globalThis.ABBATE_ACCOUNTS.access(person);
 const daysLeft = date => Math.max(0,Math.ceil((endOfDay(date)-new Date())/86400000));
 const initials = name => name.split(' ').filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase();
-const isNativeApp = () => globalThis.Capacitor?.isNativePlatform?.() === true;
+const isNativeApp = () => globalThis.Capacitor?.isNativePlatform?.() === true || location.protocol === 'tauri:' || location.hostname === 'tauri.localhost';
 const isAppMode = () => isNativeApp() || window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 function installPlatform() {
   const ua = navigator.userAgent;
