@@ -54,7 +54,7 @@ Für dokumentierte Schulungen oder Prüfungen können insbesondere Teilnehmerken
 
 Im aktuell geprüften Stand besitzt die App keine integrierte Zahlungsabwicklung. Die Fahrschule prüft Zahlungen außerhalb der Anwendung und schaltet einen einmaligen Zugang für 30 Kalendertage manuell frei. Es gibt keine automatische Vertragsverlängerung oder wiederkehrende Abbuchung. Eine Verlängerung um weitere 30 Tage erfolgt nur nach neuer Bestellung und bestätigter Zahlung. Ein laufender Zugang endet nach Ablauf der vereinbarten Tage automatisch. Eine Pause verlängert die bereits bezahlte Frist nicht. Innerhalb der Anwendung werden dabei nur Zugangsstatus und Laufzeit angezeigt bzw. verwaltet.
 
-Soweit die Fahrschule Rechnungs-, Zahlungs- oder Buchhaltungsdaten außerhalb der App verarbeitet, gelten dafür die jeweiligen Informationspflichten und gesetzlichen Aufbewahrungsfristen. **[ERGÄNZEN: Zahlungsweg, eventueller Zahlungsdienstleister, Rechnungssoftware, Datenkategorien und konkrete Aufbewahrungsregeln. Falls später App-Store-Abrechnung oder Stripe/PayPal eingeführt wird, diesen Abschnitt aktualisieren.]**
+Die Zahlung erfolgt **entweder bar persönlich bei Andreas oder per Banküberweisung** auf ein von der Fahrschule mitgeteiltes Konto. Die App verarbeitet keine vollständigen Kontodaten, Kreditkartenangaben oder Zahlungsinstrumente. In der App werden nur Zugangsstatus, Zugangsende und eine autorisierte Freischaltungsaktion gespeichert. Bargeldbelege, Kontoauszüge, Buchungs-/Rechnungsdaten und etwaige Zuordnungen zu einem Teilnehmer werden außerhalb der App von der Fahrschule beziehungsweise deren Bank und eingesetzten Buchhaltungssystemen verarbeitet. **[ERGÄNZEN: Bank, konkrete Beleg-/Buchhaltungssoftware, verantwortliche Rolle, Datenkategorien, Aufbewahrungsfristen und Empfänger; insbesondere bei Kauf durch Arbeitgeber.]** Wird später ein Online-Zahlungsdienst eingesetzt, muss dieser Abschnitt vorab aktualisiert werden.
 
 ## 7. E-Mails zur Konto- und Zugriffssicherheit
 
@@ -121,7 +121,7 @@ Diese Datenschutzhinweise können bei Änderungen der technischen Ausstattung, d
 - [ ] Supabase-DPA, Subprozessoren, Drittlandzugriffe und Transfergarantien dokumentiert
 - [ ] ALL-INKL-AVV sowie Logs/Fristen dokumentiert
 - [ ] Aufbewahrung und tatsächliche serverseitige Kontolöschung abgestimmt
-- [ ] Zahlungs- und Rechnungssystem abschließend geklärt
+- [ ] Zahlungsarten bar/Banküberweisung bestätigt; verwendete Bank, Quittungs-/Rechnungssystem und gesetzliche Aufbewahrung konkret dokumentiert
 - [ ] Technische lokale Speicherungen und evtl. SDKs auf allen Plattformen geprüft
 - [ ] Datenkategorien der Apps und Cloud-Verarbeitung geprüft
 - [ ] Rechtsanwalt bzw. Datenschutzfachperson finaler Text zur Abnahme vorgelegt
