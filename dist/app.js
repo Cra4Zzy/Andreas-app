@@ -22,6 +22,8 @@ const daysLeft = date => Math.max(0,Math.ceil((endOfDay(date)-new Date())/864000
 const initials = name => name.split(' ').filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase();
 const isNativeApp = () => globalThis.Capacitor?.isNativePlatform?.() === true || location.protocol === 'tauri:' || location.hostname === 'tauri.localhost';
 const isAppMode = () => isNativeApp() || window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+// Native desktop/mobile builds already have an app icon and need no web download prompt.
+if (isNativeApp()) document.querySelector('#download-banner')?.remove();
 function installPlatform() {
   const ua = navigator.userAgent;
   if (/Android/i.test(ua)) return 'android';
@@ -82,7 +84,7 @@ function languageStatus() {
   return `<aside class="language-status"><span class="language-status-icon" aria-hidden="true">🌐</span><div><strong>${esc(I18N.t(180))}</strong><p>${esc(I18N.t(8))}</p></div><button class="text-link" data-action="language">${esc(tr('change'))}</button></aside>`;
 }
 function topicRows() { return TOPICS.map(t=>`<button class="topic-row" data-action="topic" data-topic="${t.id}"><span class="topic-symbol ${t.color}">${icon(t.icon)}</span><span><strong class="topic-title">${t.name}</strong><small>${t.short}</small></span>${icon('arrow')}</button>`).join(''); }
-function installStrip() { return isAppMode()?'':`<aside class="install-strip"><img src="./icon-192.png?v=9" alt="" width="47" height="47"><div><strong>Auch unterwegs lernen.</strong><p>Einmal hinzufügen und direkt über das App-Symbol starten.</p></div><button class="secondary" data-action="install">App hinzufügen ${icon('plus')}</button></aside>`; }
+function installStrip() { return isAppMode()?'':`<aside class="install-strip"><img src="./icon-192.png?v=9" alt="" width="47" height="47"><div><strong>Auch unterwegs lernen.</strong><p>Hier findest du die Versionen für Windows, Mac, iPhone und Android.</p></div><button class="secondary" data-action="install">Downloads ansehen ${icon('arrow')}</button></aside>`; }
 function home() {
   const name=esc(student().name.split(' ')[0]), learned=mastered().length, total=QUESTIONS.length, ok=active(student());
   return heading('Schön, dass du da bist',`Heute ein Stück sicherer, ${name}.`,'',accessLine())+languageStatus()+`
@@ -205,10 +207,12 @@ async function boot(){
 }
 boot();
 
-function install(platform=installPlatform()){
-if(isAppMode()){modal('Du nutzt bereits die App-Ansicht.',`<div class="install-app-identity"><img src="./icon-192.png?v=9" alt="Abbate App-Symbol"><div><strong>Andreas Abbate</strong><span>Lern- & Prüfungsapp</span></div><span class="app-mode-check">${icon('check')}</span></div><p>Der Lernbereich ist bereits in einem eigenen App-Fenster geöffnet.</p><button class="primary" data-action="close">Weiterlernen ${icon('arrow')}</button>`);return;}
-const platforms=[['windows','Windows'],['mac','Mac'],['iphone','iPhone'],['android','Android']];
-modal('Dein Lernbereich als App',`<div class="install-app-identity"><img src="./icon-192.png?v=9" alt="Abbate App-Symbol"><div><strong>Andreas Abbate</strong><span>Lern- & Prüfungsapp</span></div></div><div class="install-benefits"><span>${icon('check')} Eigenes App-Symbol</span><span>${icon('check')} Eigene App-Ansicht</span></div><p>Wähle dein Gerät und füge den Lernbereich als App hinzu.</p><div class="modal-tabs platform-tabs" aria-label="Installationsanleitung nach Gerät">${platforms.map(([key,label])=>`<button class="${key===platform?'active':''}" data-action="install-tab" data-platform="${key}" aria-pressed="${key===platform}">${label}</button>`).join('')}</div><div class="install-steps"><div class="install-step"><span>1</span><div><strong>Link im Browser öffnen</strong><p>Öffne den Lernbereich in Safari, Chrome oder Edge.</p></div></div><div class="install-step"><span>2</span><div><strong>App hinzufügen</strong><p>Nutze „Zum Home-Bildschirm“, „Zum Dock hinzufügen“ oder „App installieren“.</p></div></div><div class="install-step"><span>3</span><div><strong>Über das Symbol starten</strong><p>Öffne die App anschließend direkt über das neue Symbol.</p></div></div></div>${platform!=='iphone'&&platform===installPlatform()&&deferredInstall?'<button class="primary" data-action="native-install">Auf diesem Gerät installieren '+icon('plus')+'</button>':''}<div class="install-preview-note">${icon('lock')}<span>Frei zugängliche Vorführversion mit Beispieldaten.</span></div>`);
+function install(){
+  if (!isNativeApp()) {
+    location.assign('../#downloads');
+    return;
+  }
+  modal('App bereits installiert', '<p>Du verwendest Abbate Lernraum bereits als eigenständige App. Du kannst ganz normal weiterlernen.</p><button class="primary" data-action="close">Weiterlernen</button>');
 } 
 
 B.client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')location.replace('./konto.html');});
