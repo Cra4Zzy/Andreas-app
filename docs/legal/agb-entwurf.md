@@ -3,7 +3,7 @@
 **Stand des Entwurfs:** 2. November 2026  
 **Status: NICHT RECHTLICH FREIGEGEBEN – VOR VERWENDUNG VERTRAGSMODELL KLÄREN.**
 
-**Annahme für diesen Entwurf:** Teilnehmer können ein kostenloses Konto registrieren. Ein kostenpflichtiger Zugang wird nach gesonderter Bestellung/Zahlungsprüfung durch Andreas Abbate manuell für einen vorab mitgeteilten Zeitraum freigeschaltet. Die aktuelle App enthält weder eine eigene Online-Kasse noch eine technische automatische Vertragsverlängerung. **Ob diese Annahmen für den tatsächlichen Vertrieb gelten, muss Andreas verbindlich bestätigen.** Die Vertragsbedingungen müssen vor Vertragsschluss zugänglich sein und wirksam einbezogen werden.
+**Bestätigtes Geschäftsmodell:** ein einmalig bezahlter, nach Zahlungsprüfung manuell freigeschalteter Zugang für 30 Kalendertage; keine automatische Verlängerung, keine wiederkehrende Abbuchung. Die App besitzt keine Online-Kasse. **Noch zu bestimmen:** Preis, Vertragsabschluss, konkreter Zahlungsweg, Verbraucher-/Unternehmenskunden und Startzeitpunkt im Einzelfall. Die Vertragsbedingungen müssen vor Vertragsschluss zugänglich sein und wirksam einbezogen werden.
 
 ## 1. Anbieter und Geltungsbereich
 
@@ -29,16 +29,16 @@
 ## 4. Vertragsschluss und Preise – VOR VERWENDUNG AUSFÜLLEN
 
 1. Bei einer kostenpflichtigen Freischaltung werden **Preis einschließlich anwendbarer Steuern, enthaltene Leistungen, Beginn und Ende des Nutzungszeitraums, Zahlungsweg sowie gegebenenfalls Laufzeit-/Verlängerungsbedingungen** vor Abgabe einer verbindlichen Bestellung klar mitgeteilt.
-2. **[VARIANTE A – manuell vereinbarte Einmalleistung:** Der kostenpflichtige Vertrag kommt durch eine gesonderte, vom Anbieter bestätigte Bestellung zustande. Nach Zahlung bzw. nach der vereinbarten Zahlungsbedingung wird der Zugang für den in der Bestätigung bezeichneten Zeitraum freigeschaltet. Es erfolgt **keine automatische Verlängerung**. Eine spätere Freischaltung für einen neuen Zeitraum setzt eine neue Vereinbarung voraus. **NUR VERWENDEN, WENN TATSÄCHLICH SO PRAKTIZIERT.]**
-3. **[VARIANTE B – automatisch verlängerndes Abonnement:** Nicht durch Variante A ersetzen, sondern erst Preis, Mindestlaufzeit, Verlängerung, Kündigungsfrist, Zahlungsmittel, Vertragsschluss, Kündigungsbutton, mögliche Store-Regeln und Widerrufs-/Informationspflichten festlegen. Bis dahin keine rechtssichere Abo-Klausel behaupten.]**
-4. Das bloße Anlegen eines Kontos löst keine Zahlungspflicht aus. Es werden keine nicht ausgewiesenen Gebühren oder automatischen Abbuchungen vereinbart. **[LETZTEN SATZ NUR BEIBEHALTEN, WENN PREIS-/ABRECHNUNGSMODELL DAS BESTÄTIGT.]**
-5. Bei Buchungen durch Arbeitgeber bzw. Unternehmen ist zu regeln, ob das Unternehmen oder der einzelne Teilnehmer Vertragspartner ist und wer Entgelte schuldet. **[KLÄREN: Zuweisung und Rechte bei Arbeitgeberwechsel].**
+2. **Einmaliger 30-Tage-Zugang:** Nach gesonderter Bestellung und bestätigter Zahlung wird der Lernzugang von der Fahrschule manuell für 30 aufeinanderfolgende Kalendertage freigeschaltet. Der Freischaltungstag zählt als erster Kalendertag. Das im Konto angezeigte Ablaufdatum ist der letzte Tag mit Zugang. **[VERTRAGLICH BESTÄTIGEN: Für Zahlungen vor späterer Freischaltung müssen Beginn und gegebenenfalls Lieferfrist eindeutig vereinbart werden.]**
+3. Der Zugang endet nach Ablauf dieser 30 Tage automatisch. Es erfolgt **keine automatische Vertragsverlängerung**, keine wiederkehrende Abbuchung und kein automatischer erneuter Vertragsschluss. Für weitere 30 Tage bedarf es einer neuen bewussten Bestellung und Bezahlung. Bei vorzeitig bezahlter Verlängerung wird die neue 30-Tage-Periode an das bestehende Enddatum angehängt; bereits bezahlte Resttage bleiben erhalten.
+4. Eine Registrierung allein löst keine Zahlungspflicht aus. **[OFFEN: tatsächlichen Preis, Steuerangaben, Zahlungsart, Vertragspartner und Buchungsbestätigung ergänzen.]**
+5. Bei Bestellung durch Arbeitgeber ist zu regeln, ob Arbeitgeber oder Teilnehmer Vertragspartei ist und wer die Kosten trägt.
 
 ## 5. Freischaltung, Laufzeit, Verlängerung, Kündigung
 
 1. Der vereinbarte Nutzungszeitraum beginnt zum jeweils mitgeteilten Zeitpunkt. Der genaue Endzeitpunkt ist im persönlichen Konto bzw. in der Buchungsbestätigung ersichtlich. **[ABGLEICHEN, ob Vertrag ab Kauf, Zahlung oder tatsächlicher Freischaltung beginnt.]**
-2. Bei einem **einmalig befristeten, nicht automatisch verlängernden Zugang** endet die kostenpflichtige Nutzung ohne gesonderte Kündigung mit Ablauf des vereinbarten Zeitraums. Vorzeitige Beendigungsrechte, gesetzliche Mängelrechte und Widerrufsrechte bleiben unberührt.
-3. Soweit ein Abonnement mit automatischer Verlängerung oder sonstiges kündbares Dauerschuldverhältnis über eine Website abgeschlossen werden kann, sind die gesetzlich erforderlichen Kündigungsmöglichkeiten, gegebenenfalls einschließlich der elektronischen Kündigungsschaltfläche nach § 312k BGB, technisch bereitzustellen; ein bloßer AGB-Satz genügt nicht.
+2. Bei diesem **einmalig befristeten, nicht automatisch verlängernden 30-Tage-Zugang** endet die kostenpflichtige Nutzung ohne gesonderte Kündigung mit Ablauf des vereinbarten Zeitraums. Vorzeitige Beendigungsrechte, gesetzliche Mängelrechte und Widerrufsrechte bleiben unberührt.
+3. Ein Abonnement wird derzeit nicht angeboten. Die rechtliche Erforderlichkeit eines Kündigungsbuttons nach § 312k BGB ist für den konkret gewählten Bestellweg und Vertragstyp abschließend zu prüfen; eine fehlende automatische Verlängerung allein ersetzt diese Prüfung nicht.
 4. Die Kündigung des entgeltlichen Vertrags und die Löschung eines persönlichen Benutzerkontos sind **nicht identisch**. Eine Kontolöschung darf bestehende gesetzliche Verbraucherrechte nicht verkürzen. **[TECHNISCH PRÜFEN: aktueller „Konto löschen“-Prozess trennt Vertragskündigung und Datenlöschung noch nicht.]**
 5. **[KLÄREN: Pausierung durch Fahrschule, Zahlungsverzug, Mahnung und Wiederfreischaltung; kein automatischer Entzug bereits bezahlter Leistungen ohne rechtliche Prüfung.]**
 
@@ -106,7 +106,7 @@ Telefon: 0176 43515596
 ## Interne Freigabecheckliste – NICHT Teil der veröffentlichten AGB
 
 - [ ] Wer ist Vertragspartner und wer bezahlt – Teilnehmer privat, Arbeitgeber oder beide?
-- [ ] Einmalige 30-Tage-Freischaltung oder sich automatisch verlängerndes Abo?
+- [ ] Bestätigt: einmalige 30-Tage-Freischaltung ohne automatische Verlängerung. Vertragsunterlagen und Adminprozess darauf abgestimmt?
 - [ ] Preise, MwSt.-Hinweis, Rechnungsstellung, Zahlungsweg und Vertragsabschluss klar definiert
 - [ ] Beginn und Ende der entgeltlichen Leistung mit Server-Logik abgestimmt
 - [ ] Widerrufsbelehrung + Musterformular und ggf. Widerrufsbutton umgesetzt
