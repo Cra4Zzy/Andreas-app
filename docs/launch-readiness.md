@@ -19,7 +19,7 @@ Drei auf den ermittelten technischen Betrieb abgestimmte, **noch nicht veröffen
 - [AGB und Nutzungsbedingungen](legal/agb-entwurf.md)
 - [Widerruf, Musterformular und Online-Funktionen](legal/widerruf-und-umsetzung-entwurf.md)
 
-**Ausstehende Entscheidungen:** Wer zahlt (B2C/B2B)? Einmalige Freischaltung oder automatisch erneuerndes Abonnement? Welche Preise und Laufzeiten? Welche Zahlungsmethode? Welche Nachweise müssen wie lange aufbewahrt werden? Welche Arbeitgeber- und Schulungsdaten verlassen die App?
+**Ausstehende Entscheidungen:** Wer zahlt (B2C/B2B)? **Entschieden:** einmalig bezahlter 30-Tage-Zugang ohne automatische Verlängerung. Welche Preise und Laufzeiten? Welche Zahlungsmethode? Welche Nachweise müssen wie lange aufbewahrt werden? Welche Arbeitgeber- und Schulungsdaten verlassen die App?
 
 **Bekanntes Risiko:** Das Impressum der ursprünglichen Fahrschulwebsite enthält gegenwärtig nicht ausgefüllte Platzhalter zu Steuer-/Registrierungsangaben und Verbraucherstreitbeilegung. Diese Angaben mit Andreas prüfen, bevor der App-Vertrag öffentlich angeboten wird. Seit dem 19. Juni 2026 ist bei betroffenen Online-Fernabsatzverträgen die Widerrufsfunktion nach § 356a BGB zu berücksichtigen. Bei entsprechendem Online-Dauerschuldverhältnis § 312k BGB sowie bei Online-Kauf § 312j BGB prüfen.
 
@@ -42,3 +42,7 @@ Drei auf den ermittelten technischen Betrieb abgestimmte, **noch nicht veröffen
 `index.html`, `downloads.json`, `dist/` per FTPS auf den isolierten
 ALL-INKL-FTP-Zugang hoch, der in KAS auf den App-Ordner beschränkt ist.
 Das ist **nicht** die Freigabe für zahlende Endkunden oder Stores.
+
+## 30-Tage-Zugang (technischer Stand)
+
+Die Serverfunktion `abbate_manage_access` ermöglicht nur autorisierten Administratoren eine Freischaltung für 30 aufeinanderfolgende Kalendertage, weitere 30 Tage bei bestätigter Folgebestellung, das Fortsetzen einer Pause und das Pausieren. Keine automatische Verlängerung oder Belastung. Das Ablaufdatum bleibt nach Pausierung unverändert. Bestehende Mitgliedschaften wurden nicht migriert/verkürzt. Vor echtem Verkauf Zahlungseingang, Vertragsbeginn, Kundenhinweis und Wiederruf im Prozess abnehmen.
