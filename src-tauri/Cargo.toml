@@ -1,0 +1,14 @@
+[package]
+name = "abbate-lernraum-desktop"
+version = "0.1.0"
+description = "Abbate Lernraum desktop pilot"
+authors = ["Kaiser Webdesign"]
+edition = "2021"
+rust-version = "1.77.2"
+build = "build.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
