@@ -2,7 +2,7 @@
 
 Lern-App und persönlicher Schulungspass mit Supabase-Anmeldung. Teilnehmer registrieren sich mit E-Mail und Passwort, bestätigen ihre Adresse und warten auf Freischaltung durch die Fahrschule. Ein gemeinsamer Karten-QR führt zur Anmeldung. Das Konto bestimmt den eigenen Schulungsverlauf.
 
-## Aktueller Stand: technischer Pilot
+## Entwicklungsstand und Kundenabnahme
 
 - Eigenes Supabase-Projekt **Abbate Lernraum**, Region Frankfurt; andere Projekte bleiben getrennt.
 - Echte Auth-Anbindung statt lokaler Demo-Sitzungen. Kein Service-Key im Client.
@@ -12,7 +12,7 @@ Lern-App und persönlicher Schulungspass mit Supabase-Anmeldung. Teilnehmer regi
 - Native Android-/iOS-Projekte mit Abbate-Icons und Startbildern, Android API 36, deaktivierten WebView-Logs und Android-Backup. Automatische Pilotbuilds in GitHub Actions.
 - Desktop-Pilot mit Tauri 2: GitHub Actions erstellt Windows-NSIS-Installer (.exe) und universelle macOS-DMGs (Intel/Apple Silicon). Noch keine öffentliche, signierte Distribution; siehe [Desktop-Installer](docs/desktop-installers.md).
 
-**Noch kein öffentlicher Produktstart:** eigener E-Mail-Versand und Auth-Redirects müssen konfiguriert, das erste echte Adminkonto freigegeben und Anmeldung/Verwaltung auf echten Konten und Geräten durchgetestet werden. Entwicklerkonten, Produktionsidentität, Signing und Store-Einreichung fehlen. Die sechs Beispiel-Lernfragen, Fachübersetzungen und Datenschutzhinweise benötigen die Freigabe des Betreibers.
+**Kundenoberfläche für Abnahme aufbereitet:** Die störenden Pilot-/Demo-Banner sind aus der Benutzeroberfläche entfernt. Die eigene ALL-INKL-App-Subdomain und der verschlüsselte Upload aus GitHub sind eingerichtet; Website-Änderungen werden nach bestandenen Tests automatisch bereitgestellt. Der SMTP-Versand wurde eingerichtet und eine Reset-Mail empfangen. **Noch keine vollständige Produktionsfreigabe:** Die neue Supabase-Redirect-URL, der vollständige Passwort-Reset-End-to-End-Test, ein vom Betreiber freigegebenes Adminkonto, echte Inhaltsfreigabe (derzeit sechs Übungsfragen), Rechtsprüfung, Installer-Signierung und App Stores fehlen noch. Siehe [Launch-Checkliste](docs/launch-readiness.md).
 
 ## Einstieg
 
@@ -39,7 +39,8 @@ npm run native:ios
 Die zusammengefasste Migration unter `supabase/migrations/` entspricht der Cloud-Migration. `backend/schema.sql`, `accounts.sql` und `live.sql` dokumentieren dieselben Schritte in lesbarer Reihenfolge. Nicht erneut über eine bereits migrierte Datenbank ausführen.
 
 - [Backend und Inbetriebnahme](docs/backend-launch.md)
-- [Eigene App-Subdomain: ALL-INKL, GitHub Pages und Supabase](docs/custom-domain.md)
+- [Eigene App-Subdomain: ALL-INKL und Supabase](docs/custom-domain.md)
+- [Launch-Checkliste](docs/launch-readiness.md)
 - [Konten und Schulungspass](docs/schulungspass.md)
 - [App Stores und Testbuilds](docs/app-stores.md)
 
