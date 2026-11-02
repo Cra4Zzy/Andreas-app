@@ -1,87 +1,92 @@
-# Eigene App-Domain vorbereiten (ALL-INKL + GitHub Pages + Supabase)
+# Abbate-App auf ALL-INKL (eigene Subdomain)
 
-Stand: 2. November 2026. **Technisch vorbereitet, DNS und Websitezuordnung noch nicht bestätigt.**
-Kein bestehender E-Mail-, Domain- oder Websiteeintrag wurde geändert.
+Stand: 2. November 2026. Die Subdomain `app.gabelstaplerfahrschule-andreas.de`
+wurde vom Betreiber im KAS angelegt und das Let's-Encrypt-Zertifikat dort
+als **aktiv** bestätigt. Ein externer HTTPS-Aufruf, ein Dateiupload und der
+vollständige Authentifizierungsablauf sind noch **nicht abgenommen**.
 
-## Zieladressen
+## Ziel
 
-| Zweck | Adresse |
-| --- | --- |
-| Bestehende Website, bleibt unberührt | `https://gabelstaplerfahrschule-andreas.de/` |
-| Neue App-Landingpage | `https://app.gabelstaplerfahrschule-andreas.de/` |
-| Login, Bestätigung, Passwort-Reset | `https://app.gabelstaplerfahrschule-andreas.de/dist/konto.html` |
-| GitHub Pages DNS-Ziel | `cra4zzy.github.io.` |
+- Website und App-Downloads: `https://app.gabelstaplerfahrschule-andreas.de/`
+- Login, Registrierung, Reset: `https://app.gabelstaplerfahrschule-andreas.de/dist/konto.html`
+- KAS-Webspace-Ziel: `/gabelstaplerfahrschule-andreas.de/abbate-app/`
+- Bestehende Hauptwebsite bleibt unverändert.
+- ALL-INKL-Mailpostfach `noreply@gabelstaplerfahrschule-andreas.de` und seine MX/SPF/DKIM-Einträge bleiben unverändert.
+- Kein kostenpflichtiges DNS-Upgrade und **keine** GitHub-Pages-CNAME-Umstellung erforderlich.
 
-## Schritt 1 – ALL-INKL KAS (vom Domaininhaber)
+## Vorbereitung: bereits vom Betreiber durchgeführt
 
-In **Tools → DNS-Einstellungen** die Domain
-`gabelstaplerfahrschule-andreas.de` öffnen.
+1. In KAS eine Subdomain mit dem vollständigen Namen `app.gabelstaplerfahrschule-andreas.de` angelegt.
+2. Ziel `Webspace`; eigenes Verzeichnis `/gabelstaplerfahrschule-andreas.de/abbate-app/` angelegt und zugeordnet.
+3. SSL-Schutz über Let's Encrypt beantragt; in KAS als `aktiv` angezeigt.
 
-Zuerst prüfen, ob bereits ein Record mit Namen `app` existiert. Wenn nicht,
-**Neuen DNS-Eintrag erstellen**:
+## Website-Deployment (per GitHub Actions, noch nicht ausgelöst)
 
-| ALL-INKL-Feld | Wert |
-| --- | --- |
-| Name | `app` |
-| Typ | `CNAME` |
-| Prio | `0` |
-| Data | `cra4zzy.github.io.` |
+Manuell zu startender Workflow:
+[Deploy Abbate website to ALL-INKL](https://github.com/Cra4Zzy/Andreas-app/actions/workflows/deploy-allinkl.yml)
 
-Abschließenden Punkt bei Data nicht vergessen. Keine Änderungen an `@`,
-`www`, MX, SPF, DKIM oder anderen Records vornehmen. Wenn ein `app`-Record
-existiert, vor einer Änderung dessen Zweck überprüfen.
+Voraussetzungen in **GitHub Repository → Settings → Secrets and variables → Actions**:
 
-Bei ALL-INKL kann es 3–4 Stunden dauern, bis DNS propagiert ist:
-https://all-inkl.com/wichtig/anleitungen/providerwechsel/einrichtung/dns/cname_178.html
+**Repository Secrets (niemals in Chat oder Code eintragen):**
 
-## Schritt 2 – GitHub Pages
+- `ABBATE_FTPS_HOST`: FTPS-Server/Host aus KAS → FTP (nicht automatisch die Website-Domain verwenden)
+- `ABBATE_FTPS_USER`: zugehöriger FTP-Benutzer
+- `ABBATE_FTPS_PASSWORD`: FTP-Passwort
 
-Repository: https://github.com/Cra4Zzy/Andreas-app/settings/pages
+**Repository Variable:**
 
-- Unter **Custom domain** den Wert
-  `app.gabelstaplerfahrschule-andreas.de` eintragen und **Save** wählen.
-- Bei Branch Publishing schreibt GitHub gewöhnlich automatisch eine
-  `CNAME`-Datei in den Publish-Branch. Eine manuell vorweg erstellte CNAME
-  kann die bisherige GitHub Pages-Adresse früher als erwünscht umstellen:
-  deshalb ist sie noch nicht committed.
-- DNS-Check und Zertifikat abwarten und anschließend **Enforce HTTPS**
-  aktivieren.
-- Beide Seiten im privaten Browserfenster testen: Root-Seite und
-  `/dist/konto.html`.
+- `ABBATE_FTPS_REMOTE_DIR`: `/gabelstaplerfahrschule-andreas.de/abbate-app/`, **sofern der FTP-Benutzer diesen Pfad von seiner Login-Wurzel aus sieht**. Andernfalls vor einem Upload die FTP-Zuordnung und Berechtigung prüfen. Der Workflow lehnt andere Zielordner ab.
 
-Dokumentation:
-https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site
+Danach in **Actions → Deploy Abbate website to ALL-INKL → Run workflow**
+den Upload von Hand starten. Es erfolgt **kein automatischer Upload**
+beim Push.
 
-## Schritt 3 – Supabase (erst wenn HTTPS auf der App-Domain funktioniert)
+Der Workflow führt `npm ci`, `npm test` und `npm run build` aus,
+packt nur `index.html`, `downloads.json` und `dist/` und lädt
+sie per explizitem TLS/FTPS über `lftp` hoch. Ein Artefakt als
+manuelle Upload-Alternative wird ebenfalls erzeugt. Keine Löschung
+auf dem Remote-Server. Keine Repository-Secrets im öffentlichen Webspace.
 
-Projekt **Abbate Lernraum** → Authentication → URL Configuration.
+Verfügbarkeit anschließend prüfen:
+- `https://app.gabelstaplerfahrschule-andreas.de/`
+- `https://app.gabelstaplerfahrschule-andreas.de/dist/konto.html`
+- `https://app.gabelstaplerfahrschule-andreas.de/downloads.json`
 
-- **Site URL:** `https://app.gabelstaplerfahrschule-andreas.de/dist/konto.html`
-- **Redirect URLs:** Diese neue URL UND vorübergehend
-  `https://cra4zzy.github.io/Andreas-app/dist/konto.html` erlauben.
-- Vorhandene E-Mail-Vorlagen und ihre `.SiteURL`/`.RedirectTo`-Verwendung
-  auf das neue Ziel prüfen; nur auf die neue Domain verweisen, wenn sie
-  wirklich erreichbar ist.
-- Mit frischem Testkonto Registrierung, Bestätigung, Passwort-Reset,
-  erneute Anmeldung und wiederverwendeten Reset-Link testen.
+## Supabase Auth nach erfolgreichem HTTPS-Upload
 
-Die Applikation in `dist/backend-config.js` erkennt den neuen HTTPS-Host
-und benutzt daraufhin automatisch die neue Rücksprung-URL; auf der alten
-GitHub-Domain bleibt die vorhandene Pilot-URL. Bereits installierte native
-Apps enthalten ihre alten Webassets und brauchen nach der Domainumstellung
-bei Bedarf einen neuen Release.
+Im Projekt Abbate Lernraum:
+**Authentication → URL Configuration**.
 
-**Hinweis:** Ein neues Domainziel allein behebt keine fehlerhafte
-Authentifizierungslogik. Der Reset-Link-Fix muss nach Deployment auch real
-mit einem Einmal-Link getestet werden. E-Mail-Versand und DNS-Einträge für
-`noreply@gabelstaplerfahrschule-andreas.de` bleiben unverändert.
+- Site URL: `https://app.gabelstaplerfahrschule-andreas.de/dist/konto.html`
+- Redirect URLs: diese neue URL und zur Übergangszeit die bisherige
+  `https://cra4zzy.github.io/Andreas-app/dist/konto.html`.
+- E-Mail-Templates und eventuell fest eingetragene URL-Ziele überprüfen.
+- Anmelden, Bestätigen, Zurücksetzen, wiederholten Reset-Link und Abmelden
+  mit frischen Testkonten in privaten Fenstern und der Desktop-App prüfen.
 
-## Freigabe-Checkliste
+`dist/backend-config.js` verwendet die neue Portal-URL nur dann, wenn
+die App unter dem neuen HTTPS-Host läuft. Bereits installierte Desktop-
+und Mobile-Builds sind weiterhin gesondert zu aktualisieren.
+Ein Domainwechsel allein löst keine Auth-/Token-Probleme.
 
-- [ ] KAS-DNS-CNAME korrekt gesetzt (keine bestehenden Records überschrieben)
-- [ ] GitHub Pages Custom Domain gesetzt
-- [ ] HTTPS aktiv und die bestehende Website unverändert erreichbar
-- [ ] Supabase-Redirects und Site URL hinterlegt
-- [ ] Registrierungs- und Reset-Mails zeigen auf den neuen Host
-- [ ] Ablauf mit frischem + erneut verwendetem Reset-Link bestanden
-- [ ] Download-Links, Schulungspass, QR-Code und Desktop-App abgeprüft
+## Hinweise und Sicherheit
+
+ALL-INKL unterstützt explizite FTPs-Verbindungen über SSL/TLS:
+https://all-inkl.com/wichtig/faq
+
+Ein FTP-Konto für die App sollte nach Möglichkeit auf deren Verzeichnis
+beschränkt sein. Keine globalen FTP-Passwörter in Chatnachrichten eingeben.
+Den Workflow erst auslösen, wenn die FTP-Wurzel und das richtige Ziel
+klar sind. Nicht `/gabelstaplerfahrschule-andreas.de/` als Ziel verwenden.
+
+## Checkliste
+
+- [x] Subdomain in KAS erstellt
+- [x] SSL in KAS als aktiv bestätigt
+- [ ] Neue Subdomain extern mit gültigem HTTPS erreichbar
+- [ ] Abgetrenntes FTP-Konto/Pfad bestätigt und GitHub-Secrets hinterlegt
+- [ ] GitHub Actions Deployment erfolgreich
+- [ ] Startseite und Konto-Seite über neue Adresse erreichbar
+- [ ] Supabase Redirect URLs nachgezogen
+- [ ] Passwort-Reset, bestehender Login, abgelaufener Link sicher geprüft
+- [ ] Desktop-Installer und Mobile-App-Links auf neuer Domain überprüft
