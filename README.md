@@ -2,14 +2,18 @@
 
 ## Nächste Entwicklungsstufe
 
-Separate [Schulungspass-Vorschau](dist/nachweise.html) mit QR-Freigaben und ausschließlich fiktiven Daten. Ein lokal getestetes Datenbankmodell und native Android-/iOS-Projekte sind vorbereitet, aber noch nicht mit einer produktiven Datenbank verbunden oder als Store-Binaries gebaut.
+Gemeinsamer Karten-QR zur [Portal-Vorschau](dist/konto.html), [Kontenverwaltung](dist/verwaltung.html) und [persönlichem Schulungsverlauf](dist/nachweise.html). Neue Demo-Registrierungen warten auf Freischaltung. Andreas kann Zugänge aktivieren, pausieren, ihre Laufzeit setzen und Demo-Konten nach Bestätigung löschen. Durchgeführte Schulungen und Prüfungen werden mit Datum und „Teilgenommen“, „Bestanden“ oder „Nicht bestanden“ erfasst; Teilnehmer sehen ausschließlich eine Leseansicht.
 
-- [Nachweise und noch offene Backend-Anbindung](docs/schulungspass.md)
+**Ausschließlich fiktive Browserdaten:** Es gibt weiterhin keine echte Authentifizierung, produktive API, Zahlungsanbindung oder zentrale Datenbank. Die öffentliche Verwaltungsdemo ist kein geschützter Admin-Bereich. Echte Kontolöschung und Passwortfunktionen sind noch nicht implementiert.
+
+Das lokal geprüfte Datenbankmodell (`backend/schema.sql`, danach `backend/accounts.sql`) enthält ausstehende Registrierungen, Rollen-/Schulgrenzen, aktuelle Zugangssperren und protokollierte Ergebnisänderungen. Es wurde in keinem Cloud-Projekt ausgeführt. Native Android-/iOS-Projekte sind vorbereitet, aber nicht signiert oder als Store-Binaries gebaut.
+
+- [Konten, Nachweise und offene Backend-Anbindung](docs/schulungspass.md)
 - [Store-Vorbereitung und offene Freigaben](docs/app-stores.md)
 
 Entwicklung: `npm ci`, `npm run build`, `npm test`, `npm run native:sync`.
 
-Mobile-first Produktvorschau für die Gabelstapler-Theorie. Buildloses HTML/CSS/JavaScript in `dist/`. Vorführlink ohne Anmeldung; ausschließlich lokale Beispieldaten.
+Die bestehende Lern-App nutzt weiterhin sechs redaktionelle Beispielfragen und alle 24 EU-Sprachen für ihre Navigation. Die neue Portal-Vorschau ist vorerst deutsch. Angaben und Übungsrunden bleiben lokal im Browser.
 
 ## Gestaltung
 

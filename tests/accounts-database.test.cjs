@@ -1,0 +1,41 @@
+const test=require('node:test'),assert=require('node:assert/strict');
+const {readFileSync}=require('node:fs');const {PGlite}=require('@electric-sql/pglite');
+test('registration, admin approval and result permissions are enforced in PostgreSQL',async()=>{
+ const db=new PGlite();
+ const school='10000000-0000-0000-0000-000000000001',otherSchool='10000000-0000-0000-0000-000000000002';
+ const learner='20000000-0000-0000-0000-000000000001',admin='20000000-0000-0000-0000-000000000002',trainer='20000000-0000-0000-0000-000000000003',other='20000000-0000-0000-0000-000000000004';
+ const course='30000000-0000-0000-0000-000000000001',record='40000000-0000-0000-0000-000000000001';
+ const as=async id=>db.exec(`reset role;set role authenticated;set request.jwt.claim.sub='${id}';`);
+ try{
+  await db.exec(`create schema auth;create table auth.users(id uuid primary key,email text,raw_user_meta_data jsonb default '{}');create role anon;create role authenticated;create role service_role bypassrls;grant usage on schema auth to authenticated;create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant execute on function auth.uid() to authenticated;`);
+  await db.exec(readFileSync('backend/schema.sql','utf8'));await db.exec(readFileSync('backend/accounts.sql','utf8'));
+  await db.exec(`insert into abbate_schools values('${school}','School'),('${otherSchool}','Other');insert into abbate_private.registration_settings values(true,'${school}');
+   insert into auth.users(id,email,raw_user_meta_data) values('${learner}','learner@example.test','{"display_name":"Learner","role":"admin"}'),('${admin}','admin@example.test','{}'),('${trainer}','trainer@example.test','{}'),('${other}','other@example.test','{}');
+   update abbate_memberships set role='admin',access_status='active' where user_id='${admin}';update abbate_memberships set role='trainer',access_status='active' where user_id='${trainer}';
+   insert into abbate_courses values('${course}','${school}','Test course','1');
+   insert into abbate_completions(id,school_id,participant_id,course_id,course_version,kind,completed_at,issued_by,reference,outcome) values('${record}','${school}','${learner}','${course}','1','exam','2026-01-01','${trainer}','TEST','failed');`);
+  await as(learner);let own=(await db.query('select role,access_status from abbate_memberships')).rows;
+  assert.deepEqual(own,[{role:'learner',access_status:'pending'}]);assert.equal((await db.query('select * from abbate_completions')).rows.length,0);
+  await assert.rejects(db.exec("update abbate_memberships set role='admin'"),/permission denied/i);
+  await db.exec("update abbate_memberships set access_status='active'");assert.equal((await db.query('select * from abbate_completions')).rows.length,0);
+  await db.exec("update abbate_completions set outcome='passed'");
+  await as(admin);await db.exec(`update abbate_memberships set access_status='active',access_until='2099-01-01' where user_id='${learner}'`);
+  await as(learner);assert.equal((await db.query('select outcome from abbate_completions')).rows[0].outcome,'failed');
+  await db.exec("update abbate_completions set outcome='passed'");assert.equal((await db.query('select outcome from abbate_completions')).rows[0].outcome,'failed');
+  await as(trainer);await db.exec(`update abbate_completions set outcome='passed' where id='${record}'`);
+  await db.exec(`update abbate_memberships set access_status='paused' where user_id='${learner}'`);
+  await as(learner);assert.equal((await db.query('select outcome from abbate_completions')).rows[0].outcome,'passed');
+  await as(admin);await db.exec(`update abbate_memberships set access_status='paused' where user_id='${learner}'`);
+  await as(learner);assert.equal((await db.query('select * from abbate_completions')).rows.length,0);
+  await as(admin);await db.exec(`update abbate_memberships set access_status='active',access_until='2000-01-01' where user_id='${learner}'`);
+  await as(learner);assert.equal((await db.query('select * from abbate_completions')).rows.length,0);
+  await db.exec('reset role');assert.ok((await db.query("select * from abbate_private.account_audit where action='result_changed'")).rows.length>0);
+  await db.exec(`insert into abbate_memberships(school_id,user_id,role,access_status) values('${otherSchool}','${other}','admin','active')`);
+  await as(other);await db.exec(`update abbate_memberships set access_status='active',access_until='2099-01-01' where user_id='${learner}'`);
+  await db.exec(`update abbate_completions set outcome='failed' where id='${record}'`);
+  await db.exec('reset role');assert.equal((await db.query(`select outcome from abbate_completions where id='${record}'`)).rows[0].outcome,'passed');
+  assert.equal((await db.query(`select access_until::text from abbate_memberships where user_id='${learner}'`)).rows[0].access_until,'2000-01-01');
+  await as(learner);await assert.rejects(db.query('select * from abbate_private.account_audit'),/permission denied/i);
+  await db.exec('reset role;set role anon');await assert.rejects(db.query('select * from abbate_completions'),/permission denied/i);
+ }finally{await db.close();}
+});
