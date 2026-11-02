@@ -33,9 +33,13 @@ Voraussetzungen in **GitHub Repository → Settings → Secrets and variables �
 - `ABBATE_FTPS_USER`: zugehöriger FTP-Benutzer
 - `ABBATE_FTPS_PASSWORD`: FTP-Passwort
 
-**Repository Variable:**
-
-- `ABBATE_FTPS_REMOTE_DIR`: `/gabelstaplerfahrschule-andreas.de/abbate-app/`, **sofern der FTP-Benutzer diesen Pfad von seiner Login-Wurzel aus sieht**. Andernfalls vor einem Upload die FTP-Zuordnung und Berechtigung prüfen. Der Workflow lehnt andere Zielordner ab.
+**Wichtig zum Serverpfad:** Im ALL-INKL-KAS ist der neu angelegte FTP-Benutzer auf
+`/gabelstaplerfahrschule-andreas.de/abbate-app/` beschränkt. Nach FTP-Login
+erscheint dieser Ordner als eigenes Startverzeichnis `/`. Der Workflow lädt
+daher gezielt nach `/` **innerhalb dieses beschränkten Kontos** und benötigt
+keine zusätzliche Remote-Path-Variable. **Keinen Haupt-FTP-Benutzer verwenden.**
+Vor dem ersten Upload kontrollieren, dass das neue FTP-Konto im KAS wirklich
+nur für den App-Ordner gilt und Schreibrechte besitzt.
 
 Danach in **Actions → Deploy Abbate website to ALL-INKL → Run workflow**
 den Upload von Hand starten. Es erfolgt **kein automatischer Upload**
