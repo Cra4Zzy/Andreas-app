@@ -11,6 +11,18 @@ Stand: 2. November 2026. **Die Oberfläche wird für Kunden aufbereitet; die vol
 - Lernfortschritt und echte Schulungsnachweise sind voneinander getrennt.
 - Download-Seite verlinkt vorhandene Desktop-Pakete nur unter ihrem tatsächlichen Veröffentlichungsstatus. Mobile Store-Links bleiben bis zur realen Veröffentlichung deaktiviert.
 
+## Rechtliche Entwürfe – Stand 2. November 2026
+
+Drei auf den ermittelten technischen Betrieb abgestimmte, **noch nicht veröffentlichte und nicht rechtsverbindlich freigegebene** Entwürfe:
+
+- [Datenschutzerklärung](legal/datenschutz-entwurf.md)
+- [AGB und Nutzungsbedingungen](legal/agb-entwurf.md)
+- [Widerruf, Musterformular und Online-Funktionen](legal/widerruf-und-umsetzung-entwurf.md)
+
+**Ausstehende Entscheidungen:** Wer zahlt (B2C/B2B)? Einmalige Freischaltung oder automatisch erneuerndes Abonnement? Welche Preise und Laufzeiten? Welche Zahlungsmethode? Welche Nachweise müssen wie lange aufbewahrt werden? Welche Arbeitgeber- und Schulungsdaten verlassen die App?
+
+**Bekanntes Risiko:** Das Impressum der ursprünglichen Fahrschulwebsite enthält gegenwärtig nicht ausgefüllte Platzhalter zu Steuer-/Registrierungsangaben und Verbraucherstreitbeilegung. Diese Angaben mit Andreas prüfen, bevor der App-Vertrag öffentlich angeboten wird. Seit dem 19. Juni 2026 ist bei betroffenen Online-Fernabsatzverträgen die Widerrufsfunktion nach § 356a BGB zu berücksichtigen. Bei entsprechendem Online-Dauerschuldverhältnis § 312k BGB sowie bei Online-Kauf § 312j BGB prüfen.
+
 ## Freigabeblocker (vor echten Kundendaten / offiziellem Launch)
 
 - [ ] **Datenschutz & Vertragliches:** Verantwortlicher, Rechtsgrundlagen, Aufbewahrungs- und Löschfristen, Subprozessoren, ALL-INKL/Supabase AVV, Datentransfers, Schulungsnachweise und Betroffenenrechte fachlich/rechtlich prüfen und rechtsgültige Datenschutzinformation freigeben. Die Seite `dist/datenschutz.html` ist eine technische Datenverarbeitungsübersicht, keine anwaltlich überprüfte vollständige Datenschutzerklärung.
