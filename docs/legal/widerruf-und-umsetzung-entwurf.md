@@ -7,7 +7,7 @@
 
 Dieser Entwurf setzt voraus, dass ein **Verbraucher** direkt mit Andreas Abbate einen entgeltlichen Fernabsatzvertrag über den digitalen Lernraum abschließt. Bei Erwerb durch einen Arbeitgeber oder bei rein unternehmerischen Verträgen kann die rechtliche Lage anders sein.
 
-Der Abbate Lernraum enthält sowohl eine fortlaufend erreichbare digitale Dienstleistung als auch Lerninhalte. Die genaue vertragsrechtliche Einordnung und die gesetzlichen Voraussetzungen für ein etwaiges Erlöschen des Widerrufsrechts sind vor Verwendung dieses Mustertexts juristisch zu klären. **Sofortiger Zugang bedeutet nicht automatisch, dass Verbraucher auf Widerruf verzichten.**
+Der Abbate Lernraum enthält sowohl eine fortlaufend erreichbare digitale Dienstleistung als auch Lerninhalte. Bestätigt ist ein einmaliger kostenpflichtiger 30-Tage-Zugang ohne automatische Vertragsverlängerung. Die genaue vertragsrechtliche Einordnung und die gesetzlichen Voraussetzungen für ein etwaiges Erlöschen des Widerrufsrechts sind vor Verwendung dieses Mustertexts juristisch zu klären. **Sofortiger Zugang bedeutet nicht automatisch, dass Verbraucher auf Widerruf verzichten.**
 
 Die elektronische Widerrufsfunktion nach § 356a BGB gilt seit dem 19. Juni 2026 unter den dort genannten Voraussetzungen für über Online-Oberflächen geschlossene Fernabsatzverträge. Bei einem online abschließbaren entgeltlichen Dauerschuldverhältnis kann auch § 312k BGB einschlägig sein. Diese Pflichten lassen sich nicht allein mit einem Link auf eine AGB-Seite erfüllen.
 
@@ -81,7 +81,7 @@ Datum: ____________________
 
 ## 5. Gesonderte Kündigungsfunktion nach § 312k BGB
 
-Wenn über die Webseite ein entsprechender entgeltlicher Verbrauchervertrag über ein Dauerschuldverhältnis abgeschlossen werden kann, kann zusätzlich eine dauerhaft leicht zugängliche Kündigungsfunktion notwendig sein. Sie besteht nicht bloß aus einem Link „E-Mail schreiben“, sondern aus der gesetzlich vorgesehenen Schaltfläche, Bestätigungsseite und elektronischer Eingangsbestätigung. Bei einem einmalig im Voraus bezahlten, automatisch endenden Zugangszeitraum ohne weitere Verlängerungsvereinbarung muss geprüft werden, ob die Voraussetzungen im konkreten Vertragsmodell überhaupt vorliegen.
+Wenn über die Webseite ein entsprechender entgeltlicher Verbrauchervertrag über ein Dauerschuldverhältnis abgeschlossen werden kann, kann zusätzlich eine dauerhaft leicht zugängliche Kündigungsfunktion notwendig sein. Sie besteht nicht bloß aus einem Link „E-Mail schreiben“, sondern aus der gesetzlich vorgesehenen Schaltfläche, Bestätigungsseite und elektronischer Eingangsbestätigung. Beim hier gewählten einmalig bezahlten, nach 30 Tagen automatisch endenden Zugang ohne automatische Vertragsverlängerung muss abschließend juristisch geklärt werden, ob § 312k BGB für den konkreten Bestellprozess einschlägig ist. Nicht vorschnell als entbehrlich einstufen.
 
 ## 6. Umsetzung vor dem ersten kostenpflichtigen Verkauf
 
