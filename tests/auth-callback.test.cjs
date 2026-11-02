@@ -14,6 +14,11 @@ function evaluate(hash,hostname='cra4zzy.github.io'){
   return globals;
 }
 
+test('auth scripts contain valid JavaScript syntax',()=>{
+  assert.doesNotThrow(()=>new vm.Script(config));
+  assert.doesNotThrow(()=>new vm.Script(portal));
+});
+
 test('valid recovery callback is captured before Supabase clears the fragment',()=>{
   const data=evaluate('#access_token=not-a-real-token&refresh_token=not-a-real-token&type=recovery');
   assert.equal(data.ABBATE_AUTH_RETURN.recovery,true);
