@@ -1,6 +1,17 @@
-name: Deploy Abbate website to ALL-INKL (manual)
+name: Deploy Abbate website to ALL-INKL
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "downloads.json"
+      - "dist/**"
+      - "tests/**"
+      - "scripts/build-web.cjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/deploy-allinkl.yml"
   workflow_dispatch:
 
 permissions:
