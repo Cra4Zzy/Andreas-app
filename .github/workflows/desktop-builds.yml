@@ -119,6 +119,8 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
+          git fetch origin main
+          git checkout -B release-download-links origin/main
           node -e "const fs=require('fs');const f='downloads.json';const j=JSON.parse(fs.readFileSync(f,'utf8'));const b='https://github.com/'+process.env.GH_REPO+'/releases/download/desktop-pilot/';j.windowsPreview=b+'Abbate-Lernraum-Windows-Setup.exe';j.macosPreview=b+'Abbate-Lernraum-macOS-Universal.dmg';fs.writeFileSync(f,JSON.stringify(j,null,2)+'\n')"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
