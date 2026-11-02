@@ -51,27 +51,22 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Verify hosting secrets and isolated target path
+      - name: Verify dedicated FTP account settings
         shell: bash
         env:
           FTP_HOST: ${{ secrets.ABBATE_FTPS_HOST }}
           FTP_USER: ${{ secrets.ABBATE_FTPS_USER }}
           FTP_PASSWORD: ${{ secrets.ABBATE_FTPS_PASSWORD }}
-          REMOTE_DIR: ${{ vars.ABBATE_FTPS_REMOTE_DIR }}
         run: |
           set -euo pipefail
           test -n "$FTP_HOST"
           test -n "$FTP_USER"
           test -n "$FTP_PASSWORD"
-          test -n "$REMOTE_DIR"
           case "$FTP_HOST" in *[!a-zA-Z0-9.-]*|'') echo 'Invalid FTP hostname' >&2; exit 1;; esac
-          # This deployment must never target a website root, home directory,
-          # or any folder other than the separate Abbate application folder.
-          case "$REMOTE_DIR" in
-            */gabelstaplerfahrschule-andreas.de/abbate-app/|gabelstaplerfahrschule-andreas.de/abbate-app/)
-              ;;
-            *) echo 'Refusing deployment: remote dir must end in /gabelstaplerfahrschule-andreas.de/abbate-app/' >&2; exit 1;;
-          esac
+          # The dedicated ALL-INKL account is restricted in KAS to
+          # /gabelstaplerfahrschule-andreas.de/abbate-app/.
+          # Therefore its FTP '/' IS that directory, not the hosting root.
+          # Never use the account of the main website or an unrestricted FTP user.
 
       - name: Secure FTPS upload to ALL-INKL (explicit TLS, no remote delete)
         shell: bash
@@ -79,7 +74,6 @@ jobs:
           FTP_HOST: ${{ secrets.ABBATE_FTPS_HOST }}
           FTP_USER: ${{ secrets.ABBATE_FTPS_USER }}
           LFTP_PASSWORD: ${{ secrets.ABBATE_FTPS_PASSWORD }}
-          REMOTE_DIR: ${{ vars.ABBATE_FTPS_REMOTE_DIR }}
         run: |
           set -euo pipefail
           sudo apt-get update -qq
@@ -95,7 +89,9 @@ jobs:
           set net:max-retries 3
           set net:timeout 25
           open --env-password --user "$FTP_USER" "ftp://$FTP_HOST"
-          mirror --reverse --verbose=1 --only-newer --no-perms --parallel=2 website "$REMOTE_DIR"
+          # The FTP user's '/' maps to the app directory configured in KAS.
+          # This command intentionally does not delete any remote files.
+          mirror --reverse --verbose=1 --only-newer --no-perms --parallel=2 website /
           bye
           LFTP_SCRIPT
 
