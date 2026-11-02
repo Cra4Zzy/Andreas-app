@@ -7,3 +7,6 @@
 
 .portal-consent{display:flex!important;grid-template-columns:24px 1fr;gap:12px!important;align-items:start;font-weight:400!important}.portal-consent input{min-height:22px!important;width:22px!important;margin-top:2px}.portal-consent a{text-decoration:underline}.portal-refresh{margin:0 0 22px}.portal-body [hidden]{display:none!important}.portal-body [aria-busy=true]{cursor:progress}.portal-body button:disabled{opacity:.55;cursor:wait}#delete-password{margin-top:8px}#portal-content:empty:before{content:"Sichere Verbindung wird hergestellt …";display:block;padding:55px 0;font-size:22px}
 .privacy-copy h2:not(:first-child){margin-top:32px}.privacy-copy p{margin:14px 0;line-height:1.7}.privacy-copy a{text-decoration:underline}
+
+/* Visible on account, training records and staff pages. */
+.portal-legal-footer{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px 20px;max-width:1280px;margin:18px auto 35px;padding:24px 28px;border-top:1px solid #d8ded6;font-size:13px;color:#687671}.portal-legal-footer a{color:#365d57;text-decoration:none}.portal-legal-footer a:hover{text-decoration:underline}.portal-legal-footer span{width:100%;text-align:center;color:#788780}.portal-body .portal-consent a{color:#21584d;text-decoration:underline;text-underline-offset:3px}.portal-body .portal-hint a{color:#21584d;text-underline-offset:3px}
