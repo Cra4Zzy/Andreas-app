@@ -20,5 +20,5 @@ globalThis.ABBATE_CONFIG=Object.freeze({
   portalUrl:globalThis.location?.protocol==='https:' && globalThis.location?.hostname==='app.gabelstaplerfahrschule-andreas.de'
     ? 'https://app.gabelstaplerfahrschule-andreas.de/dist/konto.html'
     : 'https://cra4zzy.github.io/Andreas-app/dist/konto.html',
-  environment:'pilot'
+  environment:'production'
 });
