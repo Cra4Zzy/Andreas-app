@@ -39,6 +39,7 @@ npm run native:ios
 Die zusammengefasste Migration unter `supabase/migrations/` entspricht der Cloud-Migration. `backend/schema.sql`, `accounts.sql` und `live.sql` dokumentieren dieselben Schritte in lesbarer Reihenfolge. Nicht erneut über eine bereits migrierte Datenbank ausführen.
 
 - [Backend und Inbetriebnahme](docs/backend-launch.md)
+- [Eigene App-Subdomain: ALL-INKL, GitHub Pages und Supabase](docs/custom-domain.md)
 - [Konten und Schulungspass](docs/schulungspass.md)
 - [App Stores und Testbuilds](docs/app-stores.md)
 
