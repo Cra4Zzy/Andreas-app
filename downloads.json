@@ -1,0 +1,7 @@
+{
+  "note": "Only publish reviewed, signed/notarized production installers and official store listings. Leave empty until approved.",
+  "windows": "",
+  "macos": "",
+  "ios": "",
+  "android": ""
+}
