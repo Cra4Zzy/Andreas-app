@@ -28,6 +28,9 @@ jobs:
       - run: chmod +x android/gradlew
       - run: ./gradlew --no-daemon assembleDebug
         working-directory: android
+      - name: Compile unsigned release AAB for Play preflight (NOT uploadable)
+        run: ./gradlew --no-daemon bundleRelease
+        working-directory: android
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: abbate-android-pilot-apk
@@ -45,6 +48,8 @@ jobs:
       - run: npm run native:sync
       - run: xcodebuild -version
       - run: xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath ios-build CODE_SIGNING_ALLOWED=NO build
+      - name: Verify device Release archive compiles without distribution signing
+        run: xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -archivePath ios-build/Abbate-Lernraum-Unsigned.xcarchive CODE_SIGNING_ALLOWED=NO archive
       - run: ditto -c -k --sequesterRsrc --keepParent ios-build/Build/Products/Debug-iphonesimulator/App.app ios-build/Abbate-Simulator.zip
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
