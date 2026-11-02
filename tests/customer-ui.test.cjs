@@ -36,7 +36,7 @@ test('legal and account links stay on all customer entry points',()=>{
   assert.match(read('index.html'),/dist\/datenschutz\.html/);
   assert.match(read('dist/konto.html'),/backend-config\.js/);
   assert.match(read('dist/app.js'),/\.\/datenschutz\.html/);
-  assert.match(read('dist/datenschutz.html'),/Konto verwalten oder löschen/);
+  assert.match(read('dist/datenschutz.html'),/Deine Rechte/);
 });
 
 test('unreleased mobile store links remain disabled',()=>{
