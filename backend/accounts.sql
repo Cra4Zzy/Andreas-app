@@ -1,4 +1,4 @@
--- Draft extension for backend/schema.sql. Not deployed to a cloud project.
+-- Account extension for backend/schema.sql. Deployed through the combined migration.
 -- Apply only to this app's database, after configuring the registration school.
 begin;
 alter table public.abbate_memberships add column access_status text not null default 'pending'

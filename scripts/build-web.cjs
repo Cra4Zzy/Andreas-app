@@ -7,6 +7,8 @@ async function main() {
   await build({ entryPoints: [require.resolve('qrcode/lib/browser.js')], bundle: true,
     platform: 'browser', format: 'iife', globalName: 'AbbateQR', minify: true,
     outfile: 'dist/vendor/qrcode.js', legalComments: 'linked' });
+  await build({ entryPoints: ['@supabase/supabase-js'], bundle: true, platform: 'browser', format: 'iife', globalName: 'AbbateSupabase', minify: true, outfile: 'dist/vendor/supabase.js', legalComments: 'linked' });
+  copyFileSync(join(dirname(dirname(require.resolve('@supabase/supabase-js'))), 'LICENSE'), 'dist/vendor/supabase-LICENSE.txt');
   copyFileSync(join(dirname(require.resolve('qrcode/package.json')), 'license'), 'dist/vendor/qrcode-LICENSE.txt');
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

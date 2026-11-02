@@ -11,3 +11,9 @@ ios/**/xcuserdata/
 *.jks
 *.p12
 *.mobileprovision
+
+supabase/.temp/
+ios-build/
+*.apk
+*.aab
+*.ipa
