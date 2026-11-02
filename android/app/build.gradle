@@ -1,6 +1,29 @@
 apply plugin: 'com.android.application'
 
+/*
+ * Google Play upload signing is configured only through environment variables.
+ * The private keystore must never be committed to this repository.
+ */
+def signingEnvKeys = [
+    'ABBATE_ANDROID_KEYSTORE_PATH',
+    'ABBATE_ANDROID_KEYSTORE_PASSWORD',
+    'ABBATE_ANDROID_KEY_ALIAS',
+    'ABBATE_ANDROID_KEY_PASSWORD'
+]
+def hasUploadSigning = signingEnvKeys.every { System.getenv(it) }
+
+
 android {
+    signingConfigs {
+        if (hasUploadSigning) {
+            abbateUpload {
+                storeFile file(System.getenv('ABBATE_ANDROID_KEYSTORE_PATH'))
+                storePassword System.getenv('ABBATE_ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ABBATE_ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ABBATE_ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
     namespace = "de.abbate.lernraum.preview"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
@@ -18,6 +41,9 @@ android {
     }
     buildTypes {
         release {
+            if (hasUploadSigning) {
+                signingConfig signingConfigs.abbateUpload
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
