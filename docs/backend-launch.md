@@ -27,11 +27,14 @@ Die Lernoberfläche prüft den Zugang beim Öffnen, beim Zurückkehren in die Ap
 
 ## Noch nötige Konfiguration
 
-1. **E-Mail-Versand:** in Supabase Auth einen eigenen SMTP-Absender konfigurieren. Der Standardversand ist auf Teamadressen beschränkt und nicht für Teilnehmer im Produktivbetrieb geeignet. Versanddomain und SPF/DKIM beim gewählten Anbieter einrichten. Niemals Passwörter/SMTP-Secrets im Repository speichern.
+1. **E-Mail-Versand:** Der Betreiber hat am 2. November 2026 ein Postfach bei ALL-INKL eingerichtet, Custom SMTP in Supabase gespeichert und den Empfang einer Passwort-Reset-E-Mail bestätigt. Auch die Passwort-Reset-Seite wurde nach Klick auf den Link erreicht. **Die tatsächliche Passwortänderung und erneute Anmeldung sind noch nicht abschließend bestätigt.** Für den Launch SMTP/DNS (SPF/DKIM), Zustellbarkeit, Rate-Limits und den vollständigen Prozess auf Endgeräten abnehmen. Niemals Passwörter/SMTP-Secrets im Repository speichern.
 2. **Auth-URLs:** derzeit zeigt `portalUrl` auf `https://cra4zzy.github.io/Andreas-app/dist/konto.html`. Diese URL als Site URL bzw. erlaubtes Redirect-Ziel konfigurieren; zusätzlich bei Verwendung der bestehenden Sites-Adresse deren `/konto.html` freigeben. Vor dem Kartendruck auf die endgültige Kundendomain umstellen. Native Bestätigung/Reset nutzt vorerst die HTTPS-Webansicht, anschließend normale Anmeldung in der App; keine vorgetäuschten Universal Links.
 3. **Passwortschutz:** serverseitige Mindestlänge mindestens zwölf Zeichen, geeignete Rate-Limits und gegebenenfalls CAPTCHA konfigurieren. Die Oberfläche verlangt bereits zwölf Zeichen. E-Mail-Bestätigung bleibt aktiviert. Administrativen MFA-Schutz vor echten Teilnehmerdaten entscheiden/einrichten.
 4. **Erster Admin:** der vorgesehene Inhaber registriert selbst ein Konto mit eigenem Passwort und bestätigt seine E-Mail. Ein vertrauenswürdiger Betreiber prüft die ausdrücklich freigegebene E-Mail und setzt nur diese Mitgliedschaft auf `admin/active`. Keine automatische Rollenübernahme aus Registrierungsfeldern. Keine Zugangsdaten per Chat sammeln.
 5. **Abnahme:** Registrierung, Bestätigung, Reset, Freischaltung, Verlauf und Kontolöschung mit ausdrücklich freigegebenen Konten auf zwei Geräten testen. Dann Inhalte, Datenschutz/Rechtsgrundlagen, Aufbewahrung, Auftragsverarbeitung und Backup-/Wiederherstellungskonzept freigeben.
+
+
+Bei einem zweiten Aufruf eines Passwort-Reset-Links wurde nach Nutzerangabe ein bereits angemeldetes Konto angezeigt. Das Frontend unter `dist/portal.js` wurde daraufhin angepasst: verbrauchte/abgelaufene Links erhalten eine verständliche Meldung, und nach erfolgreicher Passwortänderung wird die lokale Recovery-Sitzung beendet. **Die Funktion muss nach Deployment noch mit einem frischen Reset-Link getestet werden.**
 
 ## Verifiziert und offene Prüfung
 
