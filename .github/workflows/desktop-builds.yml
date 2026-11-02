@@ -62,3 +62,44 @@ jobs:
             src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
           if-no-files-found: error
           retention-days: 14
+
+  publish_windows_preview:
+    name: Publish Windows pilot download
+    needs: desktop
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Download successful Windows installer
+        uses: actions/download-artifact@v4
+        with:
+          name: abbate-windows-x64-pilot-installer
+          path: windows-artifact
+      - name: Give the setup a stable download name
+        shell: bash
+        run: |
+          set -euo pipefail
+          setup_file="$(find windows-artifact -type f -name '*.exe' -print -quit)"
+          test -n "$setup_file"
+          mkdir -p release
+          cp "$setup_file" release/Abbate-Lernraum-Windows-Setup.exe
+      - name: Publish or refresh public Windows test prerelease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tag="desktop-pilot"
+          asset="release/Abbate-Lernraum-Windows-Setup.exe"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$asset" --clobber
+          else
+            gh release create "$tag" "$asset" \
+              --target "$GITHUB_SHA" \
+              --title "Abbate Lernraum – Windows-Testversion" \
+              --notes "Vorabversion zum Testen, noch nicht produktiv freigegeben oder digital signiert. Windows SmartScreen kann deshalb einen Sicherheitshinweis anzeigen. Bitte nur aus der offiziellen Abbate-Downloadseite beziehen." \
+              --prerelease
+          fi
