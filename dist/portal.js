@@ -44,11 +44,11 @@
   // A recovery link must be confirmed by Supabase's PASSWORD_RECOVERY event.
   // A previously-used link can coexist with an already-signed-in browser:
   // never treat that existing session as proof that a reset link is valid.
-  const initialAuthHash = new URLSearchParams(location.hash.slice(1));
-  const initialAuthQuery = new URLSearchParams(location.search);
-  const recoveryLinkAttempt = initialAuthHash.get('type') === 'recovery' || initialAuthQuery.get('type') === 'recovery';
-  const failedAuthLink = initialAuthHash.has('error') || initialAuthHash.has('error_code') ||
-    initialAuthQuery.has('error') || initialAuthQuery.has('error_code');
+  // The callback was captured before Supabase initialized and removed the URL fragment.
+  // Preserve only boolean flags; never copy tokens to storage or application logs.
+  const authReturn = globalThis.ABBATE_AUTH_RETURN || {recovery:false, failed:false};
+  const recoveryLinkAttempt = authReturn.recovery === true;
+  const failedAuthLink = authReturn.failed === true;
   let recoveryMode = false;
   function invalidResetLink(){
     root.innerHTML=`<section class="portal-empty"><span class="portal-eyebrow">Dein Zugang</span><h1>Dieser Link ist nicht mehr gültig.</h1><p>Der Link wurde möglicherweise bereits verwendet oder ist abgelaufen. Fordere bitte einen neuen Link an, um dein Passwort sicher zurückzusetzen.</p><a class="primary" href="./konto.html?reset=neu#passwort">Neuen Link anfordern</a><a class="portal-text" href="./konto.html">Zur Anmeldung</a></section>`;
@@ -56,10 +56,18 @@
   async function render(){
     root.setAttribute('aria-busy','true');
     try{
-      await load();
+      // Handle auth callbacks BEFORE resolving profiles or performing signed-in redirects.
+      // A replayed/expired recovery link must never fall through to the account page,
+      // even when the browser still holds a perfectly valid prior session.
       if(view==='login' && failedAuthLink){invalidResetLink();return;}
-      if(recoveryMode){newPassword();return;}
-      if(view==='login' && recoveryLinkAttempt){invalidResetLink();return;}
+      if(view==='login' && (recoveryLinkAttempt || recoveryMode)){
+        const {data,error} = await B.client.auth.getSession();
+        if(error || !data?.session){invalidResetLink();return;}
+        recoveryMode=true;
+        newPassword();
+        return;
+      }
+      await load();
       if(view==='admin'){
         if(!state.me){root.innerHTML='<section class="portal-empty"><h1>Verwaltung anmelden.</h1><p>Dieser Bereich ist nur für berechtigte Mitarbeiter zugänglich.</p><a class="primary" href="./konto.html?next=verwaltung">Zur Anmeldung</a></section>';return;}
         if(!B.isStaff(state.me)){root.innerHTML='<section class="portal-empty"><h1>Kein Verwaltungszugang.</h1><p>Dein Konto besitzt keine aktive Mitarbeiterberechtigung.</p><a class="primary" href="./nachweise.html">Zu meinen Schulungen</a></section>';return;}
@@ -144,7 +152,13 @@
     }catch(error){document.querySelector('#delete-error').textContent=B.message(error);del.disabled=false;}return;}
     const revoke=event.target.closest('[data-revoke]');if(revoke){revoke.disabled=true;try{await B.updateRecord(revoke.dataset.revoke,{revoked_at:new Date().toISOString()});await load();renderDetail();notice('Fehleintrag zurückgezogen. Er erscheint nicht mehr beim Teilnehmer.');}catch(error){notice(B.message(error));revoke.disabled=false;}}
   });
-  B.client.auth.onAuthStateChange(event=>{if(event==='PASSWORD_RECOVERY'){recoveryMode=true;setTimeout(newPassword,0);}if(event==='SIGNED_OUT')setTimeout(render,0);});
+  B.client.auth.onAuthStateChange(event=>{
+    if(event==='PASSWORD_RECOVERY' && !failedAuthLink){
+      recoveryMode=true;
+      setTimeout(render,0);
+    }
+    if(event==='SIGNED_OUT')setTimeout(render,0);
+  });
   addEventListener('hashchange',()=>{if(view==='login')render();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&view!=='admin')render();});
   setInterval(()=>{if(!document.hidden&&view==='reader')render();},30000);
