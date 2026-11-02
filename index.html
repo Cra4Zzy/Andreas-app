@@ -238,6 +238,22 @@
           action.querySelector("span").textContent = platform === "ios" ? "Zum App Store" : platform === "android" ? "Zu Google Play" : "Jetzt herunterladen";
           if (platform === "ios" || platform === "android") action.rel = "noopener";
         }
+        // Pilot releases are kept separate from signed production downloads.
+        const preview = links.windowsPreview;
+        if (!links.windows && typeof preview === "string" && /^https:\\/\\/[^/\\s]+/i.test(preview)) {
+          const card = document.querySelector('[data-platform="windows"]');
+          const action = card && card.querySelector('[data-download="windows"]');
+          if (card && action) {
+            card.classList.add("ready");
+            card.querySelector("[data-status]").textContent = "Testversion verfügbar";
+            action.href = preview;
+            action.removeAttribute("aria-disabled");
+            action.removeAttribute("tabindex");
+            action.querySelector("span").textContent = "Windows-Testversion laden";
+            const notice = document.querySelector(".note span");
+            if (notice) notice.innerHTML = "<strong>Windows-Testversion:</strong> Dieser Installer ist für den Pilotbetrieb gedacht und noch nicht digital signiert. Windows kann deshalb einen Sicherheitshinweis zeigen. Mac, iPhone und Android folgen nach Test und Freigabe.";
+          }
+        }
       } catch (error) {
         // Never present a placeholder as an active download.
       }
