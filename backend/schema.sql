@@ -1,4 +1,4 @@
--- Proposed Supabase schema. Tested locally; NOT deployed to a remote database.
+-- Baseline schema. The combined deployed migration is tracked under supabase/migrations/.
 -- Practice attempts are intentionally separate from confirmed completions.
 begin;
 create schema if not exists abbate_private;

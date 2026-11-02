@@ -1,2 +1,5 @@
 *.bat text eol=crlf whitespace=cr-at-eol
 dist/vendor/qrcode-LICENSE.txt whitespace=-blank-at-eof
+
+# Generated SDK contains significant whitespace in embedded strings.
+dist/vendor/supabase.js whitespace=-blank-at-eol,-blank-at-eof

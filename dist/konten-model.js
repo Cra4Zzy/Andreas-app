@@ -32,7 +32,7 @@
     state.mastered ||= {};
     return state;
   }
-  const access=p=>!!p&&p.access==='active'&&dateOK(p.until)&&p.until>=today();
+  const access=p=>!!p&&p.access==='active'&&(!p.until||(dateOK(p.until)&&p.until>=today()));
   function register(state,{name,email},id){
     name=String(name||'').trim();email=String(email||'').trim().toLowerCase();
     if(!name||name.length>120)throw Error('Bitte einen Namen mit höchstens 120 Zeichen angeben.');
