@@ -4,5 +4,6 @@
   "windowsPreview": "https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-pilot/Abbate-Lernraum-Windows-Setup.exe",
   "macos": "",
   "ios": "",
-  "android": ""
+  "android": "",
+  "macosPreview": "https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-pilot/Abbate-Lernraum-macOS-Universal.dmg"
 }
