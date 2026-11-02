@@ -51,7 +51,7 @@
     initialAuthQuery.has('error') || initialAuthQuery.has('error_code');
   let recoveryMode = false;
   function invalidResetLink(){
-    root.innerHTML=`<section class="portal-empty"><span class="portal-eyebrow">Dein Zugang</span><h1>Dieser Link ist nicht mehr gültig.</h1><p>Der Link wurde möglicherweise bereits verwendet oder ist abgelaufen. Fordere bitte einen neuen Link an, um dein Passwort sicher zurückzusetzen.</p><a class="primary" href="./konto.html#passwort">Neuen Link anfordern</a><a class="portal-text" href="./konto.html">Zur Anmeldung</a></section>`;
+    root.innerHTML=`<section class="portal-empty"><span class="portal-eyebrow">Dein Zugang</span><h1>Dieser Link ist nicht mehr gültig.</h1><p>Der Link wurde möglicherweise bereits verwendet oder ist abgelaufen. Fordere bitte einen neuen Link an, um dein Passwort sicher zurückzusetzen.</p><a class="primary" href="./konto.html?reset=neu#passwort">Neuen Link anfordern</a><a class="portal-text" href="./konto.html">Zur Anmeldung</a></section>`;
   }
   async function render(){
     root.setAttribute('aria-busy','true');
