@@ -42,8 +42,11 @@ test('server disallows learner record tampering, revoked sessions, and stale pra
    const record=(await db.query(`select abbate_record_completion($1,$2,'Stapler Theorie','exam','failed','2026-11-01') as id`,[school,learner])).rows[0].id;
    await as(learner);
    await assert.rejects(db.query('select abbate_change_record($1,$2,$3,$4)',[school,record,'correct_outcome','passed']),/Staff access required/);
-   await assert.rejects(db.query("update public.abbate_completions set outcome='passed'"),/permission denied|row-level/i);
-   await assert.rejects(db.query("update public.abbate_memberships set access_until='2099-12-31'"),/permission denied|row-level/i);
+   // RLS may silently update zero rows instead of throwing; check persistent data.
+   await db.query("update public.abbate_completions set outcome='passed'");
+   assert.equal((await db.query('select outcome from public.abbate_completions where id=$1',[record])).rows[0].outcome,'failed');
+   await db.query("update public.abbate_memberships set access_until='2099-12-31'");
+   assert.equal((await db.query('select access_until::text as day from public.abbate_memberships where user_id=$1',[learner])).rows[0].day,'2099-01-01');
    const r1={results:[{id:'round-a',at:'2026-11-03T08:00:00Z'}],mastered:['q1']};
    const r2={results:[{id:'round-b',at:'2026-11-03T09:00:00Z'}],mastered:['q2']};
    for(const payload of [r1,r2,r1])await db.query('select abbate_merge_practice($1::jsonb)',[JSON.stringify(payload)]);
