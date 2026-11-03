@@ -46,15 +46,26 @@
    school:me.school,participant:input.student,title:input.title,kind:input.kind==='instruction'?'refresher':input.kind,
    outcome:input.outcome,completed_on:input.completedAt});fail(r.error);return r.data;}
  async function updateRecord(id,patch){
-   const r=await client.from('abbate_completions').update(patch).eq('school_id',me.school).eq('id',id).select('id');
-   fail(r.error);if(r.data.length!==1)throw Error('Der Eintrag wurde nicht geändert. Bitte Berechtigung prüfen.');
+   if(!me?.id||!me?.school)throw Error('Please sign in again');
+   let action,outcome=null;
+   if(Object.keys(patch).length===1 && typeof patch.outcome==='string'){
+     action='correct_outcome';outcome=patch.outcome;
+   }else if(Object.keys(patch).length===1 && Object.hasOwn(patch,'revoked_at')){
+     action='revoke';
+   }else throw Error('Ungültige Änderung am Schulungsnachweis.');
+   const r=await client.rpc('abbate_change_record',{p_school:me.school,p_record:id,p_action:action,p_outcome:outcome});
+   fail(r.error);
  }
  async function reauthenticate(password){
    const r=await client.auth.signInWithPassword({email:me.email,password});fail(r.error);
  }
  async function deleteAccount(id,password){await reauthenticate(password);const r=await client.rpc('abbate_delete_account',{target:id});fail(r.error);if(id===me.id)await client.auth.signOut({scope:'local'});}
  async function loadPractice(){const r=await client.from('abbate_practice').select('payload').eq('user_id',me.id).maybeSingle();fail(r.error);return r.data?.payload||{results:[],mastered:[]};}
- async function savePractice(payload){const r=await client.from('abbate_practice').upsert({user_id:me.id,payload,updated_at:new Date().toISOString()});fail(r.error);}
+ async function savePractice(payload){
+   if(!me?.id)throw Error('Please sign in again');
+   const r=await client.rpc('abbate_merge_practice',{p_payload:payload});
+   fail(r.error);return r.data;
+ }
  function message(error){
    const text=String(error?.message||'');
    if(/invalid login|invalid_credentials/i.test(text))return 'E-Mail oder Passwort stimmt nicht.';
