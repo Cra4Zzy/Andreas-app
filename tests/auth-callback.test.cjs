@@ -53,4 +53,11 @@ test('auth error and recovery guard are checked before loading signed-in profile
   assert.ok(errorGuard>0 && recoveryGuard>errorGuard);
   assert.ok(profileLoad>recoveryGuard,'Must not auto-redirect prior to handling callback');
   assert.ok(portal.includes('const authReturn = globalThis.ABBATE_AUTH_RETURN'));
+  assert.match(portal,/!data\?\.session \|\| !recoveryMode/);
+  assert.match(portal,/checked\.data\.user\.id!==data\.session\.user\?\.id/);
+  assert.match(portal,/event==='PASSWORD_RECOVERY'/);
+});
+test('an old authenticated session alone never authorizes password-reset form',()=>{
+  assert.match(portal,/Only Supabase's PASSWORD_RECOVERY callback authorizes this screen/);
+  assert.match(portal,/if\(error \|\| !data\?\.session \|\| !recoveryMode\)/);
 });
