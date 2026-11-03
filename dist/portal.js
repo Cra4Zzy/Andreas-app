@@ -62,9 +62,15 @@
       // even when the browser still holds a perfectly valid prior session.
       if(view==='login' && failedAuthLink){invalidResetLink();return;}
       if(view==='login' && (recoveryLinkAttempt || recoveryMode)){
+        // A session from an earlier login is NOT proof of a fresh recovery link.
+        // Only Supabase's PASSWORD_RECOVERY callback authorizes this screen.
+        // getSession waits for initial token processing, allowing the event to fire.
         const {data,error} = await B.client.auth.getSession();
-        if(error || !data?.session){invalidResetLink();return;}
-        recoveryMode=true;
+        if(error || !data?.session || !recoveryMode){invalidResetLink();return;}
+        const checked=await B.client.auth.getUser();
+        if(checked.error || !checked.data?.user || checked.data.user.id!==data.session.user?.id){
+          invalidResetLink();return;
+        }
         newPassword();
         return;
       }
@@ -157,7 +163,7 @@
     const revoke=event.target.closest('[data-revoke]');if(revoke){revoke.disabled=true;try{await B.updateRecord(revoke.dataset.revoke,{revoked_at:new Date().toISOString()});await load();renderDetail();notice('Fehleintrag zurückgezogen. Er erscheint nicht mehr beim Teilnehmer.');}catch(error){notice(B.message(error));revoke.disabled=false;}}
   });
   B.client.auth.onAuthStateChange(event=>{
-    if(event==='PASSWORD_RECOVERY' && !failedAuthLink){
+    if(event==='PASSWORD_RECOVERY' && !failedAuthLink && view==='login'){
       recoveryMode=true;
       setTimeout(render,0);
     }
