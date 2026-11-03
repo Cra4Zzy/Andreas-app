@@ -116,9 +116,9 @@
         result=await B.client.auth.updateUser({password:values.password});if(result.error)throw result.error;
         recoveryMode=false;
         if(form.id==='password-form'){
-          // A reset link creates a temporary authenticated session. End it locally
-          // so the learner confirms the new password with a fresh sign-in.
-          const signOutResult=await B.client.auth.signOut({scope:'local'});
+          // Password recovery invalidates existing refresh sessions across devices.
+          // The learner must authenticate again with the new password.
+          const signOutResult=await B.client.auth.signOut({scope:'global'});
           if(signOutResult.error)throw signOutResult.error;
           location.replace('./konto.html#passwort-gesetzt');
           return;
