@@ -80,7 +80,6 @@
     .platform.ready .platform-action{color:#fff;background:var(--ink);cursor:pointer;transition:background .2s}
     .platform.ready .platform-action:hover{background:#31616a}
     .platform-action svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none}
-    .platform-disclaimer{display:block;margin-top:10px;font-size:12px;line-height:1.4;color:#6f7774}
     .note{display:flex;align-items:start;gap:12px;margin-top:22px;padding:16px 18px;border-radius:14px;background:#f0e9d7;color:#635d4c;font-size:15px;line-height:1.5}
     .note svg{width:22px;height:22px;flex:0 0 22px}
     .browser{padding-top:0;padding-bottom:80px}
@@ -235,28 +234,24 @@
           action.querySelector("span").textContent = platform === "ios" ? "Zum App Store" : platform === "android" ? "Zu Google Play" : "Jetzt herunterladen";
           if (platform === "ios" || platform === "android") action.rel = "noopener";
         }
-        // Only explicitly marked pilot releases may activate unsigned test links.
+        // Internal desktop builds are offered as test downloads; no production certification is implied.
         for (const [platform, key, label] of [
           ["windows", "windowsPreview", "Windows herunterladen"],
           ["macos", "macosPreview", "Mac herunterladen"]
         ]) {
-          if (links[platform]) continue; // Official signed release takes priority.
+          if (links[platform]) continue;
           const url = links[key];
           if (typeof url !== "string" || !/^https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/releases\/download\/[^/\s]+\/[^/\s]+$/i.test(url)) continue;
           const card = document.querySelector('[data-platform="' + platform + '"]');
           const action = card && card.querySelector("[data-download]");
           if (!card || !action) continue;
           card.classList.add("ready");
-          card.querySelector("[data-status]").textContent = "Desktop-Installer verfügbar";
+          card.querySelector("[data-status]").textContent = platform === "macos" ? "Mac-Testversion verfügbar" : "Desktop-Version verfügbar";
           action.href = url;
           action.rel = "noopener noreferrer";
           action.removeAttribute("aria-disabled");
           action.removeAttribute("tabindex");
           action.querySelector("span").textContent = label;
-          const info = document.createElement("small");
-          info.className = "platform-disclaimer";
-          info.textContent = "Noch ohne öffentliche Code-Signatur. Dein Betriebssystem kann bei der Installation einen Sicherheitshinweis anzeigen.";
-          action.insertAdjacentElement("afterend", info);
         }
       } catch (error) {
         // Never present a placeholder as an active download.
