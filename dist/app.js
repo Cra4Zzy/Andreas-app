@@ -111,13 +111,24 @@ function quizView() {
   return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${t.name}</span><span>${run.index+1} / ${run.ids.length}</span></div><h1>${q.title}</h1><p class="question-context">${q.context}</p><div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${answer}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig. Gut eingeordnet.':'Gut, dass du es hier ausprobierst.'}</h3><p>${q.why}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
 }
 function rememberCorrect(id) { const list=data.mastered[student().id]||[]; if(!list.includes(id))list.push(id); data.mastered[student().id]=list; }
+let completingRun=false;
 async function completeRun() {
-  if(!await checkAccess())return;
-  if(!run)return;
-  if(!active(student())) { run=null;close();go('start');access();return; }
-  const result={id:uid(),student:student().id,mode:run.mode,ids:[...run.ids],answers:{...run.answers},score:run.ids.filter(id=>run.answers[id]===question(id).correct).length,total:run.ids.length,at:new Date().toISOString()};
-  run.ids.forEach(id=>{if(run.answers[id]===question(id).correct)rememberCorrect(id);});
-  data.results.push(result);latestResult=result;run=null;save();close();go('ergebnis');
+  if(completingRun)return;
+  completingRun=true;
+  try{
+    if(!await checkAccess())return;
+    if(!run)return;
+    if(!active(student())) { run=null;close();go('start');access();return; }
+    const result={id:uid(),student:student().id,mode:run.mode,ids:[...run.ids],answers:{...run.answers},score:run.ids.filter(id=>run.answers[id]===question(id).correct).length,total:run.ids.length,at:new Date().toISOString()};
+    const nextMastered=[...new Set([...mastered(),...run.ids.filter(id=>run.answers[id]===question(id).correct)])];
+    // A completed round is only shown as saved after the server has accepted it.
+    await B.savePractice({results:[result],mastered:nextMastered});
+    data.mastered[student().id]=nextMastered;
+    data.results.push(result);
+    latestResult=result;run=null;close();go('ergebnis');
+  }catch{
+    toast('Ergebnis noch nicht gespeichert. Die Runde bleibt erhalten – bitte Verbindung prüfen und erneut abschließen.');
+  }finally{completingRun=false;}
 }
 function reviewCards(result) { return (result.ids||[]).map(id=>{const q=question(id);if(!q)return '';const choice=result.answers[id],correct=choice===q.correct;return `<article class="review-card ${correct?'':'wrong'}"><header>${icon(correct?'check':'help')}<h3>${q.title}</h3></header><p>${q.why}</p><p class="your-answer">Deine Antwort: ${choice===undefined?'Nicht beantwortet':esc(q.answers[choice])}</p></article>`;}).join(''); }
 function resultView() {
@@ -198,9 +209,28 @@ function practicePayload(input){
   const results=source.filter(r=>r&&typeof r.id==='string'&&r.id.length<=80&&['learn','exam'].includes(r.mode)&&Array.isArray(r.ids)&&Number.isInteger(r.score)&&Number.isInteger(r.total)&&r.score>=0&&r.total<=ids.length&&r.score<=r.total&&Number.isFinite(Date.parse(r.at))).map(r=>({id:r.id,student:B.me.id,mode:r.mode,ids:r.ids.filter(id=>ids.includes(id)),answers:Object.fromEntries(Object.entries(r.answers||{}).filter(([id,a])=>ids.includes(id)&&Number.isInteger(a)&&a>=0&&a<3)),score:r.score,total:r.total,at:new Date(r.at).toISOString()}));
   return {results:results.slice(-100),mastered:Array.isArray(input?.mastered)?input.mastered.filter(id=>ids.includes(id)):[]};
 }
+let accessRequest=null;
 async function checkAccess(){
-  try{const me=await B.identity();if(!me){location.replace('./konto.html');return false;}if(!await B.termsAccepted()){location.replace('./konto.html#bedingungen');return false;}if(!active(me)){location.replace('./nachweise.html');return false;}data.students=[me];return true;}
-  catch{document.documentElement.dataset.loading='';$('#main').innerHTML='<section class="empty-state"><h1>Keine Serververbindung.</h1><p>Bitte prüfe deine Internetverbindung und lade die Seite erneut.</p><a class="primary" href="./index.html">Erneut verbinden</a><a class="text-link" href="./konto.html">Zur Anmeldung</a></section>';document.documentElement.removeAttribute('data-loading');run=null;return false;}
+  if(accessRequest)return accessRequest;
+  const work=(async()=>{
+    try{
+      const me=await B.identity();
+      if(!me){location.replace('./konto.html');return false;}
+      if(!await B.termsAccepted()){location.replace('./konto.html#bedingungen');return false;}
+      if(!active(me)){location.replace('./nachweise.html');return false;}
+      data.students=[me];return true;
+    }catch{
+      // Temporary connectivity problems must not destroy an in-progress exercise.
+      if(data.selected){
+        toast('Verbindung unterbrochen. Deine laufende Runde bleibt erhalten – wir prüfen den Zugang erneut.');
+        return false;
+      }
+      $('#main').innerHTML='<section class="empty-state"><h1>Keine Serververbindung.</h1><p>Bitte prüfe deine Internetverbindung und lade die Seite erneut.</p><a class="primary" href="./index.html">Erneut verbinden</a><a class="text-link" href="./konto.html">Zur Anmeldung</a></section>';
+      document.documentElement.removeAttribute('data-loading');return false;
+    }
+  })();
+  accessRequest=work;
+  try{return await work;}finally{if(accessRequest===work)accessRequest=null;}
 }
 async function boot(){
   if(!await checkAccess())return;
