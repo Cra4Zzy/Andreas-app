@@ -31,3 +31,4 @@
 /* Customer photo: preserve complete forklift, mast and forks on all viewport widths. */
 .hero-photo>img{width:100%;height:auto;aspect-ratio:1244/1265;object-fit:contain;object-position:center;background:#e7eae5;filter:none}
 @media(max-width:650px){.hero-photo>img{height:auto;aspect-ratio:1244/1265}}
+.hero-photo .photo-caption{position:relative;left:auto;right:auto;bottom:auto;margin:-19px 14px 0 auto;z-index:2;max-width:min(345px,calc(100% - 18px))}
