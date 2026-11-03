@@ -14,3 +14,16 @@
 
 /* Contrast for supporting copy; body text remains 18–20 px. */
 .hero-proof,.route-step small,.topic-row small,.progress-count,.lesson-meta,.question-note,.question-meta,.admin-note,.student-info small,.form-caption,.person-option small,.install-step p,.install-preview-note{color:#68745f}.progress-note p{color:#736d56}.feedback p{color:#637b50}.feedback.again p{color:#806d40}.page-footer,.page-footer a,.page-footer button{color:#738069}.hero-photo>img{object-position:50% 50%}
+
+/* Abbate · refinements before customer acceptance: quieter UI, stronger hierarchy. */
+.exam-disclaimer{margin:20px 2px 8px;padding:0 0 0 15px;border-left:3px solid #d1b258;color:#6f766d;font-size:14px;line-height:1.65;max-width:760px}
+.mode-card{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+.mode-card:hover{transform:translateY(-2px);box-shadow:0 14px 32px #18383c12;border-color:#cbd6c9}
+.mode-card.focus{box-shadow:0 13px 38px #203d4012}
+.question-card{box-shadow:0 14px 42px #142f3510}
+.answer{transition:border-color .18s ease,background .18s ease,transform .18s ease}
+.answer:not(:disabled):hover{transform:translateY(-1px)}
+.site-header{position:relative;z-index:10}
+#desktop-nav a:focus-visible,.answer:focus-visible{outline:3px solid #b88721;outline-offset:3px}
+@media(max-width:650px){.exam-disclaimer{margin:16px 0 12px;font-size:13px}.mode-card:hover,.answer:not(:disabled):hover{transform:none}}
+@media(prefers-reduced-motion:reduce){.mode-card,.answer{transition:none!important;transform:none!important}}
