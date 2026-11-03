@@ -27,7 +27,7 @@ test('customer portal remains accessible to authenticated users',()=>{
   for(const p of ['dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
     const text=read(p);
     assert.match(text,/id="portal-content"/,p);
-    assert.match(text,/portal\.js\?v=6/,p);
+    assert.match(text,/portal\.js\?v=7/,p);
     assert.doesNotMatch(text,/class="portal-preview"/,p);
   }
 });
@@ -47,9 +47,9 @@ test('unreleased mobile store links remain disabled',()=>{
 });
 
 test('cached offline shell gets fresh app JavaScript',()=>{
-  assert.match(read('dist/index.html'),/app\.js\?v=15/);
-  assert.match(read('dist/sw.js'),/app\.js\?v=15/);
-  assert.match(read('dist/sw.js'),/abbate-learning-v15/);
+  assert.match(read('dist/index.html'),/app\.js\?v=16/);
+  assert.match(read('dist/sw.js'),/app\.js\?v=16/);
+  assert.match(read('dist/sw.js'),/abbate-learning-v16/);
 });
 
 test('learning UI stays focused and identifies simulation honestly',()=>{
