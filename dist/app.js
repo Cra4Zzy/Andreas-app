@@ -49,13 +49,18 @@ const student = () => data.students.find(s=>s.id===data.selected)||{id:'guest',n
 const question = id => QUESTIONS.find(q=>q.id===id);
 const topic = id => TOPICS.find(t=>t.id===id);
 const mastered = () => (data.mastered[student().id]||[]).filter(id=>question(id));
-let saveTimer,saveQueue=Promise.resolve();
+let saveTimer,saveQueue=Promise.resolve(),saveRevision=0,savedRevision=0;
 function save(){
-  clearTimeout(saveTimer);saveTimer=setTimeout(()=>{
-    const payload={results:data.results.slice(-100),mastered:mastered()};
-    saveQueue=saveQueue.then(()=>B.savePractice(payload)).catch(()=>toast('Dein Lernstand konnte gerade nicht auf dem Server gespeichert werden. Bitte Internetverbindung prüfen.'));
+  const revision=++saveRevision;
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{
+    const payload={results:data.results.slice(-100),mastered:[...mastered()]};
+    saveQueue=saveQueue.catch(()=>{}).then(()=>B.savePractice(payload)).then(()=>{
+      savedRevision=Math.max(savedRevision,revision);
+    }).catch(()=>toast('Dein Lernstand ist noch nicht gespeichert. Bitte Verbindung prüfen; bei Wiederverbindung wird erneut gespeichert.'));
   },150);
 }
+window.addEventListener('online',()=>{if(savedRevision<saveRevision)save();});
 function toast(message) { $('#toast').textContent=I18N.text(message); $('#toast').classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),4300); }
 function modal(title,content) { $('#modal-content').innerHTML=`<div class="modal-head"><h2>${title}</h2><button class="icon-button" data-action="close" aria-label="Schließen">${icon('close')}</button></div><div class="modal-body">${content}</div>`; I18N.localize($('#modal-content')); if(!$('#modal').open) $('#modal').showModal(); }
 function close() { $('#modal').close(); }
@@ -216,5 +221,5 @@ function install(){
 } 
 
 B.client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')location.replace('./konto.html');});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkAccess();});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkAccess();if(savedRevision<saveRevision)save();}});
 setInterval(()=>{if(!document.hidden)checkAccess();},30000);
