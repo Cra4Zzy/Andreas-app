@@ -24,7 +24,7 @@ test('admin and backend do not expose arbitrary paid expiry dates',()=>{
 test('access controls load newest scripts',()=>{
  for(const p of ['dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
    const s=read(p);
-   assert.match(s,/backend\.js\?v=3/);
-   assert.match(s,/portal\.js\?v=6/);
+   assert.match(s,/backend\.js\?v=4/);
+   assert.match(s,/portal\.js\?v=7/);
  }
 });
