@@ -95,4 +95,4 @@ revoke all on function public.abbate_merge_practice(jsonb) from public,anon;
 grant execute on function public.abbate_merge_practice(jsonb) to authenticated;
 revoke insert, update, delete on public.abbate_practice from authenticated;
 comment on function public.abbate_merge_practice(jsonb)
-is 'Atomic union of a learner\'s unofficial practice rounds and mastered questions, preventing stale concurrent writes.';
+is 'Atomic union of unofficial practice rounds and mastered questions, preventing stale concurrent writes.';
