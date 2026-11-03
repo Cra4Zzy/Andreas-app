@@ -49,7 +49,7 @@ test('unreleased mobile store links remain disabled',()=>{
 test('cached offline shell gets fresh app JavaScript',()=>{
   assert.match(read('dist/index.html'),/app\.js\?v=17/);
   assert.match(read('dist/sw.js'),/app\.js\?v=17/);
-  assert.match(read('dist/sw.js'),/abbate-learning-v17/);
+  assert.match(read('dist/sw.js'),/abbate-learning-v19/);
 });
 
 test('learning UI stays focused and identifies simulation honestly',()=>{
