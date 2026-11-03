@@ -47,7 +47,14 @@ test('unreleased mobile store links remain disabled',()=>{
 });
 
 test('cached offline shell gets fresh app JavaScript',()=>{
-  assert.match(read('dist/index.html'),/app\.js\?v=14/);
-  assert.match(read('dist/sw.js'),/app\.js\?v=14/);
-  assert.match(read('dist/sw.js'),/abbate-learning-v14/);
+  assert.match(read('dist/index.html'),/app\.js\?v=15/);
+  assert.match(read('dist/sw.js'),/app\.js\?v=15/);
+  assert.match(read('dist/sw.js'),/abbate-learning-v15/);
+});
+
+test('learning UI stays focused and identifies simulation honestly',()=>{
+  assert.doesNotMatch(read('dist/index.html'),/id="download-banner"/);
+  assert.doesNotMatch(read('dist/index.html'),/download-banner\.css/);
+  assert.match(read('dist/app.js'),/Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt/);
+  assert.match(read('dist/styles.css'),/\.exam-disclaimer/);
 });
