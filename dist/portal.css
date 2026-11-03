@@ -10,3 +10,22 @@
 
 /* Visible on account, training records and staff pages. */
 .portal-legal-footer{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px 20px;max-width:1280px;margin:18px auto 35px;padding:24px 28px;border-top:1px solid #d8ded6;font-size:13px;color:#687671}.portal-legal-footer a{color:#365d57;text-decoration:none}.portal-legal-footer a:hover{text-decoration:underline}.portal-legal-footer span{width:100%;text-align:center;color:#788780}.portal-body .portal-consent a{color:#21584d;text-decoration:underline;text-underline-offset:3px}.portal-body .portal-hint a{color:#21584d;text-underline-offset:3px}
+
+/* Final customer UI pass: clearer action hierarchy without promotional banners. */
+.portal-body{background:linear-gradient(180deg,#f3f5f0 0,#f7f5ef 310px,#f7f5ef 100%)}
+.portal-login-heading{max-width:700px}
+.portal-login-heading h1{letter-spacing:-.055em}
+.portal-login-grid{gap:20px;align-items:stretch}
+.portal-login-grid>.portal-panel{position:relative;border-radius:19px;border-color:#dfe4d9;background:#fffefb;box-shadow:0 18px 46px #172f3510;transition:box-shadow .2s ease,transform .2s ease}
+.portal-login-grid>.portal-panel:nth-child(2){background:linear-gradient(165deg,#fffefb 70%,#fffbec)}
+.portal-login-grid>.portal-panel:nth-child(2):before{content:'';position:absolute;top:0;left:28px;right:28px;height:3px;border-radius:0 0 9px 9px;background:#e7bd48}
+.portal-panel h2{letter-spacing:-.03em}
+.portal-body .primary{transition:background .2s ease,transform .2s ease,box-shadow .2s ease}
+.portal-body .primary:hover:not(:disabled){background:#244e56;box-shadow:0 9px 24px #193d3e22;transform:translateY(-1px)}
+.portal-body .secondary{transition:border-color .2s ease,background .2s ease}
+.portal-body .secondary:hover:not(:disabled){background:#f4f7f1;border-color:#a7b9a8}
+.portal-body input:focus-visible,.portal-body select:focus-visible{border-color:#bf9636;outline:3px solid #f2cb6f77;outline-offset:2px}
+.portal-login-grid .portal-consent{padding:12px 14px;border:1px solid #e3e8d8;border-radius:11px;background:#f7f9f3}
+.portal-login-grid .portal-hint{line-height:1.55}
+@media(max-width:700px){.portal-login-grid>.portal-panel{box-shadow:0 9px 24px #172f350d}.portal-login-heading h1{letter-spacing:-.045em}.portal-login-grid{gap:15px}.portal-body .primary:hover:not(:disabled){transform:none}}
+@media(prefers-reduced-motion:reduce){.portal-body .primary,.portal-login-grid>.portal-panel{transition:none!important;transform:none!important}}
