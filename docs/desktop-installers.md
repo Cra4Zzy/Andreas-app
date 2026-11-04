@@ -1,5 +1,7 @@
 # Desktop-Installationspakete (Windows und macOS)
 
+> **Update vom 4. November 2026:** Ein signierter Auto-Updater für zukünftige Desktop-Releases ist als eigener, noch nicht freigeschalteter Release-Zweig vorbereitet. Die bisherigen Pilot-Installer **haben keinen Updater** und benötigen später einmalig die neue Installation. Für Schlüssel, Notarisierung, Release-Kanal und E2E-Tests siehe [Desktop-Auto-Updates](desktop-auto-updates.md).
+
 Stand: 2. November 2026. **Interner Pilot**, noch keine signierte/notarisierte öffentliche Veröffentlichung.
 
 ## Bereits implementiert
