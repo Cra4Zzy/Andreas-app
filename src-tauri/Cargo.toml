@@ -1,14 +1,20 @@
 [package]
 name = "abbate-lernraum-desktop"
 version = "0.1.0"
-description = "Abbate Lernraum desktop pilot"
+description = "Abbate Lernraum desktop client"
 authors = ["Kaiser Webdesign"]
 edition = "2021"
 rust-version = "1.77.2"
 build = "build.rs"
+
+[features]
+default = []
+# Enabled only in signed update-capable release builds. Never in pilot.
+desktop-auto-update = ["dep:tauri-plugin-updater"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
+tauri-plugin-updater = { version = "2", optional = true }
