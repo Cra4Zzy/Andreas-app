@@ -37,9 +37,9 @@ test('critical German source format variables remain available for all 3 languag
    const pack=await i18n.load(code);
    const german=await i18n.load('de');
    for(const id of ids){
-      const keys=[...german[id].matchAll(/\\{([a-z]+)\\}/g)].map(x=>x[1]);
+      const keys=(german[id].match(/\{[a-z]+\}/g)||[]);
       for(const key of keys){
-        assert.match(pack[id],new RegExp('\\\\{'+key+'\\\\}'),code+' lost '+key+' in phrase '+id);
+        assert.ok(pack[id].includes(key),code+' lost '+key+' in phrase '+id);
       }
    }
  }
