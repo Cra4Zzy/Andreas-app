@@ -77,3 +77,49 @@
 @media(max-width:780px){.theory-intro{flex-direction:column;align-items:flex-start;gap:24px}.theory-intro:after{right:0;bottom:-47px}.theory-intro>a{align-self:flex-start}}
 @media(max-width:520px){.theory-intro{padding:25px 22px;margin:4px 0 22px}.theory-intro h2{font-size:32px}.theory-intro p{font-size:17px}.theory-intro .primary{width:100%;justify-content:center}.theory-study-top{font-size:13px}.theory-question{padding:22px 17px}.theory-question h2{font-size:27px}.theory-option{padding:13px 12px;gap:12px;font-size:16px}.theory-study-actions{gap:10px}.theory-study-actions .primary,.theory-study-actions .secondary{font-size:15px;padding:12px}}
 @media(prefers-reduced-motion:reduce){.theory-option,.theory-progress>span{transition:none!important}}
+
+
+/* Independent qualifications, not mislabeled forklift subtopics. */
+.qualification-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:19px;margin:14px 0 31px}
+.qualification-card{display:flex;flex-direction:column;min-width:0;min-height:292px;padding:clamp(24px,3vw,37px);border-radius:20px;background:#f0f1e9;position:relative;overflow:hidden}
+.qualification-card:nth-child(3){background:#f1eee5}
+.qualification-card:nth-child(4){background:#e9efeb}
+.qualification-card:nth-child(5){background:#ebe9e1}
+.qualification-card h2{font:800 clamp(28px,2.5vw,37px)/1.09 Barlow,system-ui,sans-serif;letter-spacing:-.04em;color:#17363b;margin:15px 0 11px}
+.qualification-card p{font:400 17px/1.5 SourceSans,system-ui,sans-serif;color:#52665f;max-width:480px;margin:0 0 28px}
+.qualification-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.qualification-index{font:700 12px/1 Barlow,system-ui,sans-serif;letter-spacing:.12em;color:#82938a}
+.qualification-badge{border-radius:999px;padding:7px 11px;font:700 12px/1 Barlow,sans-serif;background:#e2e8dc;color:#576a5a;white-space:nowrap}
+.qualification-badge.live{background:#f2cf6c;color:#35452d}
+.qualification-symbol{width:48px;height:48px;display:grid;place-items:center;border-radius:13px;background:#e0e9da;color:#47705f;margin-top:24px}
+.qualification-symbol svg{width:23px;height:23px}
+.qualification-symbol.sand{background:#e8e0c9;color:#a7833e}
+.qualification-symbol.blue{background:#dbe8e6;color:#507e86}
+.qualification-footer{margin-top:auto;display:grid;justify-items:start;gap:14px}
+.qualification-footer .text-link{font-size:15px;text-align:left}
+.qualification-cta{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:50px;padding:12px 21px;border-radius:10px;text-decoration:none}
+.qualification-awaiting{font-size:14px;font-weight:700;color:#77897e;background:#e2e8e0;padding:8px 13px;border-radius:8px}
+.qualification-available{grid-column:span 2;min-height:310px;background:linear-gradient(118deg,#17363d 0%,#234e50 100%);padding-right:min(29%,270px)}
+.qualification-available:before{content:"";position:absolute;width:285px;height:285px;right:-64px;top:54px;border:58px solid rgba(242,207,108,.12);border-radius:50%;pointer-events:none}
+.qualification-available .qualification-index{color:#b6c8c3}
+.qualification-available .qualification-symbol{background:#355f5a;color:#f2cd6a}
+.qualification-available h2{color:#fff;font-size:clamp(38px,4vw,59px);margin-top:18px}
+.qualification-available p{color:#d6e2dc;font-size:18px}
+.qualification-available .qualification-footer{display:flex;align-items:center;flex-wrap:wrap;gap:18px}
+.qualification-available .qualification-cta{background:#edc85d;color:#233b33}
+.qualification-available .qualification-cta:hover{background:#ffe29b}
+.qualification-available .text-link{color:#f3e3b8}
+.course-home-row{border-bottom:1px solid #e4e6da}
+.course-home-number{font:700 12px/1 Barlow,sans-serif;letter-spacing:.09em;color:#a2aa96;min-width:27px}
+.course-home-copy{flex:1;min-width:0}
+.course-home-row .topic-title{font-size:clamp(19px,2vw,23px)}
+.course-home-row .topic-symbol{width:43px;height:43px}
+.course-home-row .topic-symbol svg{width:21px;height:21px}
+.course-home-link{margin-left:auto;display:grid;place-items:center;width:43px;height:43px;border-radius:50%;background:#213e42;color:#f3d274;text-decoration:none;transition:transform .2s,background .2s}
+.course-home-link:hover{background:#2f5e62;transform:translateX(2px)}
+.course-home-link svg{width:18px;height:18px}
+.course-home-soon{margin-left:auto;color:#839186;font:700 12px/1 Barlow,sans-serif;background:#eaede4;border-radius:999px;padding:8px 11px}
+.course-home-pending .topic-symbol{opacity:.82}
+@media(max-width:900px){.qualification-available{padding-right:37px}.qualification-available:before{opacity:.5}}
+@media(max-width:650px){.qualification-grid{grid-template-columns:1fr;gap:13px}.qualification-card{min-height:255px;padding:24px}.qualification-available{grid-column:span 1;min-height:310px}.qualification-card h2{font-size:30px}.qualification-card p{font-size:16px}.qualification-available h2{font-size:43px}.qualification-available .qualification-footer{align-items:stretch}.qualification-cta{width:100%}.course-home-row{gap:10px;padding-block:17px}.course-home-row .topic-title{font-size:19px}.course-home-number{display:none}.course-home-row .topic-symbol{width:41px;height:41px}.course-home-soon{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.course-home-link{transition:none!important}}
