@@ -51,6 +51,10 @@ test('mobile website installation is ready without store links',()=>{
   assert.match(landing,/App öffnen &amp; hinzufügen/);
   assert.match(landing,/App öffnen &amp; installieren/);
   assert.match(landing,/class="pwa-steps"/);
+  assert.equal((landing.match(/<details class="install-accordion">/g)||[]).length,2);
+  assert.equal((landing.match(/<summary>/g)||[]).length,2);
+  assert.equal((landing.match(/Installationsanleitung anzeigen/g)||[]).length,2);
+  assert.doesNotMatch(landing,/<details class="install-accordion" open/);
   assert.match(landing,/So fügst du die App hinzu/);
   assert.match(landing,/So installierst du die App/);
   assert.doesNotMatch(landing,/class="pwa-howto"/);
