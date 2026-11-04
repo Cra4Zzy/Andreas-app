@@ -123,3 +123,6 @@
 @media(max-width:900px){.qualification-available{padding-right:37px}.qualification-available:before{opacity:.5}}
 @media(max-width:650px){.qualification-grid{grid-template-columns:1fr;gap:13px}.qualification-card{min-height:255px;padding:24px}.qualification-available{grid-column:span 1;min-height:310px}.qualification-card h2{font-size:30px}.qualification-card p{font-size:16px}.qualification-available h2{font-size:43px}.qualification-available .qualification-footer{align-items:stretch}.qualification-cta{width:100%}.course-home-row{gap:10px;padding-block:17px}.course-home-row .topic-title{font-size:19px}.course-home-number{display:none}.course-home-row .topic-symbol{width:41px;height:41px}.course-home-soon{font-size:11px}}
 @media(prefers-reduced-motion:reduce){.course-home-link{transition:none!important}}
+
+/* Five destinations, including official training records, remain reachable on mobile. */
+@media(max-width:650px){.mobile-nav{grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;padding-inline:5px}.mobile-nav a{min-width:0;font-size:clamp(9px,2.45vw,12px);line-height:1.13;overflow-wrap:anywhere;text-align:center;padding-inline:2px}.mobile-nav a svg{width:22px;height:22px}}
