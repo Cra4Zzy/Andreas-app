@@ -1,4 +1,4 @@
-name: Abbate signed desktop auto-updates
+name: Abbate desktop updater (free key, no paid certificates)
 
 # Deliberately manual: publishing a release is an explicit, reviewed operation.
 # A regular git push still builds the unsigned pilot, NEVER a production update.
@@ -23,20 +23,14 @@ jobs:
         with:
           node-version: "24"
           cache: npm
-      - name: Require real update keys and notarization credentials
+      - name: Require only the free cryptographic Tauri updater key pair
         shell: bash
         env:
           ABBATE_UPDATER_PUBLIC_KEY: ${{ vars.ABBATE_UPDATER_PUBLIC_KEY }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
           set -euo pipefail
-          for key in ABBATE_UPDATER_PUBLIC_KEY TAURI_SIGNING_PRIVATE_KEY APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID KEYCHAIN_PASSWORD; do
+          for key in ABBATE_UPDATER_PUBLIC_KEY TAURI_SIGNING_PRIVATE_KEY; do
             if [ -z "${!key:-}" ]; then
               echo "::error::Missing required signing or notarization setting: $key"
               exit 1
@@ -84,26 +78,6 @@ jobs:
           npm test
       - name: Prepare the official Abbate desktop icon
         run: npx --yes @tauri-apps/cli@2.12.4 icon dist/icon-512.png --output src-tauri/icons
-      - name: Import Apple Developer ID Application certificate
-        if: runner.os == 'macOS'
-        shell: bash
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-        run: |
-          set -euo pipefail
-          echo "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/abbate-developer-id.p12"
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/abbate.keychain-db"
-          security default-keychain -s "$RUNNER_TEMP/abbate.keychain-db"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/abbate.keychain-db"
-          security set-keychain-settings -t 3600 -u "$RUNNER_TEMP/abbate.keychain-db"
-          security import "$RUNNER_TEMP/abbate-developer-id.p12" -k "$RUNNER_TEMP/abbate.keychain-db" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/abbate.keychain-db"
-          identity="$(security find-identity -v -p codesigning "$RUNNER_TEMP/abbate.keychain-db" | grep 'Developer ID Application:' | head -1 | sed -E 's/^[^"]*"([^"]+)".*$/\1/')"
-          test -n "$identity" || { echo "::error::Developer ID Application certificate missing"; exit 1; }
-          echo "APPLE_SIGNING_IDENTITY=$identity" >> "$GITHUB_ENV"
-          rm -f "$RUNNER_TEMP/abbate-developer-id.p12"
       - name: Build signed Windows installer and updater signature
         if: runner.os == 'Windows'
         shell: bash
@@ -113,22 +87,21 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           npx --yes @tauri-apps/cli@2.12.4 build --bundles nsis --features desktop-auto-update --config src-tauri/tauri.stable.conf.json --ci
-      - name: Build notarized universal Mac app and updater archive
+      - name: Build universal Mac app without paid Apple certificates
         if: runner.os == 'macOS'
         shell: bash
         env:
           ABBATE_UPDATER_PUBLIC_KEY: ${{ vars.ABBATE_UPDATER_PUBLIC_KEY }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_SIGNING_IDENTITY: '-'
         run: |
+          set -euo pipefail
           npx --yes @tauri-apps/cli@2.12.4 build --bundles dmg --target universal-apple-darwin --features desktop-auto-update --config src-tauri/tauri.stable.conf.json --ci
-          # Tauri notarizes/staples the DMG using APPLE_ID/APPLE_PASSWORD/APPLE_TEAM_ID.
           dmg="$(find src-tauri/target/universal-apple-darwin/release/bundle/dmg -maxdepth 1 -name '*.dmg' -type f -print -quit)"
           test -s "$dmg"
-          xcrun stapler validate "$dmg"
+          # Tauri update archive is signed using the free updater key.
+          # macOS may still display Gatekeeper warnings for the unsigned DMG.
       - name: Stage signed Windows assets
         if: runner.os == 'Windows'
         shell: bash
@@ -140,7 +113,7 @@ jobs:
           mkdir -p release
           cp "$file" release/Abbate-Lernraum-Windows-Setup.exe
           cp "$file.sig" release/Abbate-Lernraum-Windows-Setup.exe.sig
-      - name: Stage notarized Mac and signed update archive
+      - name: Stage unsigned Mac installer and signed update archive
         if: runner.os == 'macOS'
         shell: bash
         run: |
@@ -209,7 +182,7 @@ jobs:
             release/Abbate-Lernraum-macOS-Universal.app.tar.gz \
             release/Abbate-Lernraum-macOS-Universal.app.tar.gz.sig \
             --target "$GITHUB_SHA" --title "Abbate Lernraum Desktop $RELEASE_VERSION" \
-            --notes "Signierte Tauri-Updatepakete; macOS Developer ID/notarisiert. Windows-OS-Codesignatur separat prüfen."
+            --notes "Tauri-Updatepakete mit kostenlosem Signaturschlüssel; keine Betriebssystem-Signaturen, daher können SmartScreen/Gatekeeper warnen."
       - name: Publish update manifest last (atomic channel switch)
         shell: bash
         run: |
