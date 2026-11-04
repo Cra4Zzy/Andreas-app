@@ -5,5 +5,7 @@
   "macos": "",
   "ios": "",
   "android": "",
-  "macosPreview": "https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-pilot/Abbate-Lernraum-macOS-Universal.dmg"
+  "macosPreview": "https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-pilot/Abbate-Lernraum-macOS-Universal.dmg",
+  "desktopLiveFrontend": true,
+  "desktopPreviewVersion": "0.1.1"
 }
