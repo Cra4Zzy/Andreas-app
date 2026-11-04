@@ -48,7 +48,13 @@ test('mobile website installation is ready without store links',()=>{
   assert.match(landing,/data-platform="android"/);
   assert.match(landing,/Zum Home-Bildschirm hinzufügen/);
   assert.match(landing,/Zum Startbildschirm hinzufügen/);
-  assert.match(landing,/Lernraum öffnen/);
+  assert.match(landing,/App öffnen &amp; hinzufügen/);
+  assert.match(landing,/App öffnen &amp; installieren/);
+  assert.match(landing,/class="pwa-steps"/);
+  assert.match(landing,/So fügst du die App hinzu/);
+  assert.match(landing,/So installierst du die App/);
+  assert.doesNotMatch(landing,/class="pwa-howto"/);
+  assert.doesNotMatch(landing,/>Lernraum öffnen<\/span>/);
   assert.doesNotMatch(landing,/Download über (den App Store|Google Play)/);
   const login=read('dist/konto.html');
   assert.match(login,/rel="manifest"/);
