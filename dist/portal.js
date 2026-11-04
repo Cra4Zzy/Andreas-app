@@ -2,10 +2,11 @@
 (() => {
   const B=globalThis.ABBATE_BACKEND,M=globalThis.ABBATE_ACCOUNTS,view=document.body.dataset.view,root=document.querySelector('#portal-content');
   const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const day=value=>new Intl.DateTimeFormat('de-DE',{dateStyle:'long'}).format(new Date(value+'T12:00:00'));
+  const day=value=>new Intl.DateTimeFormat(localStorage.getItem('abbate-language-v1')||'de',{dateStyle:'long'}).format(new Date(value+'T12:00:00'));
   let state,selected=null,search='',filter='all';
   async function load(){state=await B.state();if(view==='admin')state.students=state.students.filter(p=>p.role==='learner');}
   function session(){return state?.me?.id;}
+  function syncShell(){const link=document.querySelector('[data-nav="admin"]');if(link)link.hidden=!state?.me||!B.isStaff(state.me);}
   function notice(text){document.querySelector('#portal-status').textContent=text;}
   const uuid=()=>globalThis.crypto?.randomUUID?.()||'local-'+Date.now().toString(36)+'-'+Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,'0')).join('');
   
@@ -86,7 +87,7 @@
         if(state.me){if(!(await B.termsAccepted())){termsGate();return;}if(location.search==='?next=verwaltung'){location.replace('./verwaltung.html');return;}if(location.hash==='#einstellungen'){settings();return;}location.replace('./nachweise.html');return;}
         login();
       }else reader();
-    }catch(error){failure(error);}finally{root.removeAttribute('aria-busy');}
+    }catch(error){failure(error);}finally{syncShell();root.removeAttribute('aria-busy');}
   }
   async function mutate(work,success){await work();await load();if(view==='admin')admin();else reader();notice(success);}
   root.addEventListener('submit',async event=>{
@@ -174,5 +175,7 @@
   setInterval(()=>{if(!document.hidden&&view==='reader')render();},30000);
   if(location.hash==='#konto-geloescht')notice('Dein Konto und die zugehörigen Daten wurden gelöscht.');
   if(location.hash==='#passwort-gesetzt')notice('Dein Passwort wurde geändert. Bitte melde dich mit deinem neuen Passwort an.');
+  // Refresh dates and rendered account records after a language change without affecting credentials.
+  window.addEventListener('abbate:language-change',()=>{if(view==='reader'||view==='admin')render();});
   render();
 })();
