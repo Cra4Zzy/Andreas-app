@@ -13,7 +13,7 @@ async fn install_available_update(
     let endpoint = "https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-update-feed/latest.json";
     let updater = app
         .updater_builder()
-        .endpoints(vec![endpoint.parse()?])
+        .endpoints(vec![endpoint.parse()?])?
         .build()?;
 
     if let Some(update) = updater.check().await? {
