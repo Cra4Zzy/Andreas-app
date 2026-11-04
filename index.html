@@ -178,6 +178,8 @@
       .btn-dark{justify-self:start}
     }
     @media(max-width:390px){.platforms{grid-template-columns:1fr}.platform{min-height:0}.platform p{margin-bottom:15px}.availability{margin-top:8px}h1{font-size:46px}}
+    /* Keep installation instructions readable in one column on phones. */
+    @media(max-width:740px){.platforms{grid-template-columns:minmax(0,1fr)}.mobile-pwa{padding:23px}.install-guide-heading{flex-wrap:wrap}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.nav-enter,.platform-action{transition:none}}
   </style>
 </head>
