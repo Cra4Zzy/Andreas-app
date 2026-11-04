@@ -61,3 +61,9 @@ test('navigation keeps staff-only routes hidden unless backend allows them',()=>
   assert.match(read('dist/app.js'),/nachweise\.html/);
   assert.doesNotMatch(read('dist/app.js'),/passPreviewLabel\(\) · DE/);
 });
+
+test('cross-page locale scripts and entry points are syntactically valid',()=>{
+  for(const path of ['dist/i18n.js','dist/portal-language.js','dist/portal.js','dist/app.js']){
+    assert.doesNotThrow(()=>new vm.Script(read(path),{filename:path}),'JS syntax invalid in '+path);
+  }
+});
