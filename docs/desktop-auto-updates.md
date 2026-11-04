@@ -69,3 +69,20 @@ Es sind bewusst **keine** Apple-Developer-Zugangsdaten oder Kaufzertifikate für
 
 - https://v2.tauri.app/plugin/updater/
 - https://v2.tauri.app/reference/config/#buildconfig
+
+
+## Verifizierbarer Web-Updatekanal ab Desktop-Vorschau 0.1.2
+
+Die Webversion erhält bei **jedem erfolgreichen Deployment** die Git-Commit-ID im HTML und in `/dist/build-info.json`. Der neue Client `/dist/frontend-updates.js` vergleicht diese Version ohne Cache und lädt eine veraltete HTML-Seite mit eindeutigem Cache-Buster neu. Während Prüfungsrunden, in offenen Dialogen, bei ausgefüllten Formularen und bei Auth-/Reset-Callbacks erscheint stattdessen eine Schaltfläche für einen kontrollierten Neustart der Oberfläche. Auch bei Netzwerkausfall bleibt die Sitzung benutzbar.
+
+Der ALL-INKL-GitHub-Workflow verwendet `lftp mirror --transfer-all` statt `--only-newer` und vergleicht nach dem FTPS-Upload die tatsächlichen HTTPS-Dateien und die Build-ID. **Erst ein grüner Verifikationsschritt bedeutet: Die neue Webversion ist tatsächlich online.**
+
+Wichtige Einschränkungen:
+
+- Der alte lokal gebündelte Desktop-Installer **0.1.0** kann weder den Server-Webclient noch den nativen Updater nachträglich laden. Für den Übergang ist eine einmalige manuelle Installation von mindestens **0.1.2** erforderlich.
+- Auch die **0.1.2-Testinstaller** verwenden für Webinhalte den Server und besitzen noch keinen aktivierten nativen Tauri-Updater. Für native Programmupdates muss später die erste signierte **0.2.0** installiert werden.
+- Zum Schutz der bisherigen Installation verwendet der signierte 0.2.0-Kanal dieselbe App-ID wie die Vorschau; ein späterer Wechsel der App-ID benötigt einen ausdrücklichen Migrationsplan.
+- Die vorhandenen Signierschlüssel müssen vor einem echten Tauri-Updater-Release **einmalig auf einem vertrauenswürdigen Rechner erstellt und in GitHub Actions hinterlegt** werden. Der private Schlüssel darf nie in GitHub-Code, Chat oder ein öffentliches Downloadverzeichnis gelangen.
+- Ohne erfolgreich gebauten, signierten Installer und E2E-Test ist der native Updater **nicht produktiv freigegeben**.
+
+Testabfolge: Erst das entfernte „Nur ansehen“-Badge im **Online-Schulungspass** nach grünem Deploy prüfen; dann die **0.1.2-Testversion** installieren, schließen, mit nachfolgender kleiner Webänderung neu starten und denselben Test durchführen.

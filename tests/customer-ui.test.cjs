@@ -97,3 +97,21 @@ test('learning UI stays focused and identifies simulation honestly',()=>{
   assert.match(read('dist/app.js'),/Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt/);
   assert.match(read('dist/styles.css'),/\.exam-disclaimer/);
 });
+
+
+test('server-side desktop web updates verify release revisions and protect in-progress sessions',()=>{
+  const manager=read('dist/frontend-updates.js');
+  const pipeline=read('.github/workflows/deploy-allinkl.yml');
+  assert.match(manager,/build-info\.json/);
+  assert.match(manager,/cache:'no-store'/);
+  assert.match(manager,/abbate-update-tried/);
+  assert.match(manager,/unsafe/);
+  assert.match(manager,/access_token/);
+  assert.match(pipeline,/website\/dist\/build-info\.json/);
+  assert.match(pipeline,/meta name="abbate-build"/);
+  assert.match(pipeline,/frontend-updates\.js/);
+  assert.match(pipeline,/--transfer-all/);
+  assert.doesNotMatch(pipeline,/--only-newer/);
+  assert.match(pipeline,/Verify real HTTPS publication/);
+  assert.doesNotThrow(()=>new (require('node:vm').Script)(manager));
+});

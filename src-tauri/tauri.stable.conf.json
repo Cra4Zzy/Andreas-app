@@ -1,7 +1,7 @@
 {
   "productName": "Abbate Lernraum",
   "version": "0.2.0",
-  "identifier": "de.abbate.lernraum.desktop",
+  "identifier": "de.abbate.lernraum.desktop.preview",
   "bundle": {
     "createUpdaterArtifacts": true
   },
