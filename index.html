@@ -99,25 +99,36 @@
     .platform-action svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none}
     .mobile-pwa{border-color:#c8d7cc;background:linear-gradient(160deg,#fffef9,#f3f7ee)}
     .mobile-pwa .platform-icon{background:#e0eade}
-    /* Installation is the primary mobile experience: steps are always visible. */
+    /* The short install guide is clearly signposted; expand only when needed. */
     .platforms{grid-template-columns:repeat(2,minmax(0,1fr));gap:19px}
-    .mobile-pwa{padding:30px;min-height:0;box-shadow:0 14px 38px #1d4e4210}
-    .install-platform-top{display:flex;align-items:center;gap:15px;margin-bottom:20px}
+    .mobile-pwa{padding:25px;min-height:0;box-shadow:0 14px 38px #1d4e4210}
+    .install-platform-top{display:flex;align-items:center;gap:15px;margin-bottom:16px}
     .install-platform-top .platform-icon{margin:0;flex-shrink:0}
     .install-platform-top h3{margin:3px 0 0}
     .install-platform-top small{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#577668}
-    .install-promise{display:flex;align-items:center;gap:14px;background:#fffbea;border:1px solid #eadcaf;border-radius:13px;padding:16px 18px;margin-bottom:23px}
+    .install-promise{display:flex;align-items:center;gap:14px;background:#fffbea;border:1px solid #eadcaf;border-radius:13px;padding:14px 16px;margin-bottom:16px}
     .install-promise img{width:53px;height:53px;border-radius:12px;flex-shrink:0;box-shadow:0 5px 14px #2e382321}
     .install-promise p{font-size:15px;color:#525b47;line-height:1.4;margin:0}
     .install-promise strong{display:block;font-size:18px;color:#1f3b39;line-height:1.2;margin-bottom:4px}
-    .install-guide-heading{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:13px}
-    .install-guide-heading strong{font:700 22px/1.2 Barlow,system-ui,sans-serif;letter-spacing:-.025em}
-    .install-guide-heading small{white-space:nowrap;color:#5d7269;font-size:13px}
-    .pwa-steps{list-style:none;counter-reset:install-step;display:grid;gap:10px;margin:0 0 23px;padding:0}
+    .install-accordion{border:1px solid #bed3ca;border-radius:12px;background:#f1f8f2;margin:0 0 15px;overflow:hidden}
+    .install-accordion summary{display:flex;align-items:center;gap:12px;padding:15px 14px;cursor:pointer;list-style:none;transition:background .2s ease}
+    .install-accordion summary::-webkit-details-marker{display:none}
+    .install-accordion summary:hover{background:#e7f1e8}
+    .install-accordion summary:focus-visible{outline:3px solid #ba9628;outline-offset:-3px}
+    .install-help-symbol{flex:0 0 37px;height:37px;display:grid;place-items:center;background:#235147;color:#fff;border-radius:10px;font:700 22px/1 Barlow,sans-serif}
+    .install-help-copy{min-width:0;flex:1;display:grid;gap:2px}
+    .install-help-copy strong{font:700 18px/1.2 Barlow,system-ui,sans-serif;color:#214a41;letter-spacing:-.015em}
+    .install-help-copy small{font-size:13px;line-height:1.3;color:#55716a}
+    .install-chevron{width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#dcebe2;font-size:21px;color:#275f52;line-height:1;transition:transform .2s ease}
+    .install-accordion[open] .install-chevron{transform:rotate(180deg)}
+    .install-accordion[open] summary{border-bottom:1px solid #d1e0d7;background:#eaf4eb}
+    .install-guide-body{padding:15px 13px 1px}
+    .install-guide-body>.install-guide-label{margin:0 3px 12px;font:700 16px/1.3 Barlow,sans-serif;color:#28574d}
+    .pwa-steps{list-style:none;counter-reset:install-step;display:grid;gap:9px;margin:0 0 14px;padding:0}
     .pwa-steps li{counter-increment:install-step;display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border:1px solid #dfe8de;background:#fffefa;border-radius:11px;font-size:16px;line-height:1.42;color:#455955}
     .pwa-steps li:before{content:counter(install-step,decimal-leading-zero);display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:9px;background:#e3ece6;color:#275b52;font:700 14px/1 Barlow,sans-serif}
     .pwa-steps li strong{color:#173e3e;font-weight:700}
-    .install-action{background:#193b40!important;color:#fff!important;padding:15px 18px;min-height:66px;gap:15px;border-radius:12px}
+    .install-action{background:#193b40!important;color:#fff!important;padding:13px 18px;min-height:59px;gap:15px;border-radius:12px}
     .install-action:hover{background:#2c595b!important}
     .install-action span{display:grid;gap:2px}
     .install-action strong{font-size:18px;line-height:1.2}
@@ -230,13 +241,17 @@
             <div><small>Safari · ohne App Store</small><h3 id="ios-install-title">iPhone &amp; iPad</h3></div>
           </div>
           <div class="install-promise"><img src="./dist/icon-192.png" alt="Abbate App-Symbol" width="53" height="53" loading="lazy"><p><strong>Die Lern-App auf dein iPhone holen.</strong> Einmal zum Home-Bildschirm hinzufügen, danach direkt über das Abbate-Symbol starten.</p></div>
-          <div class="install-guide-heading"><strong>So fügst du die App hinzu</strong><small>Nur 4 Schritte</small></div>
-          <ol class="pwa-steps">
+          <details class="install-accordion">
+            <summary><span class="install-help-symbol" aria-hidden="true">?</span><span class="install-help-copy"><strong>Installationsanleitung anzeigen</strong><small>iPhone / iPad · 4 kurze Schritte</small></span><span class="install-chevron" aria-hidden="true">⌄</span></summary>
+            <div class="install-guide-body"><p class="install-guide-label">So fügst du die App hinzu</p>
+              <ol class="pwa-steps">
             <li><span>Öffne über den Button unten den <strong>Abbate Lernraum in Safari</strong>.</span></li>
             <li><span>Tippe in Safari auf <strong>Teilen</strong> (das Quadrat mit Pfeil; ggf. über das Seitenmenü).</span></li>
             <li><span>Wähle <strong>„Zum Home-Bildschirm hinzufügen“</strong>.</span></li>
             <li><span>Aktiviere, falls angezeigt, <strong>„Als Web-App öffnen“</strong> und tippe auf <strong>„Hinzufügen“</strong>.</span></li>
-          </ol>
+              </ol>
+            </div>
+          </details>
           <a class="platform-action install-action" href="./dist/" aria-label="Abbate Lernraum in Safari öffnen; anschließend mit Teilen zum Home-Bildschirm hinzufügen"><span><strong>App öffnen &amp; hinzufügen</strong><small>Dann in Safari: Teilen → Home-Bildschirm</small></span><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
           <p class="install-after">✓ Kein Store-Download nötig. Das Hinzufügen erfolgt über Safari.</p>
         </article>
@@ -246,13 +261,17 @@
             <div><small>Chrome · ohne Google Play</small><h3 id="android-install-title">Android</h3></div>
           </div>
           <div class="install-promise"><img src="./dist/icon-192.png" alt="Abbate App-Symbol" width="53" height="53" loading="lazy"><p><strong>Die Lern-App auf dein Android-Handy holen.</strong> Einmal installieren oder zum Startbildschirm hinzufügen, danach direkt über das Abbate-Symbol starten.</p></div>
-          <div class="install-guide-heading"><strong>So installierst du die App</strong><small>Nur 4 Schritte</small></div>
-          <ol class="pwa-steps">
+          <details class="install-accordion">
+            <summary><span class="install-help-symbol" aria-hidden="true">?</span><span class="install-help-copy"><strong>Installationsanleitung anzeigen</strong><small>Android / Chrome · 4 kurze Schritte</small></span><span class="install-chevron" aria-hidden="true">⌄</span></summary>
+            <div class="install-guide-body"><p class="install-guide-label">So installierst du die App</p>
+              <ol class="pwa-steps">
             <li><span>Öffne über den Button unten den <strong>Abbate Lernraum in Chrome</strong>.</span></li>
             <li><span>Tippe oben rechts auf das <strong>Drei-Punkte-Menü (⋮)</strong>.</span></li>
             <li><span>Wähle <strong>„App installieren“</strong> oder <strong>„Zum Startbildschirm hinzufügen“</strong>.</span></li>
             <li><span>Bestätige mit <strong>„Installieren“</strong> oder <strong>„Hinzufügen“</strong>. Die App erscheint auf deinem Startbildschirm.</span></li>
-          </ol>
+              </ol>
+            </div>
+          </details>
           <a class="platform-action install-action" href="./dist/" aria-label="Abbate Lernraum in Chrome öffnen; anschließend über das Browsermenü als App installieren"><span><strong>App öffnen &amp; installieren</strong><small>Dann in Chrome: Menü ⋮ → App installieren</small></span><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
           <p class="install-after">✓ Kein Play-Store-Download nötig. Die Installation erfolgt über Chrome.</p>
         </article>
