@@ -17,6 +17,7 @@ test('stable builds require a real key, immutable channel and opt-in feature',()
   const caps=JSON.parse(fs.readFileSync(path.join(__dirname,'../src-tauri/capabilities/default.json'),'utf8'));
   assert.equal(caps.remote,undefined,'The remotely hosted frontend must never receive local Tauri IPC capabilities');
   assert.match(cargo,/desktop-auto-update = \["dep:tauri-plugin-updater"\]/);
+  assert.match(cargo,/^serde_json = "1"$/m,'Tauri generated config requires serde_json at compile time');
   assert.match(source,/env!\("ABBATE_UPDATER_PUBLIC_KEY"\)/);
   assert.match(source,/desktop-update-feed\/latest\.json/);
   // Tauri updater .endpoints returns Result<UpdaterBuilder, Error>.
@@ -31,7 +32,9 @@ test('stable builds require a real key, immutable channel and opt-in feature',()
   const pilot=JSON.parse(fs.readFileSync(path.join(__dirname,'../src-tauri/tauri.conf.json'),'utf8'));
   assert.equal(pilot.build.frontendDist,config.build.frontendDist,'The free desktop preview must load the live HTTPS frontend');
   assert.equal(pilot.identifier,'de.abbate.lernraum.desktop.preview','Keep installed pilot identity stable');
-  assert.doesNotMatch(workflow,/on:\s*\n\s*push:/);
+  assert.match(workflow,/push:\s*\n\s*branches: \[main\]/);
+  assert.match(workflow,/github\.event_name == 'workflow_dispatch' && github\.ref == 'refs\/heads\/main'/,
+    'Only an explicitly requested release may be published, never a push-triggered smoke build');
 });
 
 test('release manifest references versioned assets and their original signatures',()=>{

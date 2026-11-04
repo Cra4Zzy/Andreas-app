@@ -17,4 +17,6 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
+# Needed by tauri::generate_context! when the CLI merges the generated updater config.
+serde_json = "1"
 tauri-plugin-updater = { version = "2", optional = true }

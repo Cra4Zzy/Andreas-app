@@ -4,6 +4,15 @@ name: Abbate desktop updater (free key, no paid certificates)
 # A regular git push still builds the unsigned pilot, NEVER a production update.
 on:
   workflow_dispatch:
+  # Compile and sign an internal test artifact automatically; publish stays manual.
+  push:
+    branches: [main]
+    paths:
+      - "src-tauri/**"
+      - "scripts/prepare-desktop-updater-config.cjs"
+      - "scripts/make-desktop-update-feed.cjs"
+      - "tests/desktop-updater.test.cjs"
+      - ".github/workflows/desktop-updates.yml"
 
 permissions:
   contents: read
@@ -141,7 +150,7 @@ jobs:
 
   publish:
     needs: [preflight,build]
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
