@@ -80,10 +80,10 @@ test('desktop auto-updates are only promised after a verified live-frontend rele
 });
 
 test('cached PWA shell uses current app JavaScript and CSS',()=>{
-  assert.match(read('dist/index.html'),/app\.js\?v=24/);
-  assert.match(read('dist/sw.js'),/app\.js\?v=24/);
-  assert.match(read('dist/sw.js'),/styles\.css\?v=15/);
-  assert.match(read('dist/sw.js'),/abbate-learning-v25/);
+  assert.match(read('dist/index.html'),/app\.js\?v=25/);
+  assert.match(read('dist/sw.js'),/app\.js\?v=25/);
+  assert.match(read('dist/sw.js'),/styles\.css\?v=16/);
+  assert.match(read('dist/sw.js'),/abbate-learning-v26/);
   const html=read('dist/index.html'),worker=read('dist/sw.js');
   for(const file of ['i18n-ru.js?v=1','i18n-uk.js?v=1','i18n-modern.js?v=1','i18n.js?v=11']){
     assert.ok(html.includes(file),'HTML missing '+file);
