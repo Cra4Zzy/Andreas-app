@@ -176,6 +176,6 @@
   if(location.hash==='#konto-geloescht')notice('Dein Konto und die zugehörigen Daten wurden gelöscht.');
   if(location.hash==='#passwort-gesetzt')notice('Dein Passwort wurde geändert. Bitte melde dich mit deinem neuen Passwort an.');
   // Refresh dates and rendered account records after a language change without affecting credentials.
-  window.addEventListener('abbate:language-change',()=>{if(view==='reader'||view==='admin')render();});
+  addEventListener('abbate:language-change',()=>{if(view==='reader'||view==='admin')render();});
   render();
 })();
