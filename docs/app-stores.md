@@ -1,5 +1,8 @@
 # Android, iOS und Store-Start
 
+> **Vertriebsentscheidung vom 4. November 2026:** Für den ersten Abbate-Launch wird die bestehende installierbare **PWA per Browser** genutzt; **keine** Veröffentlichung bei Apple oder Google geplant. Diese Datei dokumentiert nur die optional vorbereiteten nativen Builds für eine spätere Wiederaufnahme. Mobilinstallation, unabhängiger 30-Tage-Zugang, externe Bezahlung, manuelle Freischaltung und echte Abnahmetests stehen in [PWA-Launch](pwa-launch.md).
+
+
 Stand: 2. November 2026. Technischer Pilot, keine Store-Einreichung erfolgt.
 
 ## Erledigte Vorbereitung
