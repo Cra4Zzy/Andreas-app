@@ -151,7 +151,7 @@ function topicRows() {
     '</div>'
   ).join('');
 }
-function installStrip() { return isAppMode()?'':`<aside class="install-strip"><img src="./icon-192.png?v=9" alt="" width="47" height="47"><div><strong>Auch unterwegs lernen.</strong><p>Hier findest du die Versionen für Windows, Mac, iPhone und Android.</p></div><button class="secondary" data-action="install">Downloads ansehen ${icon('arrow')}</button></aside>`; }
+function installStrip() { return isAppMode()?'':`<aside class="install-strip"><img src="./icon-192.png?v=9" alt="" width="47" height="47"><div><strong>Auch unterwegs lernen.</strong><p>Auf iPhone und Android kannst du Abbate direkt zum Startbildschirm hinzufügen.</p></div><button class="secondary" data-action="install">Installationsanleitung ${icon('arrow')}</button></aside>`; }
 function home() {
   const name=esc(student().name.split(' ')[0]), learned=mastered().length, total=QUESTIONS.length, ok=active(student());
   return heading('Schön, dass du da bist',`Heute ein Stück sicherer, ${name}.`,'',accessLine())+languageStatus()+`
