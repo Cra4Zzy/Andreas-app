@@ -76,6 +76,10 @@ jobs:
         run: |
           npm ci
           npm test
+      - name: Generate Tauri updater configuration from stored public key
+        env:
+          ABBATE_UPDATER_PUBLIC_KEY: ${{ vars.ABBATE_UPDATER_PUBLIC_KEY }}
+        run: node scripts/prepare-desktop-updater-config.cjs
       - name: Prepare the official Abbate desktop icon
         run: npx --yes @tauri-apps/cli@2.12.4 icon dist/icon-512.png --output src-tauri/icons
       - name: Build signed Windows installer and updater signature
@@ -86,7 +90,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
-          npx --yes @tauri-apps/cli@2.12.4 build --bundles nsis --features desktop-auto-update --config src-tauri/tauri.stable.conf.json --ci
+          npx --yes @tauri-apps/cli@2.12.4 build --bundles nsis --features desktop-auto-update --config src-tauri/tauri.stable.generated.conf.json --ci
       - name: Build universal Mac app without paid Apple certificates
         if: runner.os == 'macOS'
         shell: bash
@@ -97,7 +101,7 @@ jobs:
           APPLE_SIGNING_IDENTITY: '-'
         run: |
           set -euo pipefail
-          npx --yes @tauri-apps/cli@2.12.4 build --bundles dmg --target universal-apple-darwin --features desktop-auto-update --config src-tauri/tauri.stable.conf.json --ci
+          npx --yes @tauri-apps/cli@2.12.4 build --bundles dmg --target universal-apple-darwin --features desktop-auto-update --config src-tauri/tauri.stable.generated.conf.json --ci
           dmg="$(find src-tauri/target/universal-apple-darwin/release/bundle/dmg -maxdepth 1 -name '*.dmg' -type f -print -quit)"
           test -s "$dmg"
           # Tauri update archive is signed using the free updater key.

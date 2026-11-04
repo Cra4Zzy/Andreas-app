@@ -51,3 +51,23 @@ test('release manifest references versioned assets and their original signatures
     assert.throws(()=>buildManifest({version:'0.2.0',assetDirectory:dir}),/ENOENT/);
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+test('release builder injects the public updater key and matching feed without secrets',()=>{
+  const {prepare,ENDPOINT}=require('../scripts/prepare-desktop-updater-config.cjs');
+  const key='A'.repeat(96);
+  const generated=prepare(config,key);
+  assert.equal(generated.plugins.updater.pubkey,key);
+  assert.deepEqual(generated.plugins.updater.endpoints,[ENDPOINT]);
+  assert.equal(generated.plugins.updater.windows.installMode,'passive');
+  assert.equal(generated.bundle.createUpdaterArtifacts,true);
+  assert.equal(generated.identifier,config.identifier);
+  assert.throws(()=>prepare(config,''),/ABBATE_UPDATER_PUBLIC_KEY/);
+  assert.throws(()=>prepare({...config,bundle:{createUpdaterArtifacts:false}},key),/createUpdaterArtifacts/);
+  const script=fs.readFileSync(path.join(__dirname,'../scripts/prepare-desktop-updater-config.cjs'),'utf8');
+  assert.match(workflow,/Generate Tauri updater configuration from stored public key/);
+  assert.match(workflow,/node scripts\/prepare-desktop-updater-config\.cjs/);
+  assert.equal((workflow.match(/--config src-tauri\/tauri\.stable\.generated\.conf\.json/g)||[]).length,2);
+  assert.doesNotMatch(workflow,/--config src-tauri\/tauri\.stable\.conf\.json --ci/);
+  assert.doesNotMatch(script,/process\.env\.TAURI_SIGNING_PRIVATE_KEY/,'Never read the signing private key in config generator');
+  assert.match(source,/desktop-update-feed\/latest\.json/);
+});

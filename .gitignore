@@ -21,3 +21,6 @@ ios-build/
 # Generated Tauri desktop outputs and icons
 src-tauri/target/
 src-tauri/icons/
+
+# CI-generated updater config (contains the public verification key only)
+src-tauri/tauri.stable.generated.conf.json
