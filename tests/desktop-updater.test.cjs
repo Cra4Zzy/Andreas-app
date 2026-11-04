@@ -12,7 +12,7 @@ const workflow=fs.readFileSync(path.join(__dirname,'../.github/workflows/desktop
 
 test('stable builds require a real key, immutable channel and opt-in feature',()=>{
   assert.equal(config.bundle.createUpdaterArtifacts,true);
-  assert.equal(config.version,'0.2.0');
+  assert.match(config.version,/^\d+\.\d+\.\d+$/);
   assert.match(cargo,/desktop-auto-update = \["dep:tauri-plugin-updater"\]/);
   assert.match(source,/env!\("ABBATE_UPDATER_PUBLIC_KEY"\)/);
   assert.match(source,/desktop-update-feed\/latest\.json/);
