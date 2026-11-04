@@ -1,5 +1,8 @@
 # Abbate Lernraum – Launch-Readiness und Kundenabnahme
 
+> **Aktualisierung 4. November 2026:** Der erste Launch erfolgt als **installierbare Web-App (PWA)** über die Abbate-Domain, ohne Store-Einreichung. App-Zugang ist sowohl mit Fahrschulung als auch **eigenständig** erhältlich. Zahlung erfolgt außerhalb des Lernraums (bar/Überweisung direkt bei Andreas), Aktivierung manuell für 30 Tage. Mobilgeräte installieren über iPhone „Zum Home-Bildschirm“ bzw. Android „App installieren/Zum Startbildschirm“. Einzelheiten und offene Abnahmepunkte: [PWA-Launch](pwa-launch.md). Die bisherigen Store-Aufgaben unten sind für einen optionalen späteren Store-Release, nicht für den PWA-Erstlaunch.
+
+
 Stand: 2. November 2026. **Die Oberfläche wird für Kunden aufbereitet; die vollständige Produktionsfreigabe ist noch nicht erteilt.**
 
 ## Bereits erledigt
