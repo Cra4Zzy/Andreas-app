@@ -97,6 +97,15 @@
     .platform.ready .platform-action{color:#fff;background:var(--ink);cursor:pointer;transition:background .2s}
     .platform.ready .platform-action:hover{background:#31616a}
     .platform-action svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none}
+    .mobile-pwa{border-color:#c8d7cc;background:linear-gradient(160deg,#fffef9,#f3f7ee)}
+    .mobile-pwa .platform-icon{background:#e0eade}
+    .pwa-howto{margin-top:13px;border-top:1px solid #dfe8df;padding-top:12px;font-size:14px;color:#3b5754}
+    .pwa-howto summary{cursor:pointer;font-weight:700;list-style-position:inside}
+    .pwa-howto summary:hover{text-decoration:underline}
+    .pwa-howto ol{padding-left:22px;margin:14px 0 2px;display:grid;gap:10px;line-height:1.45}
+    .pwa-howto li{padding-left:3px}
+    .pwa-howto a{color:#1d655d;text-decoration:underline;font-weight:700}
+    .pwa-howto strong{color:#1f4445}
     .note{display:flex;align-items:start;gap:12px;margin-top:22px;padding:16px 18px;border-radius:14px;background:#f0e9d7;color:#635d4c;font-size:15px;line-height:1.5}
     .note svg{width:22px;height:22px;flex:0 0 22px}
     .browser{padding-top:0;padding-bottom:80px}
@@ -160,7 +169,7 @@
         <span class="brand-wordmark"><strong>Abbate.</strong><small>Mit Wissen wächst Sicherheit.</small></span>
       </a>
       <nav class="top-actions" aria-label="Schnellzugriff">
-        <a class="nav-download" href="#downloads">App herunterladen</a>
+        <a class="nav-download" href="#downloads">App installieren</a>
         <a class="nav-enter" href="./dist/">Zum Lernraum &nbsp;↗</a>
       </nav>
     </div>
@@ -173,7 +182,7 @@
           <h1>Dein Lernraum.<br><span>Überall dabei.</span></h1>
           <p>Ob am Schreibtisch oder unterwegs: Übe für deine Schulung, behalte deine Nachweise im Blick und melde dich mit demselben Konto an.</p>
           <div class="hero-buttons">
-            <a href="#downloads" class="btn btn-gold">App herunterladen <span aria-hidden="true">↓</span></a>
+            <a href="#downloads" class="btn btn-gold">App installieren <span aria-hidden="true">↓</span></a>
             <a href="./dist/" class="btn btn-outline">Im Browser starten <span aria-hidden="true">↗</span></a>
           </div>
         </div>
@@ -189,9 +198,28 @@
     <section id="downloads" class="downloads shell" aria-labelledby="downloads-title">
       <div class="downloads-heading">
         <div><span class="section-kicker">Die Abbate App</span><h2 id="downloads-title">Wähle dein Gerät.</h2></div>
-        <p>Lade den Lernraum für deinen Computer herunter oder melde dich direkt online an. Die mobilen Store-Versionen folgen.</p>
+        <p>Lade den Lernraum für deinen Computer herunter oder melde dich direkt online an. Auf iPhone und Android kannst du den Lernraum direkt zum Startbildschirm hinzufügen – ohne App Store oder Google Play.</p>
       </div>
       <div class="platforms" role="list">
+
+        <article class="platform ready mobile-pwa" data-platform="ios" role="listitem">
+          <div class="platform-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="8" y="2" width="16" height="28" rx="3"/><path d="M13 6h6M15 26h2"/></svg></div>
+          <h3>iPhone &amp; iPad</h3>
+          <p>Mit Safari und dem Teilen-Menü. Die App landet als Symbol auf deinem Home-Bildschirm.</p>
+          <div class="platform-spacer"></div>
+          <span class="availability" data-status>Sofort verfügbar · ohne Store</span>
+          <a class="platform-action" href="./dist/" aria-label="Abbate Lernraum öffnen, um ihn auf iPhone oder iPad hinzuzufügen"><span>Lernraum öffnen</span><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+          <details class="pwa-howto"><summary>So geht’s · Safari</summary><ol><li>Öffne den <a href="./dist/">Abbate Lernraum</a> auf deinem iPhone in <strong>Safari</strong>.</li><li>Tippe auf <strong>Teilen</strong> (gegebenenfalls erst im Seitenmenü).</li><li>Wähle <strong>„Zum Home-Bildschirm hinzufügen“</strong>.</li><li>Aktiviere <strong>„Als Web-App öffnen“</strong> und tippe auf <strong>„Hinzufügen“</strong>.</li></ol></details>
+        </article>
+        <article class="platform ready mobile-pwa" data-platform="android" role="listitem">
+          <div class="platform-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="6" y="9" width="20" height="19" rx="4"/><path d="M10 9l-2-5m14 5 2-5M12 15h.01M20 15h.01M10 28v2m12-2v2"/></svg></div>
+          <h3>Android</h3>
+          <p>Mit Chrome und dem Browser-Menü. Die App erscheint auf deinem Startbildschirm.</p>
+          <div class="platform-spacer"></div>
+          <span class="availability" data-status>Sofort verfügbar · ohne Store</span>
+          <a class="platform-action" href="./dist/" aria-label="Abbate Lernraum öffnen, um ihn auf Android hinzuzufügen"><span>Lernraum öffnen</span><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
+          <details class="pwa-howto"><summary>So geht’s · Chrome</summary><ol><li>Öffne den <a href="./dist/">Abbate Lernraum</a> in <strong>Google Chrome</strong>.</li><li>Tippe oben rechts auf das <strong>Drei-Punkte-Menü</strong>.</li><li>Wähle <strong>„App installieren“</strong> oder <strong>„Zum Startbildschirm hinzufügen“</strong>.</li><li>Bestätige die Auswahl. Das Abbate-Symbol erscheint auf deinem Startbildschirm.</li></ol></details>
+        </article>
         <article class="platform" data-platform="windows" role="listitem">
           <div class="platform-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M3 7l11-2v11H3zM17 4l12-2v14H17zM3 18h11v11L3 27zM17 18h12v13l-12-2z" fill="currentColor" stroke="none"/></svg></div>
           <h3>Windows</h3><p>Für deinen PC oder Laptop</p><div class="platform-spacer"></div>
@@ -203,18 +231,6 @@
           <h3>Mac</h3><p>Für MacBook, iMac &amp; Mac mini</p><div class="platform-spacer"></div>
           <span class="availability" data-status>Veröffentlichung folgt</span>
           <a class="platform-action" data-download="macos" aria-disabled="true" tabindex="-1"><span>In Vorbereitung</span><svg viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M4 20h16"/></svg></a>
-        </article>
-        <article class="platform" data-platform="ios" role="listitem">
-          <div class="platform-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="8" y="2" width="16" height="28" rx="3"/><path d="M13 6h6M15 26h2"/></svg></div>
-          <h3>iPhone &amp; iPad</h3><p>Download über den App Store</p><div class="platform-spacer"></div>
-          <span class="availability" data-status>Veröffentlichung folgt</span>
-          <a class="platform-action" data-download="ios" aria-disabled="true" tabindex="-1"><span>In Vorbereitung</span><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
-        </article>
-        <article class="platform" data-platform="android" role="listitem">
-          <div class="platform-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="6" y="9" width="20" height="19" rx="4"/><path d="M10 9l-2-5m14 5 2-5M12 15h.01M20 15h.01M10 28v2m12-2v2"/></svg></div>
-          <h3>Android</h3><p>Download über Google Play</p><div class="platform-spacer"></div>
-          <span class="availability" data-status>Veröffentlichung folgt</span>
-          <a class="platform-action" data-download="android" aria-disabled="true" tabindex="-1"><span>In Vorbereitung</span><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a>
         </article>
       </div>
     </section>
@@ -237,7 +253,7 @@
         const response = await fetch("./downloads.json", { cache: "no-store" });
         if (!response.ok) return;
         const links = await response.json();
-        for (const platform of ["windows","macos","ios","android"]) {
+        for (const platform of ["windows","macos"]) {
           const url = links[platform];
           if (typeof url !== "string" || !/^https:\/\/[^/\s]+/i.test(url)) continue;
           const card = document.querySelector('[data-platform="' + platform + '"]');
@@ -248,8 +264,8 @@
           action.href = url;
           action.removeAttribute("aria-disabled");
           action.removeAttribute("tabindex");
-          action.querySelector("span").textContent = platform === "ios" ? "Zum App Store" : platform === "android" ? "Zu Google Play" : "Jetzt herunterladen";
-          if (platform === "ios" || platform === "android") action.rel = "noopener";
+          action.querySelector("span").textContent = "Jetzt herunterladen";
+          
         }
         // Internal desktop builds are offered as test downloads; no production certification is implied.
         for (const [platform, key, label] of [
