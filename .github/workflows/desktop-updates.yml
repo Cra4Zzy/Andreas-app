@@ -1,0 +1,244 @@
+name: Abbate signed desktop auto-updates
+
+# Deliberately manual: publishing a release is an explicit, reviewed operation.
+# A regular git push still builds the unsigned pilot, NEVER a production update.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: abbate-desktop-stable-release
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    env:
+      ABBATE_UPDATER_PUBLIC_KEY: ${{ vars.ABBATE_UPDATER_PUBLIC_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Require real update keys and notarization credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in ABBATE_UPDATER_PUBLIC_KEY TAURI_SIGNING_PRIVATE_KEY APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID KEYCHAIN_PASSWORD; do
+            if [ -z "${!key:-}" ]; then
+              echo "::error::Missing required signing or notarization setting: $key"
+              exit 1
+            fi
+          done
+          # Never print any signing key to the build log.
+      - id: version
+        name: Verify intended app version
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./src-tauri/tauri.stable.conf.json').version")"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::Bad release version"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Releasing signed desktop version $version"
+      - name: Run all unit and release checks
+        run: |
+          npm ci
+          npm test
+
+  build:
+    needs: preflight
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+          - os: macos-15
+            platform: macos
+    runs-on: ${{ matrix.os }}
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      ABBATE_UPDATER_PUBLIC_KEY: ${{ vars.ABBATE_UPDATER_PUBLIC_KEY }}
+      APPLE_CERTIFICATE: ${{ matrix.platform == 'macos' && secrets.APPLE_CERTIFICATE || '' }}
+      APPLE_CERTIFICATE_PASSWORD: ${{ matrix.platform == 'macos' && secrets.APPLE_CERTIFICATE_PASSWORD || '' }}
+      APPLE_ID: ${{ matrix.platform == 'macos' && secrets.APPLE_ID || '' }}
+      APPLE_PASSWORD: ${{ matrix.platform == 'macos' && secrets.APPLE_PASSWORD || '' }}
+      APPLE_TEAM_ID: ${{ matrix.platform == 'macos' && secrets.APPLE_TEAM_ID || '' }}
+      KEYCHAIN_PASSWORD: ${{ matrix.platform == 'macos' && secrets.KEYCHAIN_PASSWORD || '' }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install universal Mac targets
+        if: runner.os == 'macOS'
+        run: rustup target add x86_64-apple-darwin aarch64-apple-darwin
+      - name: Install frontend dependencies and run checks
+        run: |
+          npm ci
+          npm test
+      - name: Prepare the official Abbate desktop icon
+        run: npx --yes @tauri-apps/cli@2.12.4 icon dist/icon-512.png --output src-tauri/icons
+      - name: Import Apple Developer ID Application certificate
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$APPLE_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/abbate-developer-id.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/abbate.keychain-db"
+          security default-keychain -s "$RUNNER_TEMP/abbate.keychain-db"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/abbate.keychain-db"
+          security set-keychain-settings -t 3600 -u "$RUNNER_TEMP/abbate.keychain-db"
+          security import "$RUNNER_TEMP/abbate-developer-id.p12" -k "$RUNNER_TEMP/abbate.keychain-db" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/abbate.keychain-db"
+          identity="$(security find-identity -v -p codesigning "$RUNNER_TEMP/abbate.keychain-db" | grep 'Developer ID Application:' | head -1 | sed -E 's/^[^"]*"([^"]+)".*$/\1/')"
+          test -n "$identity" || { echo "::error::Developer ID Application certificate missing"; exit 1; }
+          echo "APPLE_SIGNING_IDENTITY=$identity" >> "$GITHUB_ENV"
+          rm -f "$RUNNER_TEMP/abbate-developer-id.p12"
+      - name: Build signed Windows installer and updater signature
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          npx --yes @tauri-apps/cli@2.12.4 build --bundles nsis --features desktop-auto-update --config src-tauri/tauri.stable.conf.json --ci
+      - name: Build notarized universal Mac app and updater archive
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          npx --yes @tauri-apps/cli@2.12.4 build --bundles dmg --target universal-apple-darwin --features desktop-auto-update --config src-tauri/tauri.stable.conf.json --ci
+          # Tauri notarizes/staples the DMG using APPLE_ID/APPLE_PASSWORD/APPLE_TEAM_ID.
+          dmg="$(find src-tauri/target/universal-apple-darwin/release/bundle/dmg -maxdepth 1 -name '*.dmg' -type f -print -quit)"
+          test -s "$dmg"
+          xcrun stapler validate "$dmg"
+      - name: Stage signed Windows assets
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          file="$(find src-tauri/target/release/bundle/nsis -maxdepth 1 -type f -name '*.exe' -print -quit)"
+          test -s "$file"
+          test -s "$file.sig"
+          mkdir -p release
+          cp "$file" release/Abbate-Lernraum-Windows-Setup.exe
+          cp "$file.sig" release/Abbate-Lernraum-Windows-Setup.exe.sig
+      - name: Stage notarized Mac and signed update archive
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="src-tauri/target/universal-apple-darwin/release/bundle"
+          dmg="$(find "$root/dmg" -maxdepth 1 -type f -name '*.dmg' -print -quit)"
+          archive="$(find "$root/macos" -maxdepth 1 -type f -name '*.app.tar.gz' -print -quit)"
+          test -s "$dmg"
+          test -s "$archive"
+          test -s "$archive.sig"
+          mkdir -p release
+          cp "$dmg" release/Abbate-Lernraum-macOS-Universal.dmg
+          cp "$archive" release/Abbate-Lernraum-macOS-Universal.app.tar.gz
+          cp "$archive.sig" release/Abbate-Lernraum-macOS-Universal.app.tar.gz.sig
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: abbate-signed-${{ matrix.platform }}-${{ needs.preflight.outputs.version }}
+          path: release/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: [preflight,build]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_VERSION: ${{ needs.preflight.outputs.version }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: actions/download-artifact@v4
+        with:
+          name: abbate-signed-windows-${{ env.RELEASE_VERSION }}
+          path: release
+      - uses: actions/download-artifact@v4
+        with:
+          name: abbate-signed-macos-${{ env.RELEASE_VERSION }}
+          path: release
+      - name: Verify all files and generate static updater feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/make-desktop-update-feed.cjs
+          node -e "const j=require('./release/latest.json'); if(j.version!==process.env.RELEASE_VERSION) process.exit(1)"
+      - name: Publish immutable versioned binaries before announcing the update
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="desktop-v$RELEASE_VERSION"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "::error::Version $tag was already published. Bump src-tauri/tauri.stable.conf.json for the next release."
+            exit 1
+          fi
+          gh release create "$tag" \
+            release/Abbate-Lernraum-Windows-Setup.exe \
+            release/Abbate-Lernraum-Windows-Setup.exe.sig \
+            release/Abbate-Lernraum-macOS-Universal.dmg \
+            release/Abbate-Lernraum-macOS-Universal.app.tar.gz \
+            release/Abbate-Lernraum-macOS-Universal.app.tar.gz.sig \
+            --target "$GITHUB_SHA" --title "Abbate Lernraum Desktop $RELEASE_VERSION" \
+            --notes "Signierte Tauri-Updatepakete; macOS Developer ID/notarisiert. Windows-OS-Codesignatur separat prüfen."
+      - name: Publish update manifest last (atomic channel switch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          feed=desktop-update-feed
+          if gh release view "$feed" >/dev/null 2>&1; then
+            gh release upload "$feed" release/latest.json --clobber
+          else
+            gh release create "$feed" release/latest.json \
+              --title "Abbate Desktop Update Feed" \
+              --notes "Automatischer Update-Kanal; bitte den Feed nicht manuell verändern." \
+              --prerelease --target "$GITHUB_SHA"
+          fi
+          gh release download "$feed" --pattern latest.json --dir "$RUNNER_TEMP/feed-check" --clobber
+          cmp -s release/latest.json "$RUNNER_TEMP/feed-check/latest.json"
+      - name: Offer only verified release installers on download site
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout -B stable-download-links origin/main
+          node - <<'NODE'
+          const fs=require('fs');
+          const p='downloads.json';
+          const j=JSON.parse(fs.readFileSync(p,'utf8'));
+          const base='https://github.com/'+process.env.GH_REPO+'/releases/download/desktop-v'+process.env.RELEASE_VERSION+'/';
+          j.windows=base+'Abbate-Lernraum-Windows-Setup.exe';
+          j.macos=base+'Abbate-Lernraum-macOS-Universal.dmg';
+          fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');
+          NODE
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Release verified update-capable desktop v$RELEASE_VERSION"
+            git push origin HEAD:main
+          fi
