@@ -111,7 +111,7 @@ jobs:
           APPLE_SIGNING_IDENTITY: '-'
         run: |
           set -euo pipefail
-          npx --yes @tauri-apps/cli@2.12.4 build --bundles dmg --target universal-apple-darwin --features desktop-auto-update --config src-tauri/tauri.stable.generated.conf.json --ci
+          npx --yes @tauri-apps/cli@2.12.4 build --bundles app,dmg --target universal-apple-darwin --features desktop-auto-update --config src-tauri/tauri.stable.generated.conf.json --ci
           dmg="$(find src-tauri/target/universal-apple-darwin/release/bundle/dmg -maxdepth 1 -name '*.dmg' -type f -print -quit)"
           test -s "$dmg"
           # Tauri update archive is signed using the free updater key.

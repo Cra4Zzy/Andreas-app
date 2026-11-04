@@ -74,3 +74,11 @@ test('release builder injects the public updater key and matching feed without s
   assert.doesNotMatch(script,/process\.env\.TAURI_SIGNING_PRIVATE_KEY/,'Never read the signing private key in config generator');
   assert.match(source,/desktop-update-feed\/latest\.json/);
 });
+
+test('macOS desktop release explicitly bundles app and dmg for updater archive signing',()=>{
+  // Tauri v2 does not generate .app.tar.gz/.sig with --bundles dmg alone.
+  assert.match(workflow,/build --bundles app,dmg --target universal-apple-darwin --features desktop-auto-update/);
+  assert.doesNotMatch(workflow,/--bundles dmg --target universal-apple-darwin/);
+  assert.match(workflow,/test -s "\$archive"/);
+  assert.match(workflow,/test -s "\$archive\.sig"/);
+});
