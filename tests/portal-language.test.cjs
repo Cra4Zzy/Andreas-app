@@ -31,7 +31,7 @@ test('learning, account, records and admin share all 26 native-language options'
     assert.match(html,/i18n-packs\.js\?v=9/);
     assert.match(html,/i18n\.js\?v=11/);
     assert.match(html,/portal-language\.js\?v=2/);
-    assert.match(html,/portal\.js\?v=9/);
+    assert.match(html,/portal\.js\?v=10/);
     assert.match(html,/portal\.css\?v=7/);
     assert.doesNotMatch(html,/<select id="portal-language"/,'Outdated four-language selector in '+file);
   }
@@ -66,4 +66,10 @@ test('cross-page locale scripts and entry points are syntactically valid',()=>{
   for(const path of ['dist/i18n.js','dist/portal-language.js','dist/portal.js','dist/app.js']){
     assert.doesNotThrow(()=>new vm.Script(read(path),{filename:path}),'JS syntax invalid in '+path);
   }
+});
+
+// Visual regression guard: the Schulungspass does not show a redundant read-only label.
+test('training record page has no Nur ansehen badge',()=>{
+  const source=read('dist/portal.js');
+  assert.doesNotMatch(source,/class=\"portal-readonly\"/);
 });
