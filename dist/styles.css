@@ -32,3 +32,48 @@
 .hero-photo>img{width:100%;height:auto;aspect-ratio:600/610;object-fit:contain;object-position:center;background:#e7eae5;filter:none}
 @media(max-width:650px){.hero-photo>img{height:auto;aspect-ratio:600/610}}
 .hero-photo .photo-caption{position:relative;left:auto;right:auto;bottom:auto;margin:-19px 14px 0 auto;z-index:2;max-width:min(345px,calc(100% - 18px))}
+
+
+/* Abbate Gabelstapler · original learning materials, mobile-first and ungraded */
+.theory-intro{display:flex;align-items:center;justify-content:space-between;gap:32px;padding:clamp(28px,4vw,47px);margin:10px 0 30px;border-radius:23px;background:#183a40;color:#fff;overflow:hidden;position:relative}
+.theory-intro:after{content:"52";position:absolute;pointer-events:none;right:28%;bottom:-65px;font:800 clamp(130px,20vw,280px)/1 Barlow,sans-serif;letter-spacing:-.1em;color:#fff;opacity:.035}
+.theory-intro>div,.theory-intro>a{position:relative;z-index:1}
+.theory-intro>div{max-width:635px}
+.theory-intro-eyebrow{color:#edc962;font-size:13px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.theory-intro h2{font:800 clamp(31px,3.1vw,48px)/1.06 Barlow,sans-serif;letter-spacing:-.045em;margin:13px 0 12px}
+.theory-intro p{font-size:18px;line-height:1.55;color:#e0e9e6;max-width:545px}
+.theory-intro small{display:block;font-size:14px;color:#f3d883;font-weight:600;margin-top:15px}
+.theory-intro .primary{background:#edc75e;color:#173036;white-space:nowrap;min-height:54px;border-radius:10px;text-decoration:none;box-shadow:none}
+.theory-intro .primary:hover{background:#ffe39c}
+.theory-study{max-width:940px;margin:0 auto;padding-bottom:55px}
+.theory-study-message{background:#fffefb;border:1px solid #d9dfd1;border-radius:14px;padding:28px;margin:18px 0}
+.theory-study-message .text-link{margin-top:10px}
+.theory-study-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:8px 0 17px;font-size:15px;font-weight:700;color:#62766d}
+.theory-study-top .text-link{display:inline-flex;gap:9px}
+.theory-progress{height:6px;background:#e0e7dc;border-radius:999px;overflow:hidden;margin-bottom:18px}
+.theory-progress>span{display:block;height:100%;background:#d0a93e;border-radius:inherit;transition:width .2s ease}
+.theory-question{padding:clamp(22px,3.7vw,43px);border-radius:19px;background:#fffefa;border:1px solid #dce2d4;box-shadow:0 15px 44px #1a393b0a}
+.theory-question-meta{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px 15px;font-size:13px;color:#6f7d70;margin-bottom:22px}
+.theory-question-meta strong{color:#285646;background:#e5eee6;padding:6px 10px;border-radius:6px}
+.theory-question h2{font:700 clamp(26px,3vw,38px)/1.16 Barlow,sans-serif;letter-spacing:-.03em;color:#173840;margin:0 0 27px;overflow-wrap:anywhere}
+.theory-answers{display:grid;gap:11px}
+.theory-option{display:flex;align-items:flex-start;gap:18px;text-align:left;min-height:65px;width:100%;padding:16px 19px;background:#fafbf7;border:1px solid #dce3d8;border-radius:11px;color:#254043;font:600 17px/1.45 SourceSans,system-ui,sans-serif;transition:background .2s,border-color .2s,box-shadow .2s}
+.theory-option>span:first-child{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;background:#eef2eb;border-radius:7px;color:#466754;font:700 16px/1 Barlow,sans-serif}
+.theory-option:hover:not(:disabled){background:#f0f5ed;border-color:#99ab9e}
+.theory-option.selected{border-color:#c59b36;background:#fff7de;box-shadow:inset 0 0 0 1px #c59b36}
+.theory-option.selected>span:first-child{background:#eac65d;color:#234136}
+.theory-option:disabled{cursor:default;opacity:.78}
+.theory-option:focus-visible{outline:3px solid #b58f2d;outline-offset:3px}
+.theory-number-label{display:grid;gap:8px;font-weight:600;max-width:330px}
+.theory-number-label input{padding:12px 15px;font-size:18px;border:1px solid #d4dbd0;background:#fff;border-radius:9px;width:100%}
+.theory-diagram{display:flex;align-items:flex-start;gap:13px;margin-bottom:25px;padding:18px 19px;border:1px solid #e3d6ab;border-radius:11px;background:#fff9e9;color:#796225;font-size:15px;line-height:1.55}
+.theory-diagram svg{width:23px;height:23px;flex-shrink:0}
+.theory-answer-note{font-size:14px;color:#697669;line-height:1.55;margin:24px 0 0}
+.theory-study-actions{display:flex;justify-content:space-between;gap:18px;margin-top:24px}
+.theory-study-actions .primary,.theory-study-actions .secondary{min-height:50px}
+.theory-study-actions a.primary{display:inline-flex;align-items:center;text-decoration:none}
+.theory-draft-note,.theory-translation{font-size:14px;color:#68786d;line-height:1.55;margin:17px 0 0}
+.theory-translation{background:#ebf1e9;border-radius:10px;padding:14px 16px;margin-bottom:20px}
+@media(max-width:780px){.theory-intro{flex-direction:column;align-items:flex-start;gap:24px}.theory-intro:after{right:0;bottom:-47px}.theory-intro>a{align-self:flex-start}}
+@media(max-width:520px){.theory-intro{padding:25px 22px;margin:4px 0 22px}.theory-intro h2{font-size:32px}.theory-intro p{font-size:17px}.theory-intro .primary{width:100%;justify-content:center}.theory-study-top{font-size:13px}.theory-question{padding:22px 17px}.theory-question h2{font-size:27px}.theory-option{padding:13px 12px;gap:12px;font-size:16px}.theory-study-actions{gap:10px}.theory-study-actions .primary,.theory-study-actions .secondary{font-size:15px;padding:12px}}
+@media(prefers-reduced-motion:reduce){.theory-option,.theory-progress>span{transition:none!important}}
