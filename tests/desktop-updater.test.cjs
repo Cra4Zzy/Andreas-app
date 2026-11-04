@@ -23,7 +23,11 @@ test('stable builds require a real key, immutable channel and opt-in feature',()
   assert.match(source,/darwin-universal/);
   assert.match(workflow,/workflow_dispatch:/);
   assert.match(workflow,/TAURI_SIGNING_PRIVATE_KEY/);
-  assert.match(workflow,/APPLE_CERTIFICATE/);
+  assert.doesNotMatch(workflow,/APPLE_CERTIFICATE|APPLE_TEAM_ID|APPLE_PASSWORD/);
+  assert.match(workflow,/APPLE_SIGNING_IDENTITY: '-'/);
+  const pilot=JSON.parse(fs.readFileSync(path.join(__dirname,'../src-tauri/tauri.conf.json'),'utf8'));
+  assert.equal(pilot.build.frontendDist,config.build.frontendDist,'The free desktop preview must load the live HTTPS frontend');
+  assert.equal(pilot.identifier,'de.abbate.lernraum.desktop.preview','Keep installed pilot identity stable');
   assert.doesNotMatch(workflow,/on:\s*\n\s*push:/);
 });
 
