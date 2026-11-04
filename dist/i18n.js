@@ -250,11 +250,19 @@ const ABBATE_LANGUAGES = [
   ['de','Deutsch','de-DE'],['el','Ελληνικά','el-GR'],['hu','Magyar','hu-HU'],
   ['ga','Gaeilge','ga-IE'],['it','Italiano','it-IT'],['lv','Latviešu','lv-LV'],
   ['lt','Lietuvių','lt-LT'],['mt','Malti','mt-MT'],['pl','Polski','pl-PL'],
-  ['pt','Português','pt-PT'],['ro','Română','ro-RO'],['sk','Slovenčina','sk-SK'],
+  ['pt','Português','pt-PT'],['ro','Română','ro-RO'],['ru','Русский','ru-RU'],['uk','Українська','uk-UA'],['sk','Slovenčina','sk-SK'],
   ['sl','Slovenščina','sl-SI'],['es','Español','es-ES'],['sv','Svenska','sv-SE']
 ].map(([code,name,locale])=>({code,name,locale}));
 
-const suppliedPacks = globalThis.ABBATE_I18N_PACKS||{};
+const suppliedPacks = {
+  ...(globalThis.ABBATE_I18N_PACKS||{}),
+  ru: globalThis.ABBATE_I18N_RU,
+  uk: globalThis.ABBATE_I18N_UK
+};
+const modernCopy = globalThis.ABBATE_I18N_MODERN||{};
+const modernExact = new Map();
+for (const [source, translated] of Object.entries(modernCopy)) modernExact.set(source,translated);
+
 const repairPack = (code,pack) => pack.map((value,index)=>{
   let repaired=String(value);
   const variables=[...ABBATE_SOURCE[index].matchAll(/\{([a-z]+)\}/gi)].map(match=>match[1]);
@@ -297,6 +305,12 @@ function translateText(value){
       const variables={};matcher.names.forEach((name,index)=>{variables[name]=match[index+1];});
       translated=format(activePack[matcher.index],variables);break;
     }
+  }
+  // Current production UI contains new course names and learning copy that are
+  // not in the legacy demo catalogue. Translate them via the small modern layer.
+  if(!translated && activeCode!=='de'){
+    const translations=modernExact.get(trimmed);
+    if(translations)translated=translations[activeCode];
   }
   if(!translated)return original;
   return original.slice(0,original.indexOf(trimmed))+translated+original.slice(original.indexOf(trimmed)+trimmed.length);
