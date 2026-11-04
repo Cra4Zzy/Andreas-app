@@ -4,5 +4,8 @@
   "identifier": "de.abbate.lernraum.desktop",
   "bundle": {
     "createUpdaterArtifacts": true
+  },
+  "build": {
+    "frontendDist": "https://app.gabelstaplerfahrschule-andreas.de/dist/"
   }
 }
