@@ -45,12 +45,15 @@
       const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
       let node;
       while((node=walker.nextNode())){
+        // The current-language code is dynamic UI state, not source copy.
+        if(node.parentElement?.closest('#portal-language'))continue;
         if(!sourceText.has(node))sourceText.set(node,node.nodeValue);
         const initial=sourceText.get(node),value=trim(initial),translated=translate(value);
         const next=value && translated!==value?initial.replace(value,translated):initial;
         if(node.nodeValue!==next)node.nodeValue=next;
       }
       for(const element of root.querySelectorAll('[placeholder],[aria-label],[title]')){
+        if(element===button)continue;
         if(!sourceAttrs.has(element))sourceAttrs.set(element,{});
         const attrs=sourceAttrs.get(element);
         for(const name of ['placeholder','aria-label','title']){
