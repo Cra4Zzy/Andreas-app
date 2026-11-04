@@ -46,9 +46,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p website
-          cp index.html downloads.json website/
+          cp index.html downloads.json theorie-katalog.html website/
           cp -a dist website/dist
           test -s website/index.html
+          test -s website/theorie-katalog.html
+          test -s website/dist/theorie-katalog.html
           test -s website/dist/konto.html
           test -s website/dist/portal.js
           test -s website/dist/backend-config.js
