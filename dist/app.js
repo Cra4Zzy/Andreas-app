@@ -65,12 +65,60 @@ function toast(message) { $('#toast').textContent=I18N.text(message); $('#toast'
 function modal(title,content) { $('#modal-content').innerHTML=`<div class="modal-head"><h2>${title}</h2><button class="icon-button" data-action="close" aria-label="Schließen">${icon('close')}</button></div><div class="modal-body">${content}</div>`; I18N.localize($('#modal-content')); if(!$('#modal').open) $('#modal').showModal(); }
 function close() { $('#modal').close(); }
 let route='start';
-const routeMap={start:'Start',lernen:'Lernen',pruefung:'Prüfung',ergebnisse:'Ergebnisse',verwaltung:'Verwaltung',uebung:'Training',ergebnis:'Dein Ergebnis'};
+
+/* Gabelstapler source questions from Supabase: ungraded, no answer key, not a certified exam. */
+const theoryStudy={items:null,loading:false,error:false,index:0,choices:Object.create(null)};
+const theoryLang=()=>selectedLanguage==='ro'?'ro':'de';
+function theoryIntro(){
+ const ro=theoryLang()==='ro';
+ return '<section class="theory-intro"><div><span class="theory-intro-eyebrow">Gabelstapler · '+(ro?'Materiale de învățare':'Lernunterlagen')+'</span><h2>'+(ro?'Întrebări teoretice':'Originalfragen von Andreas')+'</h2><p>'+(ro?'52 de întrebări pentru pregătire. Răspunsurile nu sunt încă evaluate.':'52 Fragen aus dem Schulungsbogen von Andreas. Gehe sie Schritt für Schritt durch – vorerst ohne Bewertung.')+'</p><small>52 '+(ro?'întrebări':'Lernfragen')+' · '+(ro?'ianuarie 2019':'Januar 2019')+'</small></div><a class="primary" href="#lernfragen">'+(ro?'Începe învățarea':'Fragen durchgehen')+' →</a></section>';
+}
+function theoryView(){
+ const state=theoryStudy,ro=theoryLang()==='ro';
+ const ttl=ro?'Întrebări teoretice':'Gabelstapler · Theoriefragen';
+ const pre=heading('Gabelstapler',ttl,'',accessLine());
+ if(state.loading)return pre+'<div class="theory-study-message" role="status">'+(ro?'Se încarcă întrebările …':'Lernfragen werden geladen …')+'</div>';
+ if(!state.items||state.error)return pre+'<div class="theory-study-message"><p>'+(ro?'Întrebările nu sunt disponibile.':'Die Lernfragen konnten nicht geladen werden.')+'</p><button class="secondary" data-action="theory-reload">'+(ro?'Reîncarcă':'Erneut laden')+'</button></div>';
+ const list=state.items,n=Math.max(0,Math.min(list.length-1,state.index));state.index=n;
+ const q=list[n],t=q.translations?.[theoryLang()]||q.translations?.de;
+ if(!t)return pre+'<p role="alert">Der Fragetext fehlt.</p>';
+ const selected=state.choices[q.question_no],visual=!!q.requires_diagram;
+ const options=Array.isArray(t.answers)?t.answers:[];
+ const answerHtml=options.length?'<div class="theory-answers">'+options.map((option,i)=>'<button type="button" class="theory-option'+(selected===i?' selected':'')+'" data-action="theory-select" data-choice="'+i+'" aria-pressed="'+(selected===i)+'"'+(visual?' disabled':'')+'><span>'+String.fromCharCode(65+i)+'</span><span>'+esc(option)+'</span></button>').join('')+'</div>':
+ '<label class="theory-number-label">'+(ro?'Răspunsul tău':'Deine Antwort')+'<input type="text" inputmode="numeric" data-action="theory-number" value="'+esc(selected??'')+'"'+(visual?' disabled':'')+'></label>';
+ const diagram=visual?'<div class="theory-diagram" role="note">'+icon('help')+'<span>'+(ro?'Pentru această întrebare lipsește încă figura sau diagrama originală.':'Für diese Aufgabe fehlt noch die zugehörige Originalabbildung bzw. das Traglastdiagramm.')+'</span></div>':'';
+ const note=selectedLanguage!=='de'&&selectedLanguage!=='ro'?'<p class="theory-translation" role="note">Dieser Fragenkatalog ist derzeit nur auf Deutsch und Rumänisch übersetzt. Die deutsche Arbeitsübersetzung wird angezeigt.</p>':'';
+ return pre+'<div class="theory-study">'+note+'<div class="theory-study-top"><a class="text-link" href="#lernen">← '+(ro?'Înapoi la învățare':'Zum Lernbereich')+'</a><span>'+(n+1)+' / '+list.length+'</span></div>'+
+ '<div class="theory-progress" role="progressbar" aria-label="Fragenfortschritt" aria-valuemin="1" aria-valuemax="'+list.length+'" aria-valuenow="'+(n+1)+'"><span style="width:'+((n+1)/list.length*100)+'%"></span></div>'+
+ '<article class="theory-question"><div class="theory-question-meta"><strong>'+(ro?'Întrebarea':'Frage')+' '+String(q.question_no).padStart(2,'0')+'</strong><span>'+(ro?'Pagina':'Originalseite')+' '+q.source_page+'</span></div><h2>'+esc(t.title)+'</h2>'+diagram+answerHtml+
+ '<p class="theory-answer-note">'+(ro?'Nu există încă o evaluare sau răspunsuri oficiale confirmate.':'Die richtige Antwort wurde noch nicht von Andreas bestätigt. Deine Auswahl wird nicht bewertet.')+'</p></article>'+
+ '<div class="theory-study-actions"><button class="secondary" data-action="theory-prev"'+(n===0?' disabled':'')+'>'+(ro?'Înapoi':'Zurück')+'</button>'+
+ (n===list.length-1?'<a class="primary" href="#lernen">'+(ro?'Înapoi la învățare':'Zum Lernbereich')+' →</a>':'<button class="primary" data-action="theory-next">'+(ro?'Întrebarea următoare':'Nächste Frage')+' →</button>')+'</div>'+
+ '<p class="theory-draft-note">'+(ro?'Materialele din 2019 trebuie revizuite înainte de utilizarea la un examen oficial.':'Die Originalunterlagen von 2019 müssen vor einer offiziellen Prüfung fachlich geprüft werden.')+'</p></div>';
+}
+async function loadTheory(force=false){
+ if(theoryStudy.loading||(!force&&theoryStudy.items))return;
+ if(!B.me||!active(B.me))return;
+ theoryStudy.loading=true;theoryStudy.error=false;if(route==='lernfragen')render();
+ try{
+  const {data,error}=await B.client.from('abbate_theory_questions')
+   .select('question_no,source_page,requires_diagram,translations')
+   .eq('school_id',B.me.school).eq('document_key','theorie-ro-2019')
+   .order('question_no',{ascending:true});
+  if(error)throw error;
+  if(!Array.isArray(data)||data.length!==52)throw Error('Incomplete theory catalogue');
+  theoryStudy.items=data;
+ }catch(error){
+  theoryStudy.error=true;theoryStudy.items=null;console.warn('Failed to load theory questions',error?.code||'network');
+ }finally{theoryStudy.loading=false;if(route==='lernfragen')render();}
+}
+
+const routeMap={start:'Start',lernen:'Lernen',lernfragen:'Gabelstapler Lernfragen',pruefung:'Prüfung',ergebnisse:'Ergebnisse',verwaltung:'Verwaltung',uebung:'Training',ergebnis:'Dein Ergebnis'};
 function accessLine() { const s=student(); return `<span class="access-line ${active(s)?'':'expired'}">${icon(active(s)?'check':'lock')}${active(s)?s.until?`Zugang aktiv · ${daysLeft(s.until)} Tage`:'Zugang aktiv':s.access==='pending'?'Wartet auf Freischaltung':s.access==='paused'?'Zugang pausiert':'Zugang abgelaufen'}</span>`; }
 function heading(label,title,description='',action='') { return `<div class="page-heading"><div><div class="overline">${icon('book')}${label}</div><h1>${title}</h1>${description?`<p>${description}</p>`:''}</div>${action}</div>`; }
 function navigation() {
   const nav=[['start','home',tr('home')],['lernen','book',tr('learn')],['pruefung','file',tr('exam')],['ergebnisse','chart',tr('results')]];
-  const current=route==='uebung'?(run?.mode==='learn'?'lernen':'pruefung'):route==='ergebnis'?'ergebnisse':route;
+  const current=route==='uebung'?(run?.mode==='learn'?'lernen':'pruefung'):route==='lernfragen'?'lernen':route==='ergebnis'?'ergebnisse':route;
   $('#desktop-nav').innerHTML=nav.map(([id,,name])=>`<a href="#${id}" class="${current===id?'active':''}" ${current===id?'aria-current="page"':''}>${name}</a>`).join('');
   $('#mobile-nav').innerHTML=nav.map(([id,i,name])=>`<a href="#${id}" class="${current===id?'active':''}" ${current===id?'aria-current="page"':''}>${icon(i)}${name}</a>`).join('');
   document.documentElement.lang=selectedLanguage;
@@ -97,7 +145,7 @@ function home() {
   <section class="learning-route" aria-label="Dein Lernweg"><a class="route-step" href="#lernen"><span class="route-number">01</span><span><strong>Verstehen</strong><small>Themen in Ruhe durchgehen</small></span>${icon('arrow')}</a><button class="route-step" data-action="start-learn"><span class="route-number">02</span><span><strong>Wissen festigen</strong><small>Mit direkter Rückmeldung üben</small></span>${icon('arrow')}</button><a class="route-step" href="#pruefung"><span class="route-number">03</span><span><strong>Bereit werden</strong><small>Den Prüfungsablauf kennenlernen</small></span>${icon('arrow')}</a></section>
   <div class="home-lower"><section><div class="section-topline"><h2>Dein Kurs. In kleinen Schritten.</h2><a class="text-link" href="#lernen">Alle Themen ${icon('arrow')}</a></div><div class="topic-list">${topicRows()}</div></section><aside class="progress-note"><div class="note-label">${icon('chart')}Dein persönlicher Lernweg</div><h3>${learned?'Das wächst mit jeder Runde.':'Du musst nicht alles auf einmal können.'}</h3><p>${learned?`Du hast bereits ${learned} von ${total} Fragen richtig beantwortet.`:'Starte mit einer kurzen Runde. Zu jeder Antwort erhältst du eine Erklärung.'}</p><div class="progress-meter" role="progressbar" aria-label="Richtig beantwortete Übungsfragen" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${learned}"><span style="width:${learned/total*100}%"></span></div><div class="progress-count">${learned} von ${total} Fragen richtig beantwortet</div><a class="text-link" href="#ergebnisse">Deine bisherigen Runden ${icon('arrow')}</a></aside></div>${installStrip()}`;
 }
-function learning() { return heading('Dein Kurs. In kleinen Schritten.','Verstehen kommt vor Auswendiglernen.','Wähle ein Thema und lerne mit kurzen Fragen und verständlichen Erklärungen.',accessLine())+`<div class="lesson-grid">${TOPICS.map(t=>`<section class="lesson-card"><span class="topic-symbol ${t.color}">${icon(t.icon)}</span><h2>${t.name}</h2><p>${t.description}</p><div class="lesson-meta">${QUESTIONS.filter(q=>q.topic===t.id).length} Übungsfragen · mit Erklärungen</div><button class="secondary" data-action="topic" data-topic="${t.id}">Thema ansehen ${icon('arrow')}</button></section>`).join('')}</div><section class="learning-tip"><img src="./assets/theorie-schulung.webp" alt="Teilnehmer bei einer gemeinsamen Theorie-Schulung" loading="lazy" width="1100" height="825"><div><h3>Du lernst für sicheres Handeln.</h3><p>Nimm dir Zeit, Situationen wirklich zu verstehen.</p><button class="text-link" data-action="start-learn">Alle Themen üben ${icon('arrow')}</button></div></section>`; }
+function learning() { return heading('Dein Kurs. In kleinen Schritten.','Verstehen kommt vor Auswendiglernen.','Wähle ein Thema und lerne mit kurzen Fragen und verständlichen Erklärungen.',accessLine())+theoryIntro()+`<div class="lesson-grid">${TOPICS.map(t=>`<section class="lesson-card"><span class="topic-symbol ${t.color}">${icon(t.icon)}</span><h2>${t.name}</h2><p>${t.description}</p><div class="lesson-meta">${QUESTIONS.filter(q=>q.topic===t.id).length} Übungsfragen · mit Erklärungen</div><button class="secondary" data-action="topic" data-topic="${t.id}">Thema ansehen ${icon('arrow')}</button></section>`).join('')}</div><section class="learning-tip"><img src="./assets/theorie-schulung.webp" alt="Teilnehmer bei einer gemeinsamen Theorie-Schulung" loading="lazy" width="1100" height="825"><div><h3>Du lernst für sicheres Handeln.</h3><p>Nimm dir Zeit, Situationen wirklich zu verstehen.</p><button class="text-link" data-action="start-learn">Alle Themen üben ${icon('arrow')}</button></div></section>`; }
 function examStart() { return heading('Deine Prüfungsvorbereitung','Schon ein gutes Gefühl? Probier es aus.','Wähle die Runde, die zu dir passt.',accessLine())+`<div class="mode-grid"><section class="mode-card"><span class="mode-icon">${icon('book')}</span><h2>Mit Rückmeldung üben</h2><p>Du erhältst nach jeder Frage sofort eine Erklärung.</p><div class="mode-features"><span>${icon('check')}Erklärung direkt nach jeder Frage</span><span>${icon('check')}In Ruhe nachdenken und dazulernen</span><span>${icon('check')}${QUESTIONS.length} Übungsfragen aus allen Themen</span></div><button class="secondary" data-action="start-learn">Lernrunde starten ${icon('arrow')}</button></section><section class="mode-card focus"><span class="mode-icon">${icon('file')}</span><h2>Den Ablauf kennenlernen</h2><p>Beantworte zuerst die ganze Runde. Die Auswertung folgt am Schluss.</p><div class="mode-features"><span>${icon('check')}Antworten vor der Abgabe ändern</span><span>${icon('check')}Auswertung nach dem Abschluss</span><span>${icon('check')}${QUESTIONS.length} Übungsfragen · ohne Zeitlimit</span></div><button class="primary gold" data-action="start-exam">Prüfungstraining starten ${icon('arrow')}</button></section></div><p class="exam-disclaimer">Hinweis: Das Prüfungstraining zeigt deinen Übungsstand. Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt.</p>`; }
 function startRun(mode,topicId) {
   if(!active(student())) { access(); return; }
@@ -140,9 +188,9 @@ function results() {
   return heading('Dein bisheriger Weg','Du siehst, was du geschafft hast.','Hier findest du deine bisherigen Runden und Ergebnisse.',accessLine())+(list.length?`<div class="history-list">${list.map(r=>`<article class="history-row"><div><h3>${r.mode==='legacy'?'Frühere Übungsrunde':r.mode==='learn'?'Lernrunde':'Prüfungstraining'}</h3><p>${new Date(r.at).toLocaleString(languageConfig().locale,{dateStyle:'medium',timeStyle:'short'})} · ${r.total||3} Fragen</p></div><div class="history-score">${r.score} / ${r.total||3}${r.mode!=='legacy'?`<button class="text-link" data-action="review-result" data-id="${esc(r.id)}">Ansehen ${icon('arrow')}</button>`:'<small>Vorschau</small>'}</div></article>`).join('')}</div>`:`<section class="empty-state"><span class="topic-symbol">${icon('chart')}</span><h2>Deine erste Runde wartet auf dich.</h2><p>Starte mit ein paar Fragen. Dein Ergebnis erscheint anschließend hier.</p><button class="primary" data-action="start-learn">Lernrunde starten ${icon('arrow')}</button></section>`);
 }
 function admin(){if(B.isStaff(B.me)){location.href='./verwaltung.html';return '';}return heading('Verwaltung','Kein Verwaltungszugang.','Dieser Bereich ist nur für berechtigte Mitarbeiter zugänglich.');}
-function render() { navigation();const content=route==='start'?home():route==='lernen'?learning():route==='pruefung'?examStart():route==='ergebnisse'?results():route==='verwaltung'?admin():route==='uebung'?quizView():resultView();$('#main').innerHTML=`<div class="page-enter">${content}</div>`;I18N.localize(document.body);navigation(); }
+function render() { navigation();const content=route==='start'?home():route==='lernen'?learning():route==='pruefung'?examStart():route==='ergebnisse'?results():route==='verwaltung'?admin():route==='lernfragen'?theoryView():route==='uebung'?quizView():resultView();$('#main').innerHTML=`<div class="page-enter">${content}</div>`;I18N.localize(document.body);navigation(); }
 function go(next) { if(location.hash==='#'+next){route=next;render();window.scrollTo({top:0,behavior:'auto'});}else location.hash=next; }
-window.addEventListener('hashchange',()=>{let next=location.hash.slice(1);if(next==='verlauf')next='ergebnisse';if(!Object.hasOwn(routeMap,next))next='start';if(next==='uebung'&&!run)next='pruefung';if(next==='ergebnis'&&!latestResult)next='ergebnisse';route=next;render();window.scrollTo({top:0,behavior:'auto'});$('#main').focus({preventScroll:true});});
+window.addEventListener('hashchange',()=>{let next=location.hash.slice(1);if(next==='verlauf')next='ergebnisse';if(!Object.hasOwn(routeMap,next))next='start';if(next==='uebung'&&!run)next='pruefung';if(next==='ergebnis'&&!latestResult)next='ergebnisse';route=next;render();if(next==='lernfragen'&&!theoryStudy.items)loadTheory();window.scrollTo({top:0,behavior:'auto'});$('#main').focus({preventScroll:true});});
 function profile(){
   const s=student();
   modal('Dein Profil & Zugang',`<div class="profile-summary"><span class="profile-avatar">${esc(initials(s.name))}</span><div><strong>${esc(s.name)}</strong><p>${esc(s.email)}</p></div></div><p>Dein Zugang ist aktiv${s.until?' bis einschließlich '+fmtDate(s.until):'.'}.</p><div class="profile-actions"><button class="secondary" data-action="language">🌐 ${esc(languageConfig().name)}</button><a class="secondary" href="./nachweise.html">${esc(passPreviewLabel())} · DE</a><a class="secondary" href="./konto.html#einstellungen">Konto & Datenschutz</a></div><div class="profile-footer">${B.isStaff(B.me)?'<a class="text-link" href="./verwaltung.html">Zur Verwaltung ↗</a>':''}<button class="text-link" data-action="logout">Abmelden</button></div>`);
@@ -160,6 +208,11 @@ document.addEventListener('click',async event=>{
   const action=el.dataset.action;
   if(action==='close'||action==='close-modal')close();
   else if(action==='about')about();
+   else if(action==='theory-reload')loadTheory(true);
+   else if(action==='theory-next'&&theoryStudy.items){theoryStudy.index=Math.min(theoryStudy.items.length-1,theoryStudy.index+1);render();window.scrollTo({top:0,behavior:'auto'});}
+   else if(action==='theory-prev'&&theoryStudy.items){theoryStudy.index=Math.max(0,theoryStudy.index-1);render();window.scrollTo({top:0,behavior:'auto'});}
+   else if(action==='theory-select'&&theoryStudy.items){const q=theoryStudy.items[theoryStudy.index];if(!q.requires_diagram){theoryStudy.choices[q.question_no]=Number(el.dataset.choice);render();}}
+
   else if(action==='language')languagePicker();
   else if(action==='set-language'){
     const nextLanguage=el.dataset.language;
@@ -237,7 +290,7 @@ async function boot(){
   data.selected=B.me.id;
   try{
     const practice=practicePayload(await B.loadPractice());data.results=practice.results;data.mastered={[B.me.id]:practice.mastered};
-    await I18N.load(selectedLanguage);render();document.documentElement.removeAttribute('data-loading');
+    await I18N.load(selectedLanguage);render();document.documentElement.removeAttribute('data-loading');if(route==='lernfragen')loadTheory();
   }catch{document.documentElement.removeAttribute('data-loading');$('#main').innerHTML='<section class="empty-state"><h1>Dein Lernbereich konnte nicht geladen werden.</h1><a class="primary" href="./index.html">Erneut versuchen</a></section>';}
 }
 boot();
