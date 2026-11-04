@@ -43,13 +43,14 @@ test('unreleased mobile store links remain disabled',()=>{
   const links=JSON.parse(read('downloads.json'));
   assert.equal(links.ios,'');
   assert.equal(links.android,'');
-  assert.match(read('index.html'),/aria-disabled="true"/);
+  assert.match(read('index.html'),/data-platform="ios"[\\s\\S]*?href="\\.\\/dist\\/"/);
+  assert.match(read('index.html'),/data-platform="android"[\\s\\S]*?href="\\.\\/dist\\/"/);
 });
 
 test('cached offline shell gets fresh app JavaScript',()=>{
   assert.match(read('dist/index.html'),/app\.js\?v=20/);
   assert.match(read('dist/sw.js'),/app\.js\?v=20/);
-  assert.match(read('dist/sw.js'),/abbate-learning-v20/);
+  assert.match(read('dist/sw.js'),/abbate-learning-v22/);
 });
 
 test('learning UI stays focused and identifies simulation honestly',()=>{
