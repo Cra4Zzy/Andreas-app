@@ -244,13 +244,15 @@ Zugang bis {date} verlängert.
 bis einschließlich`.split('\n');
 
 const ABBATE_LANGUAGES = [
-  ['bg','Български','bg-BG'],['hr','Hrvatski','hr-HR'],['cs','Čeština','cs-CZ'],
+  ['de','Deutsch','de-DE'],['uk','Українська','uk-UA'],
+  ['ru','Русский','ru-RU'],['cs','Čeština','cs-CZ'],
+  ['bg','Български','bg-BG'],['hr','Hrvatski','hr-HR'],
   ['da','Dansk','da-DK'],['nl','Nederlands','nl-NL'],['en','English','en-GB'],
   ['et','Eesti','et-EE'],['fi','Suomi','fi-FI'],['fr','Français','fr-FR'],
-  ['de','Deutsch','de-DE'],['el','Ελληνικά','el-GR'],['hu','Magyar','hu-HU'],
-  ['ga','Gaeilge','ga-IE'],['it','Italiano','it-IT'],['lv','Latviešu','lv-LV'],
-  ['lt','Lietuvių','lt-LT'],['mt','Malti','mt-MT'],['pl','Polski','pl-PL'],
-  ['pt','Português','pt-PT'],['ro','Română','ro-RO'],['ru','Русский','ru-RU'],['uk','Українська','uk-UA'],['sk','Slovenčina','sk-SK'],
+  ['el','Ελληνικά','el-GR'],['hu','Magyar','hu-HU'],['ga','Gaeilge','ga-IE'],
+  ['it','Italiano','it-IT'],['lv','Latviešu','lv-LV'],['lt','Lietuvių','lt-LT'],
+  ['mt','Malti','mt-MT'],['pl','Polski','pl-PL'],['pt','Português','pt-PT'],
+  ['ro','Română','ro-RO'],['sk','Slovenčina','sk-SK'],
   ['sl','Slovenščina','sl-SI'],['es','Español','es-ES'],['sv','Svenska','sv-SE']
 ].map(([code,name,locale])=>({code,name,locale}));
 
