@@ -1,8 +1,8 @@
 {
   "note": "Only publish reviewed, signed/notarized production installers and official store listings. Pilot downloads are explicitly labeled and kept separate.",
-  "windows": "",
+  "windows": "https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-v0.2.0/Abbate-Lernraum-Windows-Setup.exe",
   "windowsPreview": "https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-pilot/Abbate-Lernraum-Windows-Setup.exe",
-  "macos": "",
+  "macos": "https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-v0.2.0/Abbate-Lernraum-macOS-Universal.dmg",
   "ios": "",
   "android": "",
   "macosPreview": "https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-pilot/Abbate-Lernraum-macOS-Universal.dmg",
