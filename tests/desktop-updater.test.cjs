@@ -13,6 +13,9 @@ const workflow=fs.readFileSync(path.join(__dirname,'../.github/workflows/desktop
 test('stable builds require a real key, immutable channel and opt-in feature',()=>{
   assert.equal(config.bundle.createUpdaterArtifacts,true);
   assert.match(config.version,/^\d+\.\d+\.\d+$/);
+  assert.equal(config.build.frontendDist,'https://app.gabelstaplerfahrschule-andreas.de/dist/');
+  const caps=JSON.parse(fs.readFileSync(path.join(__dirname,'../src-tauri/capabilities/default.json'),'utf8'));
+  assert.equal(caps.remote,undefined,'The remotely hosted frontend must never receive local Tauri IPC capabilities');
   assert.match(cargo,/desktop-auto-update = \["dep:tauri-plugin-updater"\]/);
   assert.match(source,/env!\("ABBATE_UPDATER_PUBLIC_KEY"\)/);
   assert.match(source,/desktop-update-feed\/latest\.json/);
