@@ -1,7 +1,7 @@
 name: Abbate desktop updater (free key, no paid certificates)
 
-# Deliberately manual: publishing a release is an explicit, reviewed operation.
-# A regular git push still builds the unsigned pilot, NEVER a production update.
+# Publishing remains explicitly manual. Main-branch pushes compile signed verification artifacts,
+# but must never publish an update manifest or a user-facing release.
 on:
   workflow_dispatch:
   # Compile and sign an internal test artifact automatically; publish stays manual.
@@ -18,8 +18,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: abbate-desktop-stable-release
-  cancel-in-progress: false
+  # An older manual release must not block CI verification of a new fix.
+  group: ${{ github.event_name == 'workflow_dispatch' && 'abbate-desktop-stable-release' || 'abbate-desktop-ci-verification' }}
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 jobs:
   preflight:
