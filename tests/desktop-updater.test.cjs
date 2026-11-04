@@ -19,6 +19,9 @@ test('stable builds require a real key, immutable channel and opt-in feature',()
   assert.match(cargo,/desktop-auto-update = \["dep:tauri-plugin-updater"\]/);
   assert.match(source,/env!\("ABBATE_UPDATER_PUBLIC_KEY"\)/);
   assert.match(source,/desktop-update-feed\/latest\.json/);
+  // Tauri updater .endpoints returns Result<UpdaterBuilder, Error>.
+  // The builder must be unwrapped before .build(), or native release builds fail with E0599.
+  assert.match(source,/\.endpoints\(vec!\[endpoint\.parse\(\)\?\]\)\?\s*\.build\(\)\?/);
   assert.match(source,/download_and_install/);
   assert.match(source,/darwin-universal/);
   assert.match(workflow,/workflow_dispatch:/);
