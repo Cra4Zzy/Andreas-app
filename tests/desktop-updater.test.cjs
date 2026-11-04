@@ -29,6 +29,9 @@ test('stable builds require a real key, immutable channel and opt-in feature',()
   assert.match(workflow,/TAURI_SIGNING_PRIVATE_KEY/);
   assert.doesNotMatch(workflow,/APPLE_CERTIFICATE|APPLE_TEAM_ID|APPLE_PASSWORD/);
   assert.match(workflow,/APPLE_SIGNING_IDENTITY: '-'/);
+  assert.match(workflow,/os: macos-15-intel/,'Avoid GitHub macOS 15 ARM64 queue exhaustion');
+  assert.match(workflow,/--target universal-apple-darwin/,'Retain both Mac CPU architectures');
+  assert.doesNotMatch(workflow,/^\s+- os: macos-15\s*$/m,'Never schedule updater Mac build on scarce ARM64 runners');
   const pilot=JSON.parse(fs.readFileSync(path.join(__dirname,'../src-tauri/tauri.conf.json'),'utf8'));
   assert.equal(pilot.build.frontendDist,config.build.frontendDist,'The free desktop preview must load the live HTTPS frontend');
   assert.equal(pilot.identifier,'de.abbate.lernraum.desktop.preview','Keep installed pilot identity stable');

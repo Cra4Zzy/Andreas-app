@@ -69,7 +69,9 @@ jobs:
         include:
           - os: windows-latest
             platform: windows
-          - os: macos-15
+          # Use the supported Intel runner: macos-15 currently uses capacity-limited ARM64 hosts.
+          # The universal-apple-darwin target still builds for Intel AND Apple Silicon Macs.
+          - os: macos-15-intel
             platform: macos
     runs-on: ${{ matrix.os }}
     steps:
