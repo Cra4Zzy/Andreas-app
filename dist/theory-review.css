@@ -1,0 +1,30 @@
+.theory-main{margin-inline:auto;max-width:1210px}
+.theory-heading{display:flex;align-items:end;justify-content:space-between;gap:28px;padding:35px 0 28px}
+.theory-heading h1{font:800 clamp(36px,4.6vw,66px)/1.07 Barlow,'Segoe UI',sans-serif;letter-spacing:-.045em;max-width:760px;margin:10px 0}
+.theory-heading p:not(.portal-eyebrow){max-width:650px;font-size:18px;color:#60716b}
+.theory-total{display:grid;place-items:center;min-width:150px;padding:16px;border-radius:18px;background:#1c3942;color:#f3c349}
+.theory-total strong{font:800 68px/1 Barlow,sans-serif;letter-spacing:-.07em}
+.theory-total span{color:#f7e6ba;font-size:14px}
+.theory-notice{background:#e9eadf;border:1px solid #d1d4bd;padding:19px 24px;border-radius:15px;margin:20px 0 23px}
+.theory-notice strong{font-size:17px}.theory-notice p{font-size:15px;max-width:900px;margin:8px 0 0;line-height:1.65;color:#4c6059}
+.theory-language-note{margin:12px 0;padding:16px 18px;background:#fff6db;border-radius:12px;font-size:15px;color:#6d541e}
+.theory-language-note[hidden]{display:none}
+#theory-state{padding:25px 0;font-size:17px}
+.theory-controls{display:flex;flex-wrap:wrap;align-items:end;gap:16px;margin:25px 0 24px}
+.theory-controls>div{min-width:230px;flex:1}.theory-controls>div:nth-child(2){flex:1.6}
+.theory-controls .theory-count{flex:0 0 auto;min-width:auto;padding:12px 0;color:#697a6b;font-size:14px}
+.theory-controls input,.theory-controls select{width:100%;border-radius:10px;background:#fff}
+.theory-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.theory-question{background:#fffefa;border:1px solid #e0e1d5;border-radius:18px;padding:25px 27px;min-width:0}
+.theory-question-top{display:flex;gap:9px;align-items:center;flex-wrap:wrap;font-size:12px;color:#718076;margin-bottom:19px}
+.theory-id{background:#ecf0e8;color:#244b3e;font-weight:700;border-radius:6px;padding:5px 9px}
+.theory-diagram{background:#fff1cf;color:#806122;border-radius:6px;padding:5px 9px}
+.theory-question h2{font:700 clamp(21px,2.1vw,26px)/1.26 Barlow,'Segoe UI',sans-serif;letter-spacing:-.02em;margin:0 0 22px}
+.theory-options{margin:0 0 20px;padding-left:29px;display:grid;gap:12px}
+.theory-options li{padding-left:5px;font-size:16px;line-height:1.5;overflow-wrap:anywhere}
+.theory-options li::marker{font-weight:700;color:#3d6556}
+.theory-numeric{font-size:15px;line-height:1.5;color:#68796d;background:#f4f4ec;padding:12px;border-radius:9px}
+.theory-foot{font-size:12px;color:#89958a;border-top:1px solid #edf0e8;margin:20px 0 0;padding-top:13px}
+.theory-empty{grid-column:1/-1;padding:45px 10px}
+@media(max-width:800px){.theory-list{grid-template-columns:1fr}.theory-heading{align-items:start}.theory-total{min-width:98px}.theory-total strong{font-size:44px}}
+@media(max-width:560px){.theory-heading{flex-direction:column;padding:18px 0}.theory-total{display:flex;gap:12px;width:100%;justify-content:start}.theory-question{padding:20px}.theory-controls{display:grid}.theory-controls>div{min-width:0}}
