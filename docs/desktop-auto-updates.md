@@ -1,84 +1,71 @@
-# Abbate Desktop: sichere automatische Updates (Tauri 2)
+# Abbate Desktop-Updates – ohne kostenpflichtige Zertifikate
 
-Stand: 4. November 2026 · Technik implementiert, **Produktionsfreigabe noch ausstehend**.
+Stand: 4. November 2026. Zwei Ebenen sind zu unterscheiden: **Live-Frontend funktioniert ohne Signierschlüssel**; die **native Binär-Aktualisierung mit Tauri ist implementiert, benötigt jedoch einen einmalig selbst erzeugten kostenlosen kryptografischen Schlüssel**.
 
-## Zwei Update-Wege – ohne Neuinstallation für normale Änderungen
+## 1. Automatische Lern- und Design-Updates: kostenlose Desktop-Installer
 
-**Website- und Lerninhalte:** Die künftige stabile Windows-/Mac-App lädt das Abbate-Frontend direkt via HTTPS von `https://app.gabelstaplerfahrschule-andreas.de/dist/`. Dadurch werden Designs, Texte, JavaScript, Übersetzungen und live synchronisierte Lerninhalte beim erneuten Aufrufen **automatisch vom Server übernommen**. Für solche Änderungen müssen **keine neuen Desktop-Installer** gebaut werden. Das setzt einen erreichbaren Webserver voraus und unterscheidet sich vom alten Pilot-Installer, der HTML/JS lokal enthielt.
+Die Windows-/Mac-Testinstaller werden ab Version **0.1.1** mit der URL
+`https://app.gabelstaplerfahrschule-andreas.de/dist/` gebaut. Hierdurch nutzen diese Desktop-Versionen das online bereitgestellte Frontend statt einer eingefrorenen Kopie aus dem Installer. Änderungen an Design, Fragen, Übersetzungen, JavaScript und Lernbereichen werden beim nächsten Laden/Neustart der App vom Server bezogen. **Keine neue .exe/.dmg wegen gewöhnlicher Frontend-Änderungen.**
 
-**Programm-/Runtime-Änderungen:** Für Änderungen am Tauri-Fenster, Rust-Code, native Sicherheitseinstellungen oder Bibliotheken ist weiterhin der **signierte native Updater** zuständig. Die Erstinstallation der neuen stabilen Version ist deshalb einmalig erforderlich. Der private Signierschlüssel und die Mac-Notarisierung sind noch nicht eingerichtet.
+Die **iPhone-/Android-PWA** aktualisiert sich unabhängig davon ebenfalls über den Webserver. Eine Internetverbindung ist für Login, Zugangsprüfung und Online-Lernstände erforderlich; keine vollwertige Offlinefunktion versprechen.
 
-Die remote geladene Website erhält **keine zusätzlichen lokalen Tauri-Berechtigungen**; die `src-tauri/capabilities/default.json` schaltet keine `remote`-Domain für IPC frei. Supabase-Anmeldung und serverseitige Rollen bleiben unverändert.
+Die alte lokal gebündelte Desktop-Version **0.1.0** kann nicht nachträglich automatisch auf den neuen Online-Modus umgestellt werden. Vorhandene Desktop-Testnutzer müssen die neue **0.1.1** einmal manuell installieren. Die bestehende Vorschau-Bundle-ID `de.abbate.lernraum.desktop.preview` bleibt für diesen Übergang gleich. Downloadlinks werden erst nach **erfolgreichen Windows- und Mac-Builds** aktualisiert.
 
-## Was nach der einmaligen Einrichtung passiert
+Die öffentlich sichtbare Downloadseite zeigt die spezielle Kennzeichnung `Lerninhalte und Design aktualisieren sich ...` auf Desktop-Karten nur, wenn der Releasejob über `downloads.json.desktopLiveFrontend` bestätigt, dass beide Pakete mit Remote-Frontend gebaut wurden.
 
-Eine **updatefähige Desktop-App** prüft bei jedem Programmstart das Update-Manifest unter:
+## 2. Native Desktop-Programmupdates: Tauri-Updater mit GRATIS-Schlüssel
 
-`https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-update-feed/latest.json`
+Wenn wir **Rust-Code, native Bibliotheken oder Installer-Einstellungen** verändern, ist ein echtes Desktop-Update erforderlich. Der Updater ist bereits technisch vorhanden:
 
-Wenn darin eine höhere Version für Windows x64 bzw. macOS Universal vorliegt, lädt Tauri das signierte Paket herunter, **prüft automatisch dessen kryptografische Tauri-Updater-Signatur** und installiert die neue Version. Anschließend startet die App neu. Ohne Netzwerk oder ohne neue Version öffnet sich die vorhandene Installation weiterhin. Die Prüfung erfolgt bewusst **nur beim Start**, nicht im Hintergrund mitten in einer längeren Lern- oder Prüfungsrunde. Bei langsamem Download kann der Neustart allerdings nach Beginn der Nutzung erfolgen; daher **mit realen Schülerkonten testen und ggf. einen nutzerbestätigten Neustart ergänzen**, bevor der Updater produktiv freigegeben wird.
+- `src-tauri/src/main.rs`: sucht beim Programmstart nach einer höheren signierten Version, lädt sie und installiert sie nach Signaturprüfung.
+- `src-tauri/Cargo.toml`: Feature `desktop-auto-update` für updatefähige Releases, in Pilot-Installern deaktiviert.
+- `src-tauri/tauri.stable.conf.json`: separate Release-App-ID, Version und `createUpdaterArtifacts: true`.
+- `.github/workflows/desktop-updates.yml`: manuell auslösbarer Workflow für Windows und Mac. **Keine Apple-/Windows-Kaufzertifikate erforderlich.**
+- `scripts/make-desktop-update-feed.cjs`: erstellt aus den echten signierten Updatepaketen die `latest.json` für GitHub Releases.
+- Release-Kanal: `https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-update-feed/latest.json`.
 
-Die **PWA für iPhone/Android** und das **Live-Frontend der stabilen Desktop-Version** werden über denselben Webserver aktualisiert: Nach erneutem Laden/Start werden geänderte Website-Dateien und Inhalte vom Server bezogen. Kein natives App-Store-Update notwendig.
+**Tauri fordert kryptografische Update-Signaturen zwingend.** Sie sind kostenlos und nicht mit Windows SmartScreen oder Apple Developer-ID-Zertifikaten identisch. Die Signaturprüfung darf nicht abgeschaltet werden. Ohne eingerichteten Schlüssel dürfen wir **nicht** behaupten, dass native Updates auf ausgelieferten Installern funktionieren.
 
-## Warum wir alte Pilot-Installer nicht einfach fernaktualisieren können
+### Einmaliger Schritt für den kostenlosen Schlüssel
 
-Die alten Windows-/Mac-Pilotinstaller enthalten **noch keinen Updater**. Sie können nicht nachträglich automatisch umgerüstet werden. **Jeder bestehende Pilot-Nutzer muss die erste updatefähige Release-Version einmal manuell installieren.** Der stabile Build bekommt die endgültige Produkt-ID `de.abbate.lernraum.desktop`; beim Wechsel von der bisherigen `.preview`-ID muss auch das Verhalten der vorhandenen Installations- und Anmeldedaten auf Windows/Mac geprüft werden.
+Auf einem vertrauenswürdigen Rechner:
 
-## Quellcode und Sicherheitsmodell
+```sh
+npx --yes @tauri-apps/cli@2.12.4 signer generate -w abbate-updater.key
+```
 
-- `src-tauri/src/main.rs`: signierte Update-Prüfung und Installation bei Programmstart.
-- `src-tauri/Cargo.toml`: optionales Feature `desktop-auto-update`; in alten Piloten standardmäßig ausgeschaltet.
-- `src-tauri/tauri.stable.conf.json`: endgültige Desktop-ID, Release-Version, `createUpdaterArtifacts: true`.
-- `scripts/make-desktop-update-feed.cjs`: erstellt `latest.json` aus tatsächlich signierten `.sig`-Dateien.
-- `.github/workflows/desktop-updates.yml`: MANUELL auslösbarer Freigabeworkflow für Windows und Mac, mit Secret-Prüfung und macOS-Notarisierung.
-- Versionspakete liegen unter **unveränderlichen Release-Tags** wie `desktop-v0.2.0`; der Kanal `desktop-update-feed` erhält nur ein neues `latest.json`, **nachdem** beide Plattform-Downloads veröffentlicht sind.
+Der Befehl erzeugt **lokal und kostenlos** eine private `abbate-updater.key` sowie öffentliche `abbate-updater.key.pub`-Datei. Den privaten Schlüssel und die Passphrase nicht im Repository, Chat, Mail oder öffentlichen Upload speichern. Er muss sicher aufbewahrt werden, damit künftige App-Updates weiter signiert werden können.
 
-**Kein privater Schlüssel im Repository oder in dieser Dokumentation.** Das Updateverfahren mit Tauri-Signatur darf nicht mit der Betriebssystem-Codesignatur verwechselt werden: Für den Mac muss zusätzlich eine Apple-Developer-ID-Signatur und Notarisierung erfolgen. Für Windows ist die OS-Code-Signatur empfehlenswert, um SmartScreen-Warnungen zu reduzieren.
+Dann im GitHub-Repository unter **Settings → Secrets and variables → Actions** einrichten:
 
-## Einmalige Einrichtung beim Betreiber (Andreas / Entwicklerzugang)
+- **Variable** `ABBATE_UPDATER_PUBLIC_KEY`: Inhalt der `abbate-updater.key.pub`.
+- **Secret** `TAURI_SIGNING_PRIVATE_KEY`: Inhalt der privaten `abbate-updater.key`.
+- **Secret** `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`: die beim Erzeugen gewählte Passphrase (wenn vorhanden).
 
-1. **Tauri-Updater-Schlüsselpaar auf einem vertrauenswürdigen Rechner erzeugen:**
+Anschließend über **Actions → Abbate desktop updater (free key, no paid certificates) → Run workflow** für die Version aus `src-tauri/tauri.stable.conf.json` einen Release bauen. Der Releasejob verlangt vollständige Pakete für beide Systeme. Er veröffentlicht zunächst die versionierten .exe/.dmg/.sig-Dateien und erst danach das aktualisierte `latest.json`-Manifest.
 
-   ```sh
-   npx --yes @tauri-apps/cli@2.12.4 signer generate -w ~/.tauri/abbate-updater.key
-   ```
+**Für jede spätere native Änderung die Versionsnummer erhöhen.** Automatische native Updates finden nur statt, wenn der Installer mit dem kostenlosen, unveränderlichen Update-Schlüssel gebaut wurde. Bestehende alte Testinstaller können sich nicht selbst nachrüsten.
 
-   Den **privaten Schlüssel** `abbate-updater.key` und seine Passphrase sicher außerhalb des Repositories (z. B. Passwortmanager und Backup) aufbewahren; **nicht per Chat oder E-Mail weiterreichen**. Den öffentlichen Schlüssel aus `abbate-updater.key.pub` verwenden. Wenn der private Schlüssel verloren geht, lassen sich vorhandene Installationen mit dieser Vertrauenskette nicht mehr aktualisieren.
+### Einschränkungen ohne bezahlte Betriebssystem-Zertifikate
 
-2. Im Repository unter **Settings → Secrets and variables → Actions** anlegen:
-   - **Repository variable** `ABBATE_UPDATER_PUBLIC_KEY`: kompletter Inhalt der `.pub`-Datei (öffentlich, einschließlich Kopfzeile).
-   - **Secret** `TAURI_SIGNING_PRIVATE_KEY`: kompletter Inhalt des privaten Update-Schlüssels.
-   - **Secret** `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`: festgelegte Passphrase (falls verwendet).
+- **Windows:** Ohne Betriebssystem-Code-Signing-Zertifikat kann SmartScreen beim Installer weiterhin warnen.
+- **Mac:** Ohne Apple Developer-ID und Notarisierung kann Gatekeeper die heruntergeladene DMG blockieren oder vor dem Öffnen warnen. Das ist unabhängig von der kostenlosen Tauri-Update-Signatur und darf dem Nutzer nicht als sicher funktionierende Standardinstallation versprochen werden.
 
-3. Für **macOS Developer-ID-Signatur und Notarisierung** außerdem vom Apple-Konto des Betreibers bereitstellen:
-   - `APPLE_CERTIFICATE`: base64-kodiertes exportiertes **Developer ID Application**-P12.
-   - `APPLE_CERTIFICATE_PASSWORD`: Passwort der P12-Datei.
-   - `KEYCHAIN_PASSWORD`: zufälliges temporäres CI-Keychain-Passwort.
-   - `APPLE_ID`: Apple-Account-E-Mail.
-   - `APPLE_PASSWORD`: **app-spezifisches** Apple-Passwort (nicht das normale Kontopasswort).
-   - `APPLE_TEAM_ID`: Apple Developer Team ID.
+Es sind bewusst **keine** Apple-Developer-Zugangsdaten oder Kaufzertifikate für den Tauri-Releaseworkflow mehr erforderlich. Eine Sicherheitsprüfung/Abnahme auf echten Geräten bleibt zwingend.
 
-   Diese Daten als **GitHub Actions Secrets** anlegen. Sie sind noch nicht eingerichtet oder verifiziert. Ein kostenpflichtiges Apple Developer Program kann nötig sein, auch ohne App Store, wenn eine öffentlich notarisiert verteilte Mac-DMG vorgesehen ist.
+## Vor realem Desktop-Launch testen
 
-4. Für die **erste Release-Version** `0.2.0` in `src-tauri/tauri.stable.conf.json` verwenden. Bei jeder weiteren Veröffentlichung **SemVer erhöhen**, z. B. `0.2.1`. Dieselbe Versionsnummer darf nicht erneut für veränderte Dateien verwendet werden.
-5. In GitHub **Actions → Abbate signed desktop auto-updates → Run workflow** bewusst manuell auslösen. Der Workflow führt Tests aus, baut Signaturpakete, prüft Mac-Notarisierung, lädt beide Versionen hoch, aktualisiert anschließend den Updatekanal und **erst danach** die beiden Downloadlinks.
-6. Für den allerersten Launch Windows und Mac lokal installieren. Die veröffentlichten Installer müssen im Browser und im Betriebssystem mit echten Benutzerkonten getestet werden.
+- [ ] Windows-/Mac-Testversion **0.1.1** auf echten Rechnern installieren, Remote-Frontend, Supabase Login, Logout, Reset und Rechte prüfen.
+- [ ] App-Frontend verändern, Website deployen, Desktop-App neu starten und Änderung **ohne neue Installation** beobachten.
+- [ ] Tauri-Schlüssel kostenlos erzeugen und als GitHub Actions Secret/Variable sicher einrichten.
+- [ ] Signierte native **0.2.0** installieren und dann **0.2.1** veröffentlichen; Update auf beiden Systemen durchlaufen lassen.
+- [ ] Manipulierte .sig-Datei muss vom Updater abgelehnt werden.
+- [ ] Während Lern- und Prüfungsrunden keine unerwarteten Neustarts: Update-Verhalten auf langsamer Verbindung testen und bei Bedarf einen nutzerbestätigten Neustart ergänzen.
+- [ ] Mac Gatekeeper und Windows SmartScreen ohne Zertifikate auf den Zielgeräten prüfen.
+- [ ] Bei Server- oder Update-Kanal-Ausfall normale Anmeldung und sichere Fehlermeldungen kontrollieren.
+- [ ] Erst nach Abschluss dieser Tests automatische **native** Programmupdates als freigegeben bezeichnen.
 
-## Unverzichtbare End-to-End-Abnahme
-
-- [ ] Fehlende Secrets müssen den Release-Workflow sicher stoppen.
-- [ ] Windows-/Mac-Installer auf echten Geräten installieren, An-/Abmeldung und Sitzungsdaten testen.
-- [ ] Release **0.2.0** starten, danach **0.2.1** mit korrektem Signaturschlüssel veröffentlichen; Update erkennen, laden, installieren, App neu starten.
-- [ ] Signatur absichtlich verfälschen: Installation muss abgelehnt werden.
-- [ ] Offline starten und Update-Server nicht erreichbar simulieren: bestehende Lern-App muss nutzbar bleiben, sofern Backend erreichbar ist.
-- [ ] Prüfungs-/Lernrunde während Update-Download: kein unbeabsichtigter Verlust von Antworten und Lernstand.
-- [ ] Windows SmartScreen prüfen; bei öffentlicher Verteilung Code-Signing-Zertifikat erwägen.
-- [ ] macOS Gatekeeper, Developer-ID-Signatur, Apple-Notarisierung und Universal-Binary auf Intel/Silicon prüfen.
-- [ ] Langsame Verbindung, Abbruch, Berechtigungen, Update-Neustart und eventuelle Rückkehr zum Login testen.
-- [ ] Vor Freigabe das Review von AGB/Datenschutz/Impressum und die fachliche Freigabe der Schulungsfragen abschließen.
-
-## Offizielle Dokumentation
+## Herstellerdokumentation
 
 - https://v2.tauri.app/plugin/updater/
-- https://v2.tauri.app/distribute/pipelines/github/
-- https://v2.tauri.app/distribute/sign/macos/
+- https://v2.tauri.app/reference/config/#buildconfig
