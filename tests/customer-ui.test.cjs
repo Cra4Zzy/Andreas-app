@@ -39,17 +39,26 @@ test('legal and account links stay on all customer entry points',()=>{
   assert.match(read('dist/datenschutz.html'),/Deine Rechte/);
 });
 
-test('unreleased mobile store links remain disabled',()=>{
+test('mobile website installation is ready without store links',()=>{
   const links=JSON.parse(read('downloads.json'));
   assert.equal(links.ios,'');
   assert.equal(links.android,'');
-  assert.match(read('index.html'),/data-platform="ios"[\\s\\S]*?href="\\.\\/dist\\/"/);
-  assert.match(read('index.html'),/data-platform="android"[\\s\\S]*?href="\\.\\/dist\\/"/);
+  const landing=read('index.html');
+  assert.match(landing,/data-platform="ios"/);
+  assert.match(landing,/data-platform="android"/);
+  assert.match(landing,/Zum Home-Bildschirm hinzufügen/);
+  assert.match(landing,/Zum Startbildschirm hinzufügen/);
+  assert.match(landing,/Lernraum öffnen/);
+  assert.doesNotMatch(landing,/Download über (den App Store|Google Play)/);
+  const login=read('dist/konto.html');
+  assert.match(login,/rel="manifest"/);
+  assert.match(login,/serviceWorker\.register/);
 });
 
-test('cached offline shell gets fresh app JavaScript',()=>{
-  assert.match(read('dist/index.html'),/app\.js\?v=20/);
-  assert.match(read('dist/sw.js'),/app\.js\?v=20/);
+test('cached PWA shell uses current app JavaScript and CSS',()=>{
+  assert.match(read('dist/index.html'),/app\.js\?v=22/);
+  assert.match(read('dist/sw.js'),/app\.js\?v=22/);
+  assert.match(read('dist/sw.js'),/styles\.css\?v=14/);
   assert.match(read('dist/sw.js'),/abbate-learning-v22/);
 });
 
