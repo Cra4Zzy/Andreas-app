@@ -65,6 +65,20 @@ test('mobile website installation is ready without store links',()=>{
   assert.match(login,/serviceWorker\.register/);
 });
 
+test('desktop auto-updates are only promised after a verified live-frontend release',()=>{
+  const landing=read('index.html');
+  assert.match(landing,/Einmal installieren\. Neue Lerninhalte automatisch erhalten/);
+  assert.match(landing,/links\.desktopLiveFrontend === true/);
+  assert.match(landing,/data-desktop-live hidden/);
+  assert.match(landing,/Änderungen am eigentlichen Windows-\/Mac-Programm können eine neue Installationsdatei erfordern/);
+  assert.match(landing,/ohne Installationsdatei/i);
+  const pilot=JSON.parse(read('src-tauri/tauri.conf.json'));
+  assert.equal(pilot.build.frontendDist,'https://app.gabelstaplerfahrschule-andreas.de/dist/');
+  const workflow=read('.github/workflows/desktop-builds.yml');
+  assert.match(workflow,/j\.desktopLiveFrontend=/);
+  assert.match(workflow,/j\.desktopPreviewVersion=/);
+});
+
 test('cached PWA shell uses current app JavaScript and CSS',()=>{
   assert.match(read('dist/index.html'),/app\.js\?v=22/);
   assert.match(read('dist/sw.js'),/app\.js\?v=22/);
