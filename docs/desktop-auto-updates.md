@@ -2,6 +2,14 @@
 
 Stand: 4. November 2026 · Technik implementiert, **Produktionsfreigabe noch ausstehend**.
 
+## Zwei Update-Wege – ohne Neuinstallation für normale Änderungen
+
+**Website- und Lerninhalte:** Die künftige stabile Windows-/Mac-App lädt das Abbate-Frontend direkt via HTTPS von `https://app.gabelstaplerfahrschule-andreas.de/dist/`. Dadurch werden Designs, Texte, JavaScript, Übersetzungen und live synchronisierte Lerninhalte beim erneuten Aufrufen **automatisch vom Server übernommen**. Für solche Änderungen müssen **keine neuen Desktop-Installer** gebaut werden. Das setzt einen erreichbaren Webserver voraus und unterscheidet sich vom alten Pilot-Installer, der HTML/JS lokal enthielt.
+
+**Programm-/Runtime-Änderungen:** Für Änderungen am Tauri-Fenster, Rust-Code, native Sicherheitseinstellungen oder Bibliotheken ist weiterhin der **signierte native Updater** zuständig. Die Erstinstallation der neuen stabilen Version ist deshalb einmalig erforderlich. Der private Signierschlüssel und die Mac-Notarisierung sind noch nicht eingerichtet.
+
+Die remote geladene Website erhält **keine zusätzlichen lokalen Tauri-Berechtigungen**; die `src-tauri/capabilities/default.json` schaltet keine `remote`-Domain für IPC frei. Supabase-Anmeldung und serverseitige Rollen bleiben unverändert.
+
 ## Was nach der einmaligen Einrichtung passiert
 
 Eine **updatefähige Desktop-App** prüft bei jedem Programmstart das Update-Manifest unter:
@@ -10,7 +18,7 @@ Eine **updatefähige Desktop-App** prüft bei jedem Programmstart das Update-Man
 
 Wenn darin eine höhere Version für Windows x64 bzw. macOS Universal vorliegt, lädt Tauri das signierte Paket herunter, **prüft automatisch dessen kryptografische Tauri-Updater-Signatur** und installiert die neue Version. Anschließend startet die App neu. Ohne Netzwerk oder ohne neue Version öffnet sich die vorhandene Installation weiterhin. Die Prüfung erfolgt bewusst **nur beim Start**, nicht im Hintergrund mitten in einer längeren Lern- oder Prüfungsrunde. Bei langsamem Download kann der Neustart allerdings nach Beginn der Nutzung erfolgen; daher **mit realen Schülerkonten testen und ggf. einen nutzerbestätigten Neustart ergänzen**, bevor der Updater produktiv freigegeben wird.
 
-Die **PWA für iPhone/Android** wird getrennt über den Webserver aktualisiert: Nach erneutem Laden/Start werden geänderte Website-Dateien und Inhalte vom Server bezogen. Kein natives App-Store-Update notwendig.
+Die **PWA für iPhone/Android** und das **Live-Frontend der stabilen Desktop-Version** werden über denselben Webserver aktualisiert: Nach erneutem Laden/Start werden geänderte Website-Dateien und Inhalte vom Server bezogen. Kein natives App-Store-Update notwendig.
 
 ## Warum wir alte Pilot-Installer nicht einfach fernaktualisieren können
 
