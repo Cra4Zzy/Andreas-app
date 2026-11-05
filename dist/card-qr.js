@@ -4,7 +4,7 @@
 (() => {
   const target='https://app.gabelstaplerfahrschule-andreas.de/dist/konto.html';
   const options=Object.freeze({errorCorrectionLevel:'Q',margin:4,color:{dark:'#000000',light:'#ffffff'}});
-  const previewWidth=240, printWidth=2048;
+  const previewWidth=240, printScale=48;
 
   function encoder() {
     if(!globalThis.AbbateQR||typeof globalThis.AbbateQR.toCanvas!=='function')
@@ -30,17 +30,17 @@
     return canvas;
   }
   async function downloadPng(){
-    // Never download the 240px preview: render a fresh, high-resolution QR.
+    // Never download the 240px preview: render a fresh QR with integer pixels per module.
     const canvas=document.createElement('canvas');
-    await encoder().toCanvas(canvas,target,{...options,width:printWidth});
-    if(canvas.width!==printWidth||canvas.height!==printWidth)
+    await encoder().toCanvas(canvas,target,{...options,scale:printScale});
+    if(canvas.width<2000||canvas.height!==canvas.width)
       throw new Error('QR-Code wurde nicht in voller Auflösung erstellt.');
     if(typeof canvas.toBlob==='function'){
       const blob=await new Promise((resolve,reject)=>
         canvas.toBlob(value=>value?resolve(value):reject(new Error('PNG konnte nicht erzeugt werden.')),'image/png'));
-      saveBlob(blob,'abbate-karten-qr-2048px.png');
+      saveBlob(blob,'abbate-karten-qr-druck.png');
     }else{
-      saveFile(canvas.toDataURL('image/png'),'abbate-karten-qr-2048px.png');
+      saveFile(canvas.toDataURL('image/png'),'abbate-karten-qr-druck.png');
     }
   }
   async function downloadSvg(){
@@ -50,5 +50,5 @@
     if(!/^<svg[\s>]/.test(svg))throw new Error('Vektor-QR-Code konnte nicht erzeugt werden.');
     saveBlob(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),'abbate-karten-qr-druck.svg');
   }
-  globalThis.AbbateCardQR=Object.freeze({target,previewWidth,printWidth,render,downloadPng,downloadSvg});
+  globalThis.AbbateCardQR=Object.freeze({target,previewWidth,printScale,render,downloadPng,downloadSvg});
 })();
