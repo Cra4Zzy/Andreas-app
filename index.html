@@ -177,6 +177,10 @@
       .platform-icon{height:45px;width:45px;border-radius:12px;margin-bottom:14px}
       .platform-icon svg{height:25px;width:25px}
       .platform-action{font-size:14px;padding:11px}
+      
+      
+      
+      
     }
     @media(max-width:390px){.platforms{grid-template-columns:1fr}.platform{min-height:0}.platform p{margin-bottom:15px}.availability{margin-top:8px}h1{font-size:46px}}
     /* Keep installation instructions readable in one column on phones. */
@@ -268,19 +272,15 @@
           <h3>Windows</h3><p>Die Abbate-App für deinen PC oder Laptop.</p><div class="platform-spacer"></div>
           <span class="availability" data-status>Veröffentlichung folgt</span>
           <a class="platform-action" data-download="windows" aria-disabled="true" tabindex="-1"><span>In Vorbereitung</span><svg viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M4 20h16"/></svg></a>
-
         </article>
         <article class="platform" data-platform="macos" role="listitem">
           <div class="platform-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><rect x="3" y="5" width="26" height="18" rx="2"/><path d="M12 27h8M16 23v4"/></svg></div>
           <h3>Mac</h3><p>Die Abbate-App für MacBook, iMac &amp; Mac mini.</p><div class="platform-spacer"></div>
           <span class="availability" data-status>Veröffentlichung folgt</span>
           <a class="platform-action" data-download="macos" aria-disabled="true" tabindex="-1"><span>In Vorbereitung</span><svg viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M4 20h16"/></svg></a>
-
         </article>
       </div>
-
     </section>
-
   </main>
   <footer class="footer">
     <div class="shell">
@@ -294,7 +294,7 @@
         const response = await fetch("./downloads.json", { cache: "no-store" });
         if (!response.ok) return;
         const links = await response.json();
-
+        for (const platform of ["windows","macos"]) {
           const url = links[platform];
           if (typeof url !== "string" || !/^https:\/\/[^/\s]+/i.test(url)) continue;
           const card = document.querySelector('[data-platform="' + platform + '"]');
