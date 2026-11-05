@@ -65,13 +65,16 @@ test('mobile website installation is ready without store links',()=>{
   assert.match(login,/serviceWorker\.register/);
 });
 
-test('desktop auto-updates are only promised after a verified live-frontend release',()=>{
+test('download cards retain live download logic without redundant update callouts',()=>{
   const landing=read('index.html');
-  assert.match(landing,/Aktualisierung der Lerninhalte/);
-  assert.match(landing,/links\.desktopLiveFrontend === true/);
-  assert.match(landing,/data-desktop-live hidden/);
-  assert.match(landing,/Bei Änderungen der Windows- oder macOS-Anwendung kann eine Programmaktualisierung erforderlich sein/);
-  assert.match(landing,/Nutzung im Browser/i);
+  assert.doesNotMatch(landing,/desktop-live-indicator|desktop-update-overview|data-desktop-live/);
+  assert.doesNotMatch(landing,/Aktualisierung der Lerninhalte|Aktualisierte Lerninhalte werden beim nächsten Start geladen/);
+  assert.doesNotMatch(landing,/Nutzung im Browser|browser-box/);
+  assert.match(landing,/data-download="windows"/);
+  assert.match(landing,/data-download="macos"/);
+  assert.match(landing,/for \(const platform of \["windows","macos"\]\)/);
+  assert.match(landing,/href="#downloads"/);
+  assert.match(landing,/Im Browser starten/);
   const pilot=JSON.parse(read('src-tauri/tauri.conf.json'));
   assert.equal(pilot.build.frontendDist,'https://app.gabelstaplerfahrschule-andreas.de/dist/');
   const workflow=read('.github/workflows/desktop-builds.yml');
