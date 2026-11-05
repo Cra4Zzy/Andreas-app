@@ -19,17 +19,17 @@ App installieren
 Zur Fahrschule
 Zugang aktiv · {count} Tage
 Zugang abgelaufen
-Schön, dass du da bist
-Heute ein Stück sicherer, {name}.
+Lernübersicht
+Willkommen, {name}.
 Gabelstapler · Dein Theorietraining
 Aus Wissen wird Sicherheit.
-Verstehe die Antworten und handle im Arbeitsalltag sicher.
+Übe die theoretischen Grundlagen für den sicheren Umgang mit Gabelstaplern.
 Lernrunde starten
 Weiterlernen
 Prüfung vorbereiten
-In deinem Tempo. Ohne Zeitdruck.
-Für deinen echten Arbeitsalltag.
-Aus der Praxis. Schritt für Schritt.
+Übungsrunden ohne Zeitlimit.
+Praxisorientierte Vorbereitung
+Lernfragen mit Erläuterungen
 Dein Lernweg
 Verstehen
 Themen in Ruhe durchgehen
@@ -39,10 +39,10 @@ Bereit werden
 Den Prüfungsablauf kennenlernen
 Dein Kurs. In kleinen Schritten.
 Alle Themen
-Dein persönlicher Lernweg
-Du musst nicht alles auf einmal können.
-Starte mit einer kurzen Runde. Zu jeder Antwort erhältst du eine Erklärung.
-Das wächst mit jeder Runde.
+Lernfortschritt
+Noch keine Fragen abgeschlossen
+Beginne eine Lernrunde. Zu jeder Antwort erhältst du eine Erläuterung.
+Dein Lernstand
 Du hast bereits {learned} von {total} Fragen richtig beantwortet.
 {learned} von {total} Fragen richtig beantwortet
 Deine bisherigen Runden
@@ -56,8 +56,8 @@ Thema ansehen
 Du lernst für sicheres Handeln.
 Nimm dir Zeit, Situationen wirklich zu verstehen.
 Alle Themen üben
-Schon ein gutes Gefühl? Probier es aus.
-Wähle die Runde, die zu dir passt.
+Prüfungsvorbereitung
+Wähle eine Übungsform.
 Mit Rückmeldung üben
 Du erhältst nach jeder Frage sofort eine Erklärung.
 Den Ablauf kennenlernen
@@ -79,17 +79,17 @@ Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.
 Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.
 Deine Antwort: {answer}
 Nicht beantwortet
-Eine Runde weiter.
-Schau dir an, was schon sitzt und was du noch festigen kannst.
-Das war eine sichere Runde.
-Mit jeder Erklärung wächst dein Wissen.
+Deine Auswertung
+Prüfe deine Antworten und die zugehörigen Erläuterungen.
+Alle Fragen richtig beantwortet.
+Ergebnis deiner Übungsrunde
 Alle Antworten richtig. Wiederhole die Themen später noch einmal.
 Lies die Erklärungen und übe die schwierigen Themen gezielt.
 Weiter üben
 Zum Start
 Dieses Ergebnis ist kein Prüfungsnachweis.
-Deine erste Runde wartet auf dich.
-Starte mit ein paar Fragen. Dein Ergebnis erscheint anschließend hier.
+Noch keine Übungsrunden
+Nach der ersten Lernrunde werden deine Ergebnisse hier angezeigt.
 Dein Profil & Zugang
 App auf deinem Gerät hinzufügen
 Dein Lernzugang
@@ -207,7 +207,7 @@ Zugang gültig bis einschließlich
 Änderungen speichern
 Teilnehmer speichern
 Erklärung direkt nach jeder Frage
-In Ruhe nachdenken und dazulernen
+Ohne Zeitlimit üben
 {count} Beispielfragen aus allen Themen
 Antworten vor der Abgabe ändern
 Auswertung nach dem Abschluss
@@ -217,10 +217,10 @@ Zugang ansehen
 Gelbes Flurförderzeug und Gabelstapler auf dem Schulungsgelände
 Teilnehmer bei einer gemeinsamen Theorie-Schulung
 Deine Prüfungsvorbereitung
-Gut, dass du drangeblieben bist.
+Lernrunde abgeschlossen
 Erklärungen zu deinen Antworten
-Dein bisheriger Weg
-Du siehst, was du geschafft hast.
+Lernhistorie
+Bisherige Ergebnisse
 Hier findest du deine bisherigen Runden und Ergebnisse.
 Lernrunde
 Prüfungstraining
