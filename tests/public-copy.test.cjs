@@ -12,7 +12,8 @@ test('public install page uses clear iOS and Android instructions without redund
  assert.match(html,/Zum Home-Bildschirm/);
  assert.match(html,/App installieren/);
  assert.doesNotMatch(html,/kein (?:Play-)?Store-Download nötig|ohne (?:App Store|Google Play)|wie eine normale App starten/i);
- assert.match(html,/Nutzung im Browser/);
+ assert.doesNotMatch(html,/Nutzung im Browser|Aktualisierung der Lerninhalte|Aktualisierte Lerninhalte werden beim nächsten Start geladen|desktop-update-overview|desktop-live-indicator/);
+ assert.match(html,/Im Browser starten/);
 });
 test('learner interface describes actual results instead of implying confirmed practical safety',()=>{
  const learner=read('dist/app.js'),german=read('dist/i18n.js');
