@@ -46,8 +46,8 @@ Dein Lernstand
 Du hast bereits {learned} von {total} Fragen richtig beantwortet.
 {learned} von {total} Fragen richtig beantwortet
 Deine bisherigen Runden
-Auch unterwegs lernen.
-Einmal hinzufügen und direkt über das App-Symbol starten.
+Mobile Nutzung
+Der Lernraum kann auf iOS und Android zum Startbildschirm hinzugefügt werden.
 App hinzufügen
 Verstehen kommt vor Auswendiglernen.
 Wähle ein Thema und lerne mit kurzen Fragen und verständlichen Erklärungen.

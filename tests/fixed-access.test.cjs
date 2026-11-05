@@ -25,7 +25,7 @@ test('access controls load newest scripts',()=>{
  for(const p of ['dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
    const s=read(p);
    assert.match(s,/backend\.js\?v=5/);
-   assert.match(s,/portal\.js\?v=11/);
+   assert.match(s,/portal\.js\?v=12/);
  }
 });
 

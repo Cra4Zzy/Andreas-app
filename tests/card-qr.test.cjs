@@ -82,7 +82,7 @@ test('admin loads QR module before portal and never exports preview canvas',()=>
   const page=read('dist/verwaltung.html');
   assert.match(page,/vendor\/qrcode\.js\?v=2/);
   assert.match(page,/card-qr\.js\?v=1/);
-  assert.ok(page.indexOf('card-qr.js?v=1')<page.indexOf('portal.js?v=11'));
+  assert.ok(page.indexOf('card-qr.js?v=1')<page.indexOf('portal.js?v=12'));
   const portal=read('dist/portal.js');
   assert.match(portal,/AbbateCardQR\.render\(canvas\)/);
   assert.match(portal,/AbbateCardQR\.downloadPng\(\)/);
