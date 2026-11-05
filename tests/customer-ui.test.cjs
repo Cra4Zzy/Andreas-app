@@ -48,17 +48,17 @@ test('mobile website installation is ready without store links',()=>{
   assert.match(landing,/data-platform="android"/);
   assert.match(landing,/Zum Home-Bildschirm hinzufügen/);
   assert.match(landing,/Zum Startbildschirm hinzufügen/);
-  assert.match(landing,/App öffnen &amp; hinzufügen/);
-  assert.match(landing,/App öffnen &amp; installieren/);
+  assert.match(landing,/iOS · Safari/);
+  assert.match(landing,/Android · Chrome/);
   assert.match(landing,/class="pwa-steps"/);
   assert.equal((landing.match(/<details class="install-accordion">/g)||[]).length,2);
   assert.equal((landing.match(/<summary>/g)||[]).length,2);
   assert.equal((landing.match(/Installationsanleitung anzeigen/g)||[]).length,2);
   assert.doesNotMatch(landing,/<details class="install-accordion" open/);
-  assert.match(landing,/So fügst du die App hinzu/);
-  assert.match(landing,/So installierst du die App/);
+  assert.match(landing,/Einrichtung unter iOS/);
+  assert.match(landing,/Einrichtung unter Android/);
   assert.doesNotMatch(landing,/class="pwa-howto"/);
-  assert.doesNotMatch(landing,/>Lernraum öffnen<\/span>/);
+  assert.equal((landing.match(/<strong>Lernraum öffnen<\/strong>/g)||[]).length,2);
   assert.doesNotMatch(landing,/Download über (den App Store|Google Play)/);
   const login=read('dist/konto.html');
   assert.match(login,/rel="manifest"/);
@@ -67,11 +67,11 @@ test('mobile website installation is ready without store links',()=>{
 
 test('desktop auto-updates are only promised after a verified live-frontend release',()=>{
   const landing=read('index.html');
-  assert.match(landing,/Einmal installieren\. Neue Lerninhalte automatisch erhalten/);
+  assert.match(landing,/Aktualisierung der Lerninhalte/);
   assert.match(landing,/links\.desktopLiveFrontend === true/);
   assert.match(landing,/data-desktop-live hidden/);
-  assert.match(landing,/Änderungen am eigentlichen Windows-\/Mac-Programm können eine neue Installationsdatei erfordern/);
-  assert.match(landing,/ohne Installationsdatei/i);
+  assert.match(landing,/Bei Änderungen der Windows- oder macOS-Anwendung kann eine Programmaktualisierung erforderlich sein/);
+  assert.match(landing,/Nutzung im Browser/i);
   const pilot=JSON.parse(read('src-tauri/tauri.conf.json'));
   assert.equal(pilot.build.frontendDist,'https://app.gabelstaplerfahrschule-andreas.de/dist/');
   const workflow=read('.github/workflows/desktop-builds.yml');
