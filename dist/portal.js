@@ -37,10 +37,16 @@
   }
   function renderDetail(){document.querySelector('#account-detail').innerHTML=detail();}
   function admin(){
-    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Geschützter Verwaltungsbereich</span><h1>Konten im Blick.<br>Ergebnisse mit einem Klick.</h1><p>Freischalten, pausieren und tatsächliche Schulungen dokumentieren.</p></div><details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Dieser eine Code führt zur Anmeldung. Das angemeldete Konto bestimmt den persönlichen Schulungsverlauf.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code"></canvas><button class="secondary" id="download-qr">Gemeinsamen QR-Code als PNG speichern</button></details></section><div class="portal-actions portal-refresh"><button class="secondary" data-refresh>Konten aktualisieren</button><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div><section class="portal-stats" aria-label="Kontenübersicht"><div><span>Registrierte Konten</span><strong>${state.students.length}</strong></div><div><span>Warten auf Freischaltung</span><strong>${state.students.filter(p=>p.access==='pending').length}</strong></div><div><span>Aktive Zugänge</span><strong>${state.students.filter(M.access).length}</strong></div><div><span>Pausiert / abgelaufen</span><strong>${state.students.filter(p=>p.access==='paused'||(p.access==='active'&&!M.access(p))).length}</strong></div></section><div class="portal-admin-layout"><aside class="portal-sidebar"><label for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name oder E-Mail" value="${safe(search)}"><label class="portal-filter-label" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></aside><div id="account-detail" class="portal-detail">${detail()}</div></div>`;
+    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Geschützter Verwaltungsbereich</span><h1>Konten im Blick.<br>Ergebnisse mit einem Klick.</h1><p>Freischalten, pausieren und tatsächliche Schulungen dokumentieren.</p></div><details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Dieser eine Code führt zur Anmeldung. Das angemeldete Konto bestimmt den persönlichen Schulungsverlauf.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code" style="image-rendering:pixelated"></canvas><p class="portal-hint">Offizielle Anmeldung · Für alle Schülerkarten identisch · Keine persönlichen Daten im QR-Code.</p><a class="portal-text" href="${AbbateCardQR.target}" target="_blank" rel="noopener noreferrer">QR-Ziel im Browser prüfen ↗</a><button class="secondary" id="download-qr" type="button" disabled>QR-Code als scharfes PNG (2048 px) speichern</button><button class="secondary" id="download-qr-svg" type="button" disabled>QR-Code als SVG für den Druck speichern</button></details></section><div class="portal-actions portal-refresh"><button class="secondary" data-refresh>Konten aktualisieren</button><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div><section class="portal-stats" aria-label="Kontenübersicht"><div><span>Registrierte Konten</span><strong>${state.students.length}</strong></div><div><span>Warten auf Freischaltung</span><strong>${state.students.filter(p=>p.access==='pending').length}</strong></div><div><span>Aktive Zugänge</span><strong>${state.students.filter(M.access).length}</strong></div><div><span>Pausiert / abgelaufen</span><strong>${state.students.filter(p=>p.access==='paused'||(p.access==='active'&&!M.access(p))).length}</strong></div></section><div class="portal-admin-layout"><aside class="portal-sidebar"><label for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name oder E-Mail" value="${safe(search)}"><label class="portal-filter-label" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></aside><div id="account-detail" class="portal-detail">${detail()}</div></div>`;
     document.querySelector('#account-filter').value=filter;
     const canvas=document.querySelector('#portal-qr');
-    AbbateQR.toCanvas(canvas,globalThis.ABBATE_CONFIG.portalUrl,{width:240,margin:4,errorCorrectionLevel:'M'}).catch(()=>{canvas.hidden=true;});
+    AbbateCardQR.render(canvas).then(()=>{
+      document.querySelector('#download-qr').disabled=false;
+      document.querySelector('#download-qr-svg').disabled=false;
+    }).catch(()=>{
+      canvas.hidden=true;
+      notice('QR-Code konnte nicht erstellt werden. Bitte die Seite aktualisieren.');
+    });
   }
   function failure(error){root.innerHTML=`<section class="portal-empty"><h1>Gerade nicht erreichbar.</h1><p>${safe(B.message(error))}</p><button class="primary" data-refresh>Erneut versuchen</button><a class="portal-text" href="./konto.html">Zur Anmeldung</a></section>`;}
   // A recovery link must be confirmed by Supabase's PASSWORD_RECOVERY event.
@@ -153,7 +159,18 @@
     if(event.target.closest('[data-logout]')){await B.client.auth.signOut();location.replace('./konto.html');return;}
     if(view!=='admin'||!B.isStaff(state?.me))return;
     const person=event.target.closest('[data-person]');if(person){selected=person.dataset.person;document.querySelector('#account-list').innerHTML=peopleList();renderDetail();return;}
-    if(event.target.closest('#download-qr')){const canvas=document.querySelector('#portal-qr');if(!canvas||canvas.hidden){notice('QR-Code konnte nicht erzeugt werden.');return;}const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='abbate-gemeinsamer-kartencode.png';a.click();return;}
+    const qrButton=event.target.closest('#download-qr, #download-qr-svg');
+    if(qrButton){
+      if(qrButton.disabled)return;
+      qrButton.disabled=true;
+      try{
+        if(qrButton.id==='download-qr-svg')await AbbateCardQR.downloadSvg();
+        else await AbbateCardQR.downloadPng();
+        notice('QR-Code als druckfähige Datei gespeichert. Bitte einmal mit dem Handy testen.');
+      }catch(error){notice('QR-Code-Download fehlgeschlagen: '+error.message);}
+      finally{qrButton.disabled=false;}
+      return;
+    }
     if(event.target.closest('[data-delete-open]')){document.querySelector('#delete-dialog').showModal();return;}
     if(event.target.closest('[data-delete-cancel]')){document.querySelector('#delete-dialog').close();return;}
     const del=event.target.closest('[data-delete-confirm]');
