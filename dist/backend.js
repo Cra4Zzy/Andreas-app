@@ -9,12 +9,75 @@
    role:membership.role,name:profile?.display_name||'Teilnehmer',email:profile?.email||'',
    access:membership.access_status,until:membership.access_until,registeredAt:profile?.registered_at});
  let me=null;
+ // Administrators and trainers must reauthenticate after 30 minutes without user input.
+ // This is an additional browser safeguard; RLS remains the server authorization layer.
+ const STAFF_IDLE_MS=30*60*1000;
+ let staffIdle=null,staffIdleWired=false,staffIdleSigningOut=false;
+ function staffSessionId(session){
+   try{
+     const payload=session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+     return JSON.parse(atob(payload)).session_id||null;
+   }catch{return null;}
+ }
+ function idleRecord(){
+   if(!staffIdle)return null;
+   try{return JSON.parse(localStorage.getItem(staffIdle.key)||'null');}catch{return null;}
+ }
+ function idleWrite(at){
+   if(!staffIdle)return;
+   staffIdle.fallbackAt=at;
+   try{localStorage.setItem(staffIdle.key,JSON.stringify({session:staffIdle.session,at}));}catch{}
+ }
+ async function checkStaffIdle(){
+   if(!staffIdle||staffIdleSigningOut)return false;
+   const record=idleRecord();
+   const last=record?.session===staffIdle.session&&Number.isFinite(record.at)?record.at:staffIdle.fallbackAt;
+   if(!last||Date.now()-last<STAFF_IDLE_MS)return false;
+   staffIdleSigningOut=true;
+   try{await client.auth.signOut({scope:'local'});}
+   finally{location.replace('./konto.html?session=expired');}
+   return true;
+ }
+ function staffActivity(){
+   if(!staffIdle||staffIdleSigningOut)return;
+   const now=Date.now(),record=idleRecord();
+   const last=record?.session===staffIdle.session&&Number.isFinite(record.at)?record.at:staffIdle.fallbackAt;
+   // An interaction after a long absence must not revive an expired session.
+   if(last&&now-last>=STAFF_IDLE_MS){void checkStaffIdle();return;}
+   if(now-(staffIdle.lastWrite||0)<5000)return;
+   staffIdle.lastWrite=now;
+   idleWrite(now);
+ }
+ async function monitorStaffIdle(user,session){
+   if(!['admin','trainer'].includes(user.role)){staffIdle=null;return true;}
+   const sid=staffSessionId(session);
+   if(!sid)return true; // Supabase session IDs are present in current access tokens.
+   const key='abbate-staff-idle-v1:'+user.id;
+   if(!staffIdle||staffIdle.session!==sid||staffIdle.key!==key){
+     staffIdle={key,session:sid,fallbackAt:Date.now(),lastWrite:0};
+     const previous=idleRecord();
+     if(previous?.session!==sid||!Number.isFinite(previous?.at))idleWrite(Date.now());
+   }
+   if(await checkStaffIdle())return false;
+   if(!staffIdleWired){
+     staffIdleWired=true;
+     for(const event of ['pointerdown','keydown','touchstart','wheel'])
+       document.addEventListener(event,staffActivity,{passive:true});
+     document.addEventListener('visibilitychange',()=>{if(!document.hidden)void checkStaffIdle();});
+     addEventListener('focus',()=>{void checkStaffIdle();});
+     setInterval(()=>{void checkStaffIdle();},15000);
+     client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')staffIdle=null;});
+   }
+   return true;
+ }
  async function identity(){
    const {data:{session}}=await client.auth.getSession();if(!session){me=null;return null;}
    const {data:{user},error}=await client.auth.getUser();fail(error);
    const membership=await client.from('abbate_memberships').select('*').eq('user_id',user.id).single();fail(membership.error);
    const profile=await client.from('abbate_profiles').select('*').eq('user_id',user.id).eq('school_id',membership.data.school_id).single();fail(profile.error);
-   me=person(membership.data,profile.data);return me;
+   me=person(membership.data,profile.data);
+   if(!await monitorStaffIdle(me,session)){me=null;return null;}
+   return me;
  }
  async function state(){
    const user=await identity();if(!user)return {me:null,students:[],completions:[]};
