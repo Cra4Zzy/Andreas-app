@@ -52,7 +52,9 @@ test('only an active, live-session admin can grant or revoke admin role in own s
     await assert.rejects(setRole(learner,'trainer'),/Unsupported account role/);
     const promoted=(await setRole(learner,'admin')).rows[0];
     assert.deepEqual(promoted,{role:'admin',access_status:'active',access_until:null});
+    await db.exec('reset role'); // The protected audit table must remain unreadable to client sessions.
     const audit=await db.query("select actor_id,target_id,action from abbate_private.account_audit where action='role_changed' order by id desc limit 1");
+    await as(owner);
     assert.equal(audit.rows[0].actor_id,owner);
     assert.equal(audit.rows[0].target_id,learner);
     await assert.rejects(setRole(learner,'admin'),/already has this role/);
