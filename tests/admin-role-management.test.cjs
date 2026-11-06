@@ -71,7 +71,7 @@ test('only an active, live-session admin can grant or revoke admin role in own s
   } finally {await db.close();}
 });
 
-test('admin role controls require explicit confirmation and do not alter the user's own account',()=>{
+test('admin role controls require explicit confirmation and prevent self-changes',()=>{
  const portal=sql('dist/portal.js'),backend=sql('dist/backend.js');
  assert.match(portal,/p\.id!==state\.me\.id/);
  assert.match(portal,/roleConfirmed/);
