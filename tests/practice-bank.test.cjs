@@ -57,5 +57,5 @@ test('PWA loads offline question bank before the app and caches both',()=>{
  assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('app.js?v=27'));
  assert.ok(sw.includes('practice-bank.js?v=1'));
  assert.ok(sw.includes('app.js?v=27'));
- assert.ok(sw.includes('abbate-learning-v28'));
+ assert.ok(sw.includes('abbate-learning-v29'));
 });

@@ -86,10 +86,19 @@
      client.from('abbate_profiles').select('*').eq('school_id',user.school),
      client.from('abbate_completions').select('id,participant_id,kind,outcome,completed_at,reference,revoked_at,abbate_courses(title)').eq('school_id',user.school).order('completed_at',{ascending:false})
    ]);[members,profiles,records].forEach(r=>fail(r.error));
-   return {me:user,students:members.data.filter(m=>m.role==='learner'||m.user_id===user.id)
-      .map(m=>person(m,profiles.data.find(p=>p.user_id===m.user_id))),
+   return {me:user,students:members.data.map(m=>person(m,profiles.data.find(p=>p.user_id===m.user_id))),
      completions:records.data.map(r=>({id:r.id,student:r.participant_id,title:r.abbate_courses?.title||'Schulung',
        kind:r.kind==='refresher'?'instruction':r.kind,outcome:r.outcome,completedAt:r.completed_at,reference:r.reference,revokedAt:r.revoked_at}))};
+ }
+ async function setRole(id,role){
+   if(!me||me.role!=='admin')throw Error('Administrator access required');
+   if(!id||id===me.id||!['admin','learner'].includes(role))
+     throw Error('Invalid role change');
+   const r=await client.rpc('abbate_manage_member_role',{
+     p_school:me.school,p_target:id,p_new_role:role
+   });
+   fail(r.error);
+   return r.data;
  }
  async function setAccess(id,action){
    if(!['activate','extend','pause','resume'].includes(action))throw Error('Ungültige Zugangsaktion.');
@@ -136,12 +145,18 @@
    if(/email.*not authorized|email_address_not_authorized/i.test(text))return 'Der E-Mail-Versand wird noch eingerichtet. Bitte wende dich an die Fahrschule.';
    if(/rate limit|too many|over_email_send_rate_limit/i.test(text))return 'Zu viele Versuche. Bitte warte kurz und versuche es erneut.';
    if(/password.*(short|least|weak)|weak_password/i.test(text))return 'Bitte ein sicheres Passwort mit mindestens 12 Zeichen verwenden.';
+   if(/access is already active/i.test(text))return 'Der Zugang ist bereits aktiviert. Bitte aktualisiere die Kontenübersicht.';
+   if(/paused access is still valid/i.test(text))return 'Der pausierte Zugang ist noch gültig. Verwende „Zugang fortsetzen“.';
+   if(/account already has this role/i.test(text))return 'Dieses Konto besitzt die ausgewählte Rolle bereits.';
+   if(/administrators cannot change their own role/i.test(text))return 'Die eigene Administratorrolle kann hier nicht geändert werden.';
+   if(/account not found in this school|learner not found/i.test(text))return 'Das Konto wurde in der Fahrschule nicht gefunden. Bitte die Liste aktualisieren.';
+   if(/administrator access required/i.test(text))return 'Für diese Änderung ist ein aktives Administratorkonto erforderlich. Bitte die Anmeldung prüfen.';
    if(/row-level|permission|42501|Staff access|Administrator access/i.test(text))return 'Für diese Aktion fehlt die Berechtigung.';
    if(/fetch|network/i.test(text))return 'Keine Serververbindung. Bitte Internetverbindung prüfen.';
    if(/sign in again/i.test(text))return 'Bitte melde dich zur Bestätigung erneut an.';
    return 'Die Anfrage konnte nicht abgeschlossen werden. Bitte neu laden oder die Fahrschule kontaktieren.';
  }
- globalThis.ABBATE_BACKEND={client,identity,state,setAccess,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,message,
+ globalThis.ABBATE_BACKEND={client,identity,state,setRole,setAccess,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,message,
    isStaff:p=>!!p&&['admin','trainer'].includes(p.role)&&p.access==='active'&&(!p.until||p.until>=globalThis.ABBATE_ACCOUNTS.today()),
    get me(){return me;}};
 })();
