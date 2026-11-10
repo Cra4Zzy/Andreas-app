@@ -17,6 +17,13 @@ test('successful registration prominently explains both confirmation and approva
 });
 
 test('rate-limit feedback handles the actual Supabase cooldown error',()=>{
+  const functionBody=backend.match(/ function message\\(error\\)\\{[\\s\\S]*?\\n \\}/)?.[0];
+  assert.ok(functionBody,'Error-message function must exist');
+  const message=new Function(functionBody+';return message;')();
+  const feedback=message({code:'over_email_send_rate_limit',message:'For security purposes, you can only request this after 20 seconds.'});
+  assert.match(feedback,/20 Sekunden/);
+  assert.match(feedback,/Du musst dich nicht erneut registrieren/);
+
   assert.match(backend,/over_email_send_rate_limit/);
   assert.match(backend,/you can only request this after/);
   assert.match(backend,/seconds/);
