@@ -85,3 +85,27 @@
 @media(max-width:700px){.portal-header{gap:9px 12px;padding:12px 16px}.portal-brand img{height:42px;width:31px}.portal-brand>span{font-size:27px}.portal-brand small{font-size:12px}.portal-language-trigger{height:40px;min-width:76px;padding:6px 10px}.portal-language-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:0 18px 18px}.portal-dialog-header{padding:23px 18px 8px}.portal-search-label{margin:12px 18px 6px}.portal-body .portal-language-dialog input[type=search]{width:calc(100% - 36px);margin:0 18px 14px}.portal-language-disclaimer{padding:14px 18px 18px}}
 @media(max-width:410px){.portal-primary-nav a{font-size:13px;padding:7px 10px}.portal-language-grid{grid-template-columns:1fr}.portal-language-dialog{width:calc(100% - 16px);max-height:92dvh}}
 @media(prefers-reduced-motion:reduce){.portal-language-option,.portal-primary-nav a{transition:none!important}.portal-language-option:hover{transform:none}}
+
+
+/* Clearly visible post-registration confirmation: no transient success toast. */
+.portal-registration-complete{max-width:800px;margin:clamp(24px,6vw,70px) auto;padding:clamp(26px,5vw,48px);background:#fffefa;border:1px solid #dce1d6;border-radius:24px;box-shadow:0 22px 70px #14363b14}
+.portal-registration-complete__icon{display:grid;place-items:center;width:64px;height:64px;margin-bottom:20px;border-radius:18px;background:#dfece2;color:#206046;font:800 35px/1 Barlow,sans-serif}
+.portal-registration-complete .portal-eyebrow{font-size:14px;font-weight:750;letter-spacing:.05em;text-transform:uppercase;color:#2d7153}
+.portal-registration-complete h1{font:800 clamp(34px,5vw,54px)/1.08 Barlow,'Segoe UI',sans-serif;letter-spacing:-.05em;color:#1b3e45;margin:13px 0 20px}
+.portal-registration-complete h1:focus{outline:none}
+.portal-registration-complete__lead{font-size:clamp(18px,2.4vw,21px);line-height:1.5;color:#344b4f;max-width:660px;margin:0 0 18px}
+.portal-registration-complete__address{padding:14px 18px;background:#f2f4ed;border:1px solid #e1e6dc;border-radius:12px;font-size:16px;line-height:1.5;overflow-wrap:anywhere;margin:0 0 27px}
+.portal-registration-complete__steps{list-style:none;padding:0;margin:0 0 28px;display:grid;gap:13px}
+.portal-registration-complete__steps li{display:flex;align-items:flex-start;gap:14px;padding:15px 17px;border:1px solid #e1e5dd;border-radius:13px;background:#fafaf5}
+.portal-registration-complete__steps li.current{background:#fff6db;border-color:#e4c86e}
+.portal-registration-complete__step-num{display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:50%;background:#e5e9e4;color:#405a57;font:750 16px/1 Barlow,'Segoe UI',sans-serif}
+.portal-registration-complete__steps li.done .portal-registration-complete__step-num{background:#d8eddb;color:#1d6a44}
+.portal-registration-complete__steps li.current .portal-registration-complete__step-num{background:#f1c64b;color:#293c3d}
+.portal-registration-complete__steps strong,.portal-registration-complete__steps li span:last-child{display:block}
+.portal-registration-complete__steps strong{font-size:17px;color:#193942;line-height:1.35}
+.portal-registration-complete__steps li div>span{font-size:15px;color:#5f6d68;margin-top:4px}
+.portal-registration-complete__help{padding:18px 21px;border-left:4px solid #e0b641;background:#fff7e7;border-radius:0 12px 12px 0;margin-bottom:25px}
+.portal-registration-complete__help>strong{display:block;font-size:17px}
+.portal-registration-complete__help p{font-size:15px;line-height:1.55;margin:6px 0 0;color:#53625e}
+.portal-registration-complete>.primary{text-decoration:none;max-width:100%;text-align:center}
+@media(max-width:700px){.portal-registration-complete{margin:20px auto;padding:24px 19px;border-radius:18px}.portal-registration-complete__steps li{padding:13px 12px;gap:11px}.portal-registration-complete__lead{font-size:18px}.portal-registration-complete>.primary{width:100%}}
