@@ -144,7 +144,7 @@
    if(/email not confirmed/i.test(text))return 'Bitte bestätige zuerst deine E-Mail-Adresse.';
    if(/email.*not authorized|email_address_not_authorized/i.test(text))return 'Der E-Mail-Versand wird noch eingerichtet. Bitte wende dich an die Fahrschule.';
    if(error?.code==='over_email_send_rate_limit'||/over_email_send_rate_limit|you can only request this after/i.test(text)){
-     const seconds=Number(text.match(/after\\s+(\\d+)\\s+seconds?/i)?.[1]||0);
+     const seconds=Number(text.match(/after\s+(\d+)\s+seconds?/i)?.[1]||0);
      return (seconds>0?'Bitte warte noch '+seconds+' Sekunden, bevor du eine weitere E-Mail anforderst. ':'Bitte warte kurz, bevor du eine weitere E-Mail anforderst. ')+'Falls du dich eben registriert hast, prüfe zuerst dein E-Mail-Postfach und den Spamordner. Du musst dich nicht erneut registrieren.';
    }
    if(/rate limit|too many|over_email_send_rate_limit/i.test(text))return 'Zu viele Versuche. Bitte warte kurz und versuche es erneut.';
