@@ -129,3 +129,31 @@
 
 /* The same searchable language choices as the account and records shell. */
 .language-search{display:block;margin:15px 0 16px}.language-search input{display:block;width:100%;max-width:100%;min-height:46px;border:1px solid #d2d6c9;border-radius:12px;background:#fffefa;color:#192e36;padding:10px 14px;font-size:16px}.language-search input:focus-visible{outline:3px solid #d9b34c;outline-offset:2px}.language-option[hidden]{display:none!important}
+
+/* Dedicated, accessible practice-exam simulation and targeted error replay */
+.quiz-shell-exam{max-width:960px;margin-inline:auto}
+.quiz-shell-exam .quiz-top{margin-bottom:18px}
+.mock-exam-banner{display:flex;align-items:center;gap:18px;background:#193a41;color:#f8f7f1;border:1px solid #31545c;border-radius:17px;padding:22px 25px;margin-bottom:16px;box-shadow:0 16px 36px #152f3c14}
+.mock-exam-seal{display:grid;place-items:center;flex:0 0 50px;height:50px;border:1px solid #ddbe70;border-radius:12px;background:#2e5050;color:#f1d08b}
+.mock-exam-seal svg{height:26px;width:26px}
+.mock-exam-banner>div:nth-child(2){flex:1;min-width:0}
+.mock-exam-eyebrow{display:block;font-size:11px;font-weight:700;letter-spacing:.15em;color:#f0c75e;margin-bottom:5px}
+.mock-exam-banner strong{display:block;font:700 clamp(22px,3vw,32px)/1.15 Barlow,'Segoe UI',sans-serif}
+.mock-exam-banner small{display:block;color:#cad7d2;font-size:13px;margin-top:5px}
+.mock-exam-points{display:grid;gap:2px;justify-items:center;padding:9px 6px 9px 18px;border-left:1px solid #4f6d71}
+.mock-exam-points strong{font-size:38px;line-height:1.05;color:#f8ca62}
+.mock-exam-points span{font-size:10px;letter-spacing:.12em;font-weight:700;color:#d6e0d9}
+.mock-exam-status{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 17px;margin-bottom:15px;border-radius:10px;background:#ecf0ea;font-size:14px;color:#355352}
+.mock-exam-status strong{font-weight:800}
+.quiz-shell-exam .question-card{border:1px solid #d4ded4;box-shadow:0 14px 32px #102f3b10;border-radius:18px}
+.quiz-shell-exam .answer.selected{outline:2px solid #b89339;outline-offset:1px}
+.quiz-shell-exam .quiz-progress{margin-top:0}
+.mock-exam-summary{display:flex;align-items:baseline;gap:10px 16px;flex-wrap:wrap;margin:11px 0 18px;padding:15px 17px;border-radius:12px;background:#e7eee6}
+.mock-exam-summary strong{font:800 29px Barlow,sans-serif;color:#1d5340}
+.mock-exam-summary span{font-size:15px;font-weight:600}
+.mock-exam-summary small{flex-basis:100%;font-size:12px;color:#5b6f61}
+.repeat-wrong-button{display:inline-flex;gap:9px;align-items:center}
+.result-perfect{display:inline-flex;align-items:center;gap:9px;color:#216241;font-weight:700}
+.review-run-intro{font-size:14px;color:#667671;padding:2px 3px 12px}
+@media(max-width:600px){.mock-exam-banner{gap:11px;padding:15px}.mock-exam-seal{flex-basis:39px;height:39px}.mock-exam-banner strong{font-size:20px}.mock-exam-points{padding-left:9px}.mock-exam-points strong{font-size:28px}.mock-exam-status{font-size:13px;line-height:1.45}.mock-exam-summary{padding:13px}.repeat-wrong-button{width:100%}}
+@media(prefers-reduced-motion:reduce){.mock-exam-banner,.quiz-shell-exam .question-card{transition:none}}
