@@ -21,7 +21,7 @@ test('learner interface describes actual results instead of implying confirmed p
    assert.ok(!learner.includes(bad),'Outdated learner wording: '+bad);
    assert.ok(!german.includes(bad),'Outdated German catalogue entry: '+bad);
  }
- assert.match(learner,/Alle Fragen richtig beantwortet/);
+ assert.match(learner,/Du hast alle Fragen dieser Runde richtig beantwortet/);
  assert.match(learner,/Dieses Ergebnis ist kein Prüfungsnachweis/);
  assert.match(german,/Alle Fragen richtig beantwortet/);
 });

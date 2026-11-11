@@ -39,14 +39,15 @@ const QUESTIONS = [
   {id:'unter-last',topic:'lasten',title:'Eine Last ist angehoben. Was gilt für den Bereich darunter?',context:'Eine Person möchte direkt unter der angehobenen Last hindurchgehen.',answers:['Der Bereich darunter bleibt frei; dort darf sich niemand aufhalten.','Ein kurzer Aufenthalt ist in Ordnung, wenn die Last stillsteht.','Der Aufenthalt ist erlaubt, wenn die Person einen Helm trägt.'],correct:0,why:'Unter angehobenen Lasten darf sich niemand aufhalten. Auch ein Helm macht diesen Bereich nicht sicher.'},
   {id:'sicht',topic:'betrieb',title:'Die Last versperrt dir die Sicht auf den Fahrweg. Wie gehst du vor?',context:'Du musst den Fahrweg und mögliche Gefahren zuverlässig erkennen können.',answers:['Ich fahre besonders schnell durch den unübersichtlichen Bereich.','Ich sorge für ausreichende Sicht oder lasse mich nach betrieblicher Vorgabe einweisen.','Ich hupe und fahre ohne freie Sicht weiter.'],correct:1,why:'Du brauchst ausreichende Sicht oder eine sichere Einweisung. Hupen ersetzt beides nicht.'},
   {id:'verlassen',topic:'betrieb',title:'Du verlässt das Fahrzeug. Was ist dabei wichtig?',context:'Dein Arbeitsschritt ist beendet und du steigst aus.',answers:['Der nächste Fahrer wird das Fahrzeug schon sichern.','Es reicht, wenn das Fahrzeug gerade stillsteht.','Ich sichere es gegen unbeabsichtigtes Bewegen und unbefugtes Benutzen.'],correct:2,why:'Vor dem Verlassen muss das Fahrzeug gegen unbeabsichtigtes Bewegen und unbefugtes Benutzen gesichert werden.'},
-  ...PRACTICE_BANK.questions
+  ...PRACTICE_BANK.questions,
+  ...(globalThis.ABBATE_PRACTICE_EXPANSION?.questions||[])
 ];
 const TOPICS = [
   {id:'grundlagen',name:'Fahrzeug & Verantwortung',description:'Gut vorbereitet starten: Was du vor dem Einsatz wissen und prüfen solltest.',short:'Dein sicherer Einstieg',icon:'shield',color:''},
   {id:'lasten',name:'Lasten & Grenzen',description:'Lasten richtig einschätzen und die Grenzen des Fahrzeugs beachten.',short:'Mit Überblick bewegen',icon:'file',color:'sand'},
   {id:'betrieb',name:'Sicher im Arbeitsalltag',description:'Sicht, Zusammenarbeit und ein sicher abgestelltes Fahrzeug.',short:'Auf dich und andere achten',icon:'users',color:'blue'}
 ];
-const COURSES=[{"id":"gabelstapler","name":"Gabelstapler","desc":"Fahrbetrieb, Fahrzeugcheck und Lastaufnahme. 52 Originalfragen ohne bestätigte Lösungen; zusätzlich bewertete Übungsaufgaben.","sub":"52 originale Lernfragen","icon":"shield","color":"","active":true},{"id":"hebebuehnen","name":"Hebebühnen","desc":"Sicheres Arbeiten mit Hubarbeitsbühnen: Vorbereitung, Standsicherheit und Bedienung.","sub":"Lernmaterial folgt","icon":"users","color":"blue","active":false},{"id":"krane","name":"Krane","desc":"Kranbetrieb, Signale, Arbeitsbereich und sichere Lastbewegungen.","sub":"Lernmaterial folgt","icon":"file","color":"sand","active":false},{"id":"lasten","name":"Anschlagen von Lasten","desc":"Lasten richtig anschlagen, Anschlagmittel beurteilen und sicher kommunizieren.","sub":"Lernmaterial folgt","icon":"book","color":"","active":false},{"id":"bagger","name":"Erdbaumaschinen & Bagger","desc":"Bedienung von Erdbaumaschinen, Sicherheitsabstände und Gefahrenbereiche.","sub":"Lernmaterial folgt","icon":"shield","color":"blue","active":false}].map(course=>({...course,active:true,sub:course.id==='gabelstapler'?'52 Originalfragen · 21 Übungsfragen':PRACTICE_BANK.questions.filter(q=>q.course===course.id).length+' Übungsfragen'}));
+const COURSES=[{"id":"gabelstapler","name":"Gabelstapler","desc":"Fahrbetrieb, Fahrzeugcheck und Lastaufnahme. 52 Originalfragen ohne bestätigte Lösungen; zusätzlich bewertete Übungsaufgaben.","sub":"52 originale Lernfragen","icon":"shield","color":"","active":true},{"id":"hebebuehnen","name":"Hebebühnen","desc":"Sicheres Arbeiten mit Hubarbeitsbühnen: Vorbereitung, Standsicherheit und Bedienung.","sub":"Lernmaterial folgt","icon":"users","color":"blue","active":false},{"id":"krane","name":"Krane","desc":"Kranbetrieb, Signale, Arbeitsbereich und sichere Lastbewegungen.","sub":"Lernmaterial folgt","icon":"file","color":"sand","active":false},{"id":"lasten","name":"Anschlagen von Lasten","desc":"Lasten richtig anschlagen, Anschlagmittel beurteilen und sicher kommunizieren.","sub":"Lernmaterial folgt","icon":"book","color":"","active":false},{"id":"bagger","name":"Erdbaumaschinen & Bagger","desc":"Bedienung von Erdbaumaschinen, Sicherheitsabstände und Gefahrenbereiche.","sub":"Lernmaterial folgt","icon":"shield","color":"blue","active":false}].map(course=>({...course,active:true,sub:course.id==='gabelstapler'?'52 Originalfragen · '+courseQuestions(course.id).length+' Übungsfragen':courseQuestions(course.id).length+' Übungsfragen'}));
 // Every qualification has its own materials. Never reuse forklift content for cranes or earthmovers.
 let activeCourseId='gabelstapler';
 const courseQuestions=id=>QUESTIONS.filter(q=>(q.course||'gabelstapler')===id);
@@ -189,17 +190,20 @@ function examStart() {
   return heading(name+' · Prüfungsvorbereitung','Prüfungsvorbereitung','Wähle eine Übungsform.',accessLine())+
   '<div class="mode-grid"><section class="mode-card"><span class="mode-icon">'+icon('book')+'</span><h2>Mit Rückmeldung üben</h2><p>Nach jeder Frage erhältst du eine Erklärung.</p><div class="mode-features"><span>'+icon('check')+'Erklärung direkt nach jeder Frage</span><span>'+icon('check')+'Ohne Zeitlimit üben</span><span>'+icon('check')+count+' Übungsfragen</span></div><button class="secondary" data-action="start-learn" data-course="'+esc(activeCourseId)+'">Lernrunde starten '+icon('arrow')+'</button></section><section class="mode-card focus"><span class="mode-icon">'+icon('file')+'</span><h2>Den Ablauf kennenlernen</h2><p>Beantworte zunächst alle Fragen. Die Auswertung erfolgt nach dem Abschluss.</p><div class="mode-features"><span>'+icon('check')+'Antworten vor der Abgabe ändern</span><span>'+icon('check')+'Auswertung nach dem Abschluss</span><span>'+icon('check')+count+' Übungsfragen · ohne Zeitlimit</span></div><button class="primary gold" data-action="start-exam" data-course="'+esc(activeCourseId)+'">Prüfungstraining starten '+icon('arrow')+'</button></section></div><p class="exam-disclaimer">Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt. Die fachliche Freigabe der neuen Übungsfragen durch die Fahrschule steht noch aus.</p>';
 }
-function startRun(mode,topicId,courseId) {
+function startRun(mode,topicId,courseId,onlyIds) {
   if(courseId&&COURSES.some(c=>c.id===courseId))activeCourseId=courseId;
   if(!active(student())) { access(); return; }
   if(run) { modal('Eine Runde läuft noch',`<p>Du kannst deine laufende Runde fortsetzen oder sie beenden und neu anfangen.</p><div class="modal-actions"><button class="primary" data-action="continue-run">Weiterlernen ${icon('arrow')}</button><button class="text-link" data-action="replace-run" data-mode="${mode}" data-topic="${topicId||''}" data-course="${activeCourseId}">Neu beginnen</button></div>`); return; }
-  run={mode,course:activeCourseId,ids:courseQuestions(activeCourseId).filter(q=>!topicId||q.topic===topicId).map(q=>q.id),index:0,answers:{},checked:[],at:new Date().toISOString()};
+  const baseIds=courseQuestions(activeCourseId).filter(q=>!topicId||q.topic===topicId).map(q=>q.id);
+  const ids=Array.isArray(onlyIds)?[...new Set(onlyIds)].filter(id=>baseIds.includes(id)):baseIds;
+  if(!ids.length){toast('Für diese Runde sind keine Fragen vorhanden.');return;}
+  run={mode,course:activeCourseId,ids,index:0,answers:{},checked:[],at:new Date().toISOString(),retry:Array.isArray(onlyIds)};
   close(); go('uebung');
 }
 function quizView() {
   if(!run)return examStart();
   const q=question(run.ids[run.index]), t=topic(q.topic)||COURSES.find(c=>c.id===q.course), chosen=run.answers[q.id], checked=run.checked.includes(q.id), correct=chosen===q.correct;
-  return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${t.name}</span><span>${run.index+1} / ${run.ids.length}</span></div><h1>${q.title}</h1><p class="question-context">${q.context}</p><div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${answer}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${q.why}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
+  return `<div class="quiz-shell ${run.mode==='exam'?'quiz-shell-exam':''}"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.mode==='learn'?(run.retry?'Fehlertraining':'Deine Lernrunde'):'Prüfungssimulation'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div>${run.mode==='exam'?`<section class="mock-exam-banner" aria-label="Prüfungsübersicht"><span class="mock-exam-seal">${icon('file')}</span><div><span class="mock-exam-eyebrow">ABBATE · THEORIE-TESTLAUF</span><strong>${esc(courseLabel(run.course))}</strong><small>Übungssimulation – kein offizieller Prüfungsnachweis</small></div><div class="mock-exam-points"><span>MAXIMAL</span><strong>${run.ids.length}</strong><span>PUNKTE</span></div></section><div class="mock-exam-status"><strong>Aufgabe ${run.index+1} / ${run.ids.length}</strong><span>${run.ids.filter(id=>run.answers[id]!==undefined).length} beantwortet · 1 Punkt je richtige Antwort</span></div>`:`<p class="review-run-intro">${run.retry?'Deine Fehler von der vorherigen Runde – jetzt gezielt wiederholen.':'Antworten lernen und direkt überprüfen.'}</p>`}<div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${t.name}</span><span>${run.index+1} / ${run.ids.length}</span></div><h1>${q.title}</h1><p class="question-context">${q.context}</p><div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${answer}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${q.why}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
 }
 function rememberCorrect(id) { const list=data.mastered[student().id]||[]; if(!list.includes(id))list.push(id); data.mastered[student().id]=list; }
 let completingRun=false;
@@ -221,10 +225,44 @@ async function completeRun() {
     toast('Ergebnis noch nicht gespeichert. Die Runde bleibt erhalten – bitte Verbindung prüfen und erneut abschließen.');
   }finally{completingRun=false;}
 }
-function reviewCards(result) { return (result.ids||[]).map(id=>{const q=question(id);if(!q)return '';const choice=result.answers[id],correct=choice===q.correct;return `<article class="review-card ${correct?'':'wrong'}"><header>${icon(correct?'check':'help')}<h3>${q.title}</h3></header><p>${q.why}</p><p class="your-answer">Deine Antwort: ${choice===undefined?'Nicht beantwortet':esc(q.answers[choice])}</p></article>`;}).join(''); }
+function resultBreakdown(result){
+  const all=(result.ids||[]).map(id=>({id,q:question(id),choice:result.answers?.[id]})).filter(item=>item.q);
+  return {
+    all,
+    wrong:all.filter(item=>item.choice!==item.q.correct),
+    right:all.filter(item=>item.choice===item.q.correct)
+  };
+}
+function reviewCards(result) {
+  const {wrong,right}=resultBreakdown(result);
+  const cards=items=>items.map(({id,q,choice},index)=>{
+    const answer=choice===undefined?'Nicht beantwortet':(q.answers[choice]??'Ungültige Antwort');
+    return '<details class="compact-review-item" data-question-id="'+esc(id)+'"><summary><span class="compact-review-number">'+String(index+1).padStart(2,'0')+'</span><span class="compact-review-title">'+esc(q.title)+'</span>'+icon('arrow')+'</summary><div class="compact-review-body"><p class="compact-review-label">Deine Antwort</p><p class="compact-review-choice">'+esc(answer)+'</p><p class="compact-review-label">Richtige Antwort</p><p class="compact-review-correct">'+esc(q.answers[q.correct])+'</p><p class="compact-review-label">Erklärung</p><p>'+esc(q.why)+'</p></div></details>';
+  }).join('');
+  return '<section class="compact-review" aria-label="Fehleranalyse"><div class="compact-review-heading"><div><span class="overline">DEINE FEHLERANALYSE</span><h2>'+wrong.length+' '+(wrong.length===1?'Frage':'Fragen')+' zum Wiederholen</h2></div><span class="compact-review-count">'+wrong.length+' offen</span></div>'+
+    (wrong.length?'<div class="compact-review-list">'+cards(wrong)+'</div>':'<p class="compact-review-empty">'+icon('check')+'Du hast alle Fragen dieser Runde richtig beantwortet.</p>')+
+    (right.length?'<details class="compact-review-correct-group"><summary>'+icon('check')+' '+right.length+' richtig beantwortete '+(right.length===1?'Frage':'Fragen')+' anzeigen '+icon('arrow')+'</summary><div class="compact-review-list compact-review-list-right">'+cards(right)+'</div></details>':'')+
+    '</section>';
+}
 function resultView() {
   if(!latestResult)return results(); const r=latestResult;
-  return heading(esc(courseLabel(r.course))+' · Lernrunde abgeschlossen','Deine Auswertung','Prüfe deine Antworten und die zugehörigen Erläuterungen.')+`<div class="result-layout"><section class="result-main"><span class="overline">${r.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><div class="result-mark">${r.score}<span> / ${r.total}</span></div><h2>${r.score===r.total?'Alle Fragen richtig beantwortet.':'Ergebnis deiner Übungsrunde'}</h2><p>${r.score===r.total?'Alle Antworten richtig. Wiederhole die Themen später noch einmal.':'Lies die Erklärungen und übe die schwierigen Themen gezielt.'}</p><div class="result-actions"><button class="primary" data-action="start-learn">Weiter üben ${icon('arrow')}</button><a class="secondary" href="#start">Zum Start</a></div><p class="form-caption">Dieses Ergebnis ist kein Prüfungsnachweis.</p></section><section class="review-list" aria-label="Erklärungen zu deinen Antworten">${reviewCards(r)}</section></div>`;
+  const {wrong,right}=resultBreakdown(r);
+  const wrongIds=wrong.map(item=>item.id);
+  const percentage=r.total?Math.round(100*r.score/r.total):0;
+  const label=r.mode==='exam'?'Prüfungssimulation':'Lernrunde';
+  return heading(esc(courseLabel(r.course))+' · '+label+' abgeschlossen','Deine Auswertung','Dein Ergebnis auf einen Blick. Öffne nur die Fragen, die du genauer ansehen möchtest.')+
+    '<div class="compact-result-page"><section class="compact-result-summary" aria-label="Ergebnisübersicht">'+
+    '<div class="compact-result-intro"><span class="compact-result-kicker">ABBATE · '+label+'</span><h2>'+esc(courseLabel(r.course))+'</h2><p>Auswertung deiner abgeschlossenen Runde</p></div>'+
+    '<div class="compact-result-metrics">'+
+    '<div class="compact-result-stat compact-result-stat-main"><strong>'+percentage+' %</strong><span>Ergebnis</span></div>'+
+    '<div class="compact-result-stat"><strong>'+right.length+'</strong><span>Richtig</span></div>'+
+    '<div class="compact-result-stat"><strong>'+wrong.length+'</strong><span>Wiederholen</span></div>'+
+    '</div><div class="compact-result-meter" role="progressbar" aria-label="Richtig beantwortete Fragen" aria-valuemin="0" aria-valuemax="'+r.total+'" aria-valuenow="'+right.length+'"><span style="width:'+percentage+'%"></span></div>'+
+    '<div class="compact-result-footnote">'+r.score+' von '+r.total+' Punkten · '+(wrong.length?'Wiederhole gezielt deine Fehler.':'Alles richtig beantwortet!')+'</div>'+
+    '<div class="compact-result-actions">'+(wrongIds.length?'<button class="primary compact-retry-cta" data-action="retry-wrong">'+icon('book')+' '+wrongIds.length+' '+(wrongIds.length===1?'Fehler':'Fehler')+' erneut üben '+icon('arrow')+'</button>':'<p class="result-perfect">'+icon('check')+'Keine Fehler – stark gemacht!</p>')+
+    '<button class="secondary" data-action="start-learn" data-course="'+esc(r.course)+'">Neue vollständige Runde</button><a class="compact-result-back" href="#start">Zur Übersicht</a></div>'+
+    '<p class="compact-result-disclaimer">'+(r.mode==='exam'?'Dies ist eine Übungssimulation ohne offizielle Bestehensgrenze. ':'')+'Dieses Ergebnis ist kein Prüfungsnachweis.</p></section>'+
+    reviewCards(r)+'</div>';
 }
 function results() {
   const list=data.results.filter(r=>r.student===student().id).slice().reverse();
@@ -287,6 +325,13 @@ document.addEventListener('click',async event=>{
   else if(action==='topic')topicInfo(el.dataset.topic);
   else if(action==='start-learn')startRun('learn',el.dataset.topic,el.dataset.course);
   else if(action==='start-exam')startRun('exam',undefined,el.dataset.course);
+  else if(action==='retry-wrong'){
+    const source=latestResult;
+    if(!source)return;
+    const wrongIds=(source.ids||[]).filter(id=>{const q=question(id);return q&&(q.course||'gabelstapler')===source.course&&source.answers[id]!==q.correct;});
+    if(!wrongIds.length){toast('Keine falschen Antworten in dieser Runde.');return;}
+    startRun('learn',undefined,source.course,wrongIds);
+  }
   else if(action==='continue-run'){close();go('uebung');}
   else if(action==='replace-run'){run=null;startRun(el.dataset.mode,el.dataset.topic,el.dataset.course);}
   else if(action==='answer'&&run){const q=question(run.ids[run.index]);if(!run.checked.includes(q.id)){run.answers[q.id]=Number(el.dataset.index);const y=window.scrollY;render();window.scrollTo({top:y,behavior:'auto'});document.querySelector(`[data-action="answer"][data-index="${el.dataset.index}"]`)?.focus({preventScroll:true});}}

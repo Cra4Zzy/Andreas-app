@@ -27,7 +27,7 @@ test('customer portal remains accessible to authenticated users',()=>{
   for(const p of ['dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
     const text=read(p);
     assert.match(text,/id="portal-content"/,p);
-    assert.match(text,/portal\.js\?v=13/,p);
+    assert.match(text,/portal\.js\?v=14/,p);
     assert.doesNotMatch(text,/class="portal-preview"/,p);
   }
 });
@@ -83,12 +83,12 @@ test('download cards retain live download logic without redundant update callout
 });
 
 test('cached PWA shell uses current app JavaScript and CSS',()=>{
-  assert.match(read('dist/index.html'),/app\.js\?v=27/);
-  assert.match(read('dist/sw.js'),/app\.js\?v=27/);
-  assert.match(read('dist/sw.js'),/styles\.css\?v=16/);
+  assert.match(read('dist/index.html'),/app\.js\?v=29/);
+  assert.match(read('dist/sw.js'),/app\.js\?v=29/);
+  assert.match(read('dist/sw.js'),/styles\.css\?v=18/);
   assert.match(read('dist/sw.js'),/practice-bank\.js\?v=1/);
   assert.match(read('dist/index.html'),/practice-bank\.js\?v=1/);
-  assert.match(read('dist/sw.js'),/abbate-learning-v29/);
+  assert.match(read('dist/sw.js'),/abbate-learning-v32/);
   const html=read('dist/index.html'),worker=read('dist/sw.js');
   for(const file of ['i18n-ru.js?v=1','i18n-uk.js?v=1','i18n-modern.js?v=2','i18n.js?v=12']){
     assert.ok(html.includes(file),'HTML missing '+file);
