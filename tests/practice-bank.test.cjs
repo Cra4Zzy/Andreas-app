@@ -8,15 +8,16 @@ const names=['gabelstapler','hebebuehnen','krane','lasten','bagger'];
 const ctx={};
 ctx.globalThis=ctx;
 vm.runInNewContext(read('dist/practice-bank.js'),ctx,{filename:'dist/practice-bank.js'});
+vm.runInNewContext(read('dist/practice-expansion.js'),ctx,{filename:'dist/practice-expansion.js'});
 const bank=ctx.ABBATE_PRACTICE_BANK;
 
 test('new questions populate ONLY the five existing qualification areas',()=>{
  assert.deepEqual(Object.keys(bank.courses).sort(),names.slice().sort());
- assert.equal(bank.questions.length,75);
+ assert.equal(bank.questions.length,125);
  const seen=new Set();
  for(const name of names){
    const questions=bank.questions.filter(q=>q.course===name);
-   assert.equal(questions.length,15,name+' needs 15 original practice questions');
+   assert.equal(questions.length,25,name+' needs 25 DGUV-based practice questions');
    const ref=bank.courses[name];
    assert.match(ref.url,/^https:\/\/(publikationen\.dguv\.de)\//);
    assert.ok(ref.source.includes('DGUV'));
@@ -54,8 +55,12 @@ test('existing course list is preserved and new exercises use its course-specifi
 
 test('PWA loads offline question bank before the app and caches both',()=>{
  const html=read('dist/index.html'),sw=read('dist/sw.js');
- assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('app.js?v=29'));
+ assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('app.js?v=30'));
  assert.ok(sw.includes('practice-bank.js?v=1'));
- assert.ok(sw.includes('app.js?v=29'));
- assert.ok(sw.includes('abbate-learning-v33'));
+ assert.ok(html.includes('practice-expansion.js?v=1'));
+ assert.ok(sw.includes('practice-expansion.js?v=1'));
+ assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('practice-expansion.js?v=1'));
+ assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('app.js?v=30'));
+ assert.ok(sw.includes('app.js?v=30'));
+ assert.ok(sw.includes('abbate-learning-v34'));
 });
