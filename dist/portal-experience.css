@@ -1,0 +1,70 @@
+/* Abbate portal — consistent with the learner experience without changing auth or admin logic. */
+.portal-body{background:#f5f5f0;color:#19363b}
+.portal-header{position:relative;max-width:1500px;padding:17px clamp(20px,4.2vw,68px);border-bottom:1px solid #dfe7df;min-height:91px}
+.portal-brand img{width:41px;height:53px;border-radius:10px;background:#f2c84b}
+.portal-brand>span{font-size:34px;letter-spacing:-.055em;color:#173b3e}
+.portal-brand small{font-size:12px;color:#71857a}
+.portal-primary-nav{border-radius:14px;background:#eaf0e9;padding:5px;gap:4px}
+.portal-primary-nav a{border-radius:9px!important;font-weight:700!important}
+.portal-primary-nav a[aria-current="page"],.portal-primary-nav a.active{background:#fffefa;color:#19413e}
+.portal-language-trigger{border-radius:11px!important;border-color:#dce6dc!important;background:#fffefa!important}
+.portal-main{max-width:1180px;padding:clamp(25px,4vw,53px) clamp(20px,4.2vw,68px) 75px}
+.portal-admin{max-width:1500px}
+.portal-eyebrow,.portal-modal-eyebrow{color:#507b68;font-size:12px;letter-spacing:.075em;font-weight:700;text-transform:uppercase}
+.portal-login-heading{margin:25px 0 27px}
+.portal-login-heading h1{font-size:clamp(41px,5vw,62px);line-height:1.03;letter-spacing:-.05em;color:#193b3e}
+.portal-login-heading>p{font-size:17px;color:#657a70}
+.portal-login-grid{gap:17px}
+.portal-panel{border-radius:20px;background:#fffefa;border:1px solid #dfe7de;padding:clamp(22px,3vw,35px);box-shadow:0 18px 45px rgba(18,54,47,.045)}
+.portal-panel h2{font-size:clamp(26px,2.5vw,34px);letter-spacing:-.04em}
+.portal-step{color:#9d762b}
+.portal-hint{color:#6c8074}
+.portal-body label{font-weight:700;color:#496259;font-size:14px}
+.portal-body input,.portal-body select{border-radius:11px;border:1px solid #d2ded2;background:#fcfdf9;min-height:51px;padding:12px 15px;font-size:16px}
+.portal-body input:focus,.portal-body select:focus{border-color:#46816c;box-shadow:0 0 0 3px #377f6119}
+.portal-body .primary{border-radius:11px;min-height:51px;background:#173f41;color:white;font-weight:700;font-size:15px}
+.portal-body .primary:hover{background:#285b54}
+.portal-body .secondary{border-radius:11px;border-color:#d3ded2;background:#fffefa;font-weight:700;font-size:15px}
+.portal-admin-heading h1{font-size:clamp(37px,4vw,56px);letter-spacing:-.055em}
+.portal-admin-heading p{color:#687b73}
+.portal-stats{gap:12px}
+.portal-stats>div{border:1px solid #dfe8dd;background:#fffefa;border-radius:16px;padding:22px}
+.portal-stats span{font-weight:700;color:#6e8477;font-size:13px}
+.portal-stats strong{font-weight:800;color:#1d4943;font-size:37px}
+.portal-admin-layout{gap:20px;grid-template-columns:310px minmax(0,1fr)}
+.portal-sidebar{border:1px solid #dfe8de;border-radius:18px;background:#fffefa;padding:20px;box-shadow:0 13px 40px #173c3209}
+.portal-people{gap:7px}
+.portal-person{border:1px solid #e1e9e0;border-radius:11px;padding:13px;background:#fbfcf8}
+.portal-person:hover{background:#f1f5ef}
+.portal-person.selected{background:#e9f1e8;border-color:#90b29c}
+.portal-person-name{color:#23453f}
+.portal-access-panel{border-radius:17px;background:#fff6db;border-color:#e7d79b}
+.portal-access-panel h3{font-size:29px}
+.portal-qr{border-radius:14px;background:#fff9e8}
+.portal-identity{margin:22px 0 27px}
+.portal-avatar{border:0;border-radius:17px;background:#e0ece4;color:#326954}
+.portal-identity h1{font-size:clamp(37px,4vw,52px);letter-spacing:-.05em}
+.portal-overview{background:#193e42;border-radius:23px;padding:31px 37px}
+.portal-overview strong{font-weight:800}
+.portal-records{gap:14px}
+.portal-record{border-radius:18px;background:#fffefa;border:1px solid #dfe7dd;padding:25px;box-shadow:0 10px 30px #123f3307}
+.portal-record h3{letter-spacing:-.035em}
+.portal-badge,.portal-result{border-radius:999px;padding:6px 11px}
+.portal-language-dialog,.portal-dialog{border-radius:20px;background:#fffefa}
+.portal-legal-footer{color:#7b8c80}
+@media(max-width:900px){.portal-admin-layout{grid-template-columns:260px minmax(0,1fr)}}
+@media(max-width:700px){
+ .portal-header{padding:13px 19px;min-height:71px}
+ .portal-brand img{width:35px;height:45px}
+ .portal-brand>span{font-size:28px}
+ .portal-brand small{font-size:11px}
+ .portal-main{padding:25px 18px 62px}
+ .portal-login-heading h1{font-size:clamp(37px,9vw,47px)}
+ .portal-admin-layout{grid-template-columns:1fr}
+ .portal-sidebar{position:static}
+ .portal-panel{padding:22px}
+ .portal-overview{padding:24px}
+ .portal-record{padding:20px}
+ .portal-people{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.portal-person{transition:none}}
