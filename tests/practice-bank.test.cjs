@@ -42,7 +42,7 @@ test('existing course list is preserved and new exercises use its course-specifi
  assert.match(app,/courseQuestions\(activeCourseId\)/);
  assert.match(app,/data-action="start-learn" data-course/);
  assert.match(app,/data-action="start-exam" data-course/);
- assert.match(app,/run=\{mode,course:activeCourseId,ids:/);
+ assert.match(app,/run=\{mode,course:activeCourseId,ids,index:0/);
  assert.match(app,/t=topic\(q\.topic\)\|\|COURSES\.find/);
  assert.match(app,/course:COURSES\.some\(c=>c\.id===r\.course\)/);
  assert.match(app,/52 Originalfragen \(unbewertet\)/,'Existing 52 question source must remain ungraded');
@@ -54,8 +54,10 @@ test('existing course list is preserved and new exercises use its course-specifi
 
 test('PWA loads offline question bank before the app and caches both',()=>{
  const html=read('dist/index.html'),sw=read('dist/sw.js');
- assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('app.js?v=27'));
+ assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('practice-expansion.js?v=1'));
+ assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('app.js?v=28'));
  assert.ok(sw.includes('practice-bank.js?v=1'));
- assert.ok(sw.includes('app.js?v=27'));
- assert.ok(sw.includes('abbate-learning-v29'));
+ assert.ok(sw.includes('practice-expansion.js?v=1'));
+ assert.ok(sw.includes('app.js?v=28'));
+ assert.ok(sw.includes('abbate-learning-v31'));
 });
