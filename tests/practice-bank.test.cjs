@@ -55,9 +55,9 @@ test('existing course list is preserved and new exercises use its course-specifi
 test('PWA loads offline question bank before the app and caches both',()=>{
  const html=read('dist/index.html'),sw=read('dist/sw.js');
  assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('practice-expansion.js?v=1'));
- assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('app.js?v=28'));
+ assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('app.js?v=29'));
  assert.ok(sw.includes('practice-bank.js?v=1'));
  assert.ok(sw.includes('practice-expansion.js?v=1'));
- assert.ok(sw.includes('app.js?v=28'));
- assert.ok(sw.includes('abbate-learning-v31'));
+ assert.ok(sw.includes('app.js?v=29'));
+ assert.ok(sw.includes('abbate-learning-v32'));
 });
