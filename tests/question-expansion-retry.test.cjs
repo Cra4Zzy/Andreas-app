@@ -62,7 +62,21 @@ test('simulation keeps scoring transparent and never claims official certificati
 });
 test('page and service worker load versioned expanded bank before app bundle',()=>{
  assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('practice-expansion.js?v=1'));
- assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('app.js?v=28'));
+ assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('app.js?v=29'));
  assert.ok(sw.includes('practice-expansion.js?v=1'));
- assert.ok(sw.includes('app.js?v=28'));
+ assert.ok(sw.includes('app.js?v=29'));
+});
+
+test('result screen is compact, has accessible expanded details and retains wrong-only replay',()=>{
+ assert.match(app,/function resultBreakdown\(result\)/);
+ assert.match(app,/function reviewCards\(result\)/);
+ assert.match(app,/compact-result-metrics/);
+ assert.match(app,/compact-result-meter/);
+ assert.match(app,/compact-review-item/);
+ assert.match(app,/compact-review-correct-group/);
+ assert.match(app,/data-action="retry-wrong"/);
+ assert.match(app,/source\.answers\[id\]!==q\.correct/);
+ assert.match(css,/\.compact-review-item\[open\]/);
+ assert.match(css,/\.compact-result-actions/);
+ assert.doesNotMatch(app,/function reviewCards\(result\) \{ return \(result\.ids/);
 });
