@@ -174,3 +174,37 @@
 .result-clean strong{font-size:17px}.result-clean p{margin:4px 0 0;font-size:15px}
 @media(max-width:650px){.compact-result{gap:12px;margin-bottom:30px}.compact-result-summary,.compact-result-review{padding:20px 17px;border-radius:17px}.compact-result-head{align-items:flex-start;gap:12px}.compact-result-percent{width:80px;height:80px;font-size:31px}.compact-result-percent span{font-size:15px;margin-top:7px}.compact-result-head p{font-size:14px}.compact-result-stats{gap:6px}.compact-result-stats>div{display:grid;gap:5px;padding:13px 9px;text-align:center}.compact-result-stats strong{font-size:26px}.compact-result-stats small{font-size:12px}.compact-result-buttons{display:grid}.compact-result-buttons>*{width:100%}.compact-result-review-heading>small{display:none}.result-error summary{padding:13px 12px;gap:10px}.result-error-title{font-size:14px}.result-error-detail{padding:15px}}
 @media(prefers-reduced-motion:reduce){.compact-result-meter span,.result-error-chevron{transition:none}}
+
+
+/* Results history: direct, compact correction workflow without opening another page. */
+.result-history-intro{display:flex;align-items:end;justify-content:space-between;gap:18px;max-width:1020px;margin:20px auto 16px}
+.result-history-intro>div{display:grid;gap:7px}
+.result-history-intro strong{font:800 23px/1.2 Barlow,system-ui,sans-serif;color:#1c3d40}
+.result-history-intro>span{color:#75867f;font-size:14px}
+.result-history-list{display:grid;gap:15px;max-width:1020px;margin:0 auto 60px}
+.result-history-item{background:#fffefa;border:1px solid #dfe5dc;border-radius:19px;overflow:hidden;box-shadow:0 8px 24px #17392c09;padding:23px 27px 0}
+.result-history-top{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.result-history-type{font-size:12px;letter-spacing:.065em;text-transform:uppercase;font-weight:700;color:#647c71}
+.result-history-description h2{font:800 34px/1 Barlow,system-ui,sans-serif;color:#1d4142;letter-spacing:-.04em;margin:11px 0 7px}
+.result-history-description h2 span{font:600 17px/1.3 SourceSans,system-ui,sans-serif;color:#789087;letter-spacing:0}
+.result-history-description p{margin:0;color:#849087;font-size:14px}
+.result-history-percentage{display:grid;place-items:center;width:82px;height:82px;flex:0 0 82px;border-radius:50%;background:#eaf2e8;color:#245f51;font:800 26px/1 Barlow,sans-serif}
+.result-history-meter{height:7px;background:#e7eae2;border-radius:20px;overflow:hidden;margin:20px 0 17px}
+.result-history-meter span{display:block;height:100%;border-radius:20px;background:#e3bb4f}
+.result-history-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.result-history-missed{margin-right:auto;font-weight:700;color:#845d3b;font-size:14px}
+.result-history-actions .primary{min-height:40px;padding:9px 14px;font-size:14px;display:inline-flex;align-items:center;gap:8px}
+.result-history-actions .primary svg{width:16px;height:16px}
+.result-history-actions .text-link{font-size:14px}
+.result-history-details{border-top:1px solid #e4e8e0;margin:0 -27px}
+.result-history-details>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;padding:15px 27px;font-weight:700;color:#2a514b;font-size:15px}
+.result-history-details>summary::-webkit-details-marker{display:none}
+.result-history-details>summary:focus-visible{outline:3px solid #d8b34e;outline-offset:-3px}
+.result-history-details>summary:hover{background:#f6f8f1}
+.result-history-details>summary>span:first-child{color:#819188;font-size:13px}
+.result-history-chevron{margin-left:auto;font-size:21px;transition:transform .2s}
+.result-history-details[open] .result-history-chevron{transform:rotate(180deg)}
+.result-history-detail-body{padding:0 27px 20px}
+.result-history-footnote{color:#7e8a83;font-size:14px;margin:0 0 20px}
+@media(max-width:650px){.result-history-intro{margin-top:14px}.result-history-intro>span{display:none}.result-history-item{padding:17px 17px 0;border-radius:15px}.result-history-percentage{width:65px;height:65px;flex-basis:65px;font-size:22px}.result-history-description h2{font-size:29px}.result-history-description h2 span{font-size:15px}.result-history-actions{gap:11px}.result-history-actions .primary{width:100%;justify-content:center}.result-history-details{margin:0 -17px}.result-history-details>summary{padding:14px 17px}.result-history-detail-body{padding:0 14px 16px}}
+@media(prefers-reduced-motion:reduce){.result-history-chevron{transition:none}}
