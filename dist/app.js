@@ -199,7 +199,7 @@ function startRun(mode,topicId,courseId) {
 function quizView() {
   if(!run)return examStart();
   const q=question(run.ids[run.index]), t=topic(q.topic)||COURSES.find(c=>c.id===q.course), chosen=run.answers[q.id], checked=run.checked.includes(q.id), correct=chosen===q.correct;
-  return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${t.name}</span><span>${run.index+1} / ${run.ids.length}</span></div><h1>${q.title}</h1><p class="question-context">${q.context}</p><div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${answer}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${q.why}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
+  return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.training?'Dein Fehlertraining':run.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${t.name}</span><span>${run.index+1} / ${run.ids.length}</span></div><h1>${q.title}</h1><p class="question-context">${q.context}</p><div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${answer}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${q.why}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
 }
 function rememberCorrect(id) { const list=data.mastered[student().id]||[]; if(!list.includes(id))list.push(id); data.mastered[student().id]=list; }
 let completingRun=false;
@@ -221,10 +221,44 @@ async function completeRun() {
     toast('Ergebnis noch nicht gespeichert. Die Runde bleibt erhalten – bitte Verbindung prüfen und erneut abschließen.');
   }finally{completingRun=false;}
 }
-function reviewCards(result) { return (result.ids||[]).map(id=>{const q=question(id);if(!q)return '';const choice=result.answers[id],correct=choice===q.correct;return `<article class="review-card ${correct?'':'wrong'}"><header>${icon(correct?'check':'help')}<h3>${q.title}</h3></header><p>${q.why}</p><p class="your-answer">Deine Antwort: ${choice===undefined?'Nicht beantwortet':esc(q.answers[choice])}</p></article>`;}).join(''); }
+function wrongQuestionIds(result) {
+  return (result.ids||[]).filter(id=>{
+    const q=question(id);
+    return q && result.answers?.[id]!==q.correct;
+  });
+}
+function startMistakeTraining(result) {
+  if(!result)return;
+  if(!active(student())){access();return;}
+  if(run){toast('Beende zuerst deine laufende Runde.');return;}
+  const ids=wrongQuestionIds(result);
+  if(!ids.length){toast('In dieser Runde gibt es keine Fehler zum Üben.');return;}
+  activeCourseId=COURSES.some(c=>c.id===result.course)?result.course:'gabelstapler';
+  run={mode:'learn',training:true,course:activeCourseId,ids,index:0,answers:{},checked:[],at:new Date().toISOString()};
+  latestResult=null;
+  go('uebung');
+}
+function reviewCards(result) {
+  const ids=wrongQuestionIds(result);
+  if(!ids.length)return '<div class="result-clean">'+icon('check')+'<div><strong>Keine Fehler in dieser Runde.</strong><p>Alle Fragen wurden richtig beantwortet.</p></div></div>';
+  return '<div class="result-error-list">'+ids.map((id,i)=>{
+    const q=question(id),choice=result.answers?.[id];
+    const selected=Number.isInteger(choice)&&q.answers?.[choice]!==undefined?esc(q.answers[choice]):'Nicht beantwortet';
+    return '<details class="result-error"><summary><span class="result-error-index">'+String(i+1).padStart(2,'0')+'</span><span class="result-error-title">'+esc(q.title)+'</span><span class="result-error-chevron" aria-hidden="true">⌄</span></summary><div class="result-error-detail"><div><small>Deine Antwort</small><p class="result-answer-wrong">'+selected+'</p></div><div><small>Richtige Antwort</small><p class="result-answer-correct">'+esc(q.answers[q.correct])+'</p></div><p class="result-error-explanation">'+esc(q.why)+'</p></div></details>';
+  }).join('')+'</div>';
+}
 function resultView() {
-  if(!latestResult)return results(); const r=latestResult;
-  return heading(esc(courseLabel(r.course))+' · Lernrunde abgeschlossen','Deine Auswertung','Prüfe deine Antworten und die zugehörigen Erläuterungen.')+`<div class="result-layout"><section class="result-main"><span class="overline">${r.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><div class="result-mark">${r.score}<span> / ${r.total}</span></div><h2>${r.score===r.total?'Alle Fragen richtig beantwortet.':'Ergebnis deiner Übungsrunde'}</h2><p>${r.score===r.total?'Alle Antworten richtig. Wiederhole die Themen später noch einmal.':'Lies die Erklärungen und übe die schwierigen Themen gezielt.'}</p><div class="result-actions"><button class="primary" data-action="start-learn">Weiter üben ${icon('arrow')}</button><a class="secondary" href="#start">Zum Start</a></div><p class="form-caption">Dieses Ergebnis ist kein Prüfungsnachweis.</p></section><section class="review-list" aria-label="Erklärungen zu deinen Antworten">${reviewCards(r)}</section></div>`;
+  if(!latestResult)return results();
+  const r=latestResult,total=Math.max(0,Number(r.total)||0),score=Math.max(0,Math.min(total,Number(r.score)||0));
+  const missed=wrongQuestionIds(r).length,percent=total?Math.round(score/total*100):0;
+  return heading(esc(courseLabel(r.course))+' · Auswertung','Dein Ergebnis','Die wichtigsten Zahlen und deine Fehler auf einen Blick.')+
+  '<div class="compact-result"><section class="compact-result-summary" aria-label="Ergebnisübersicht">'+
+  '<div class="compact-result-head"><div><span class="overline">'+(r.mode==='learn'?'Lernrunde':'Prüfungstraining')+'</span><h2>'+(missed?'Runde abgeschlossen':'Alles richtig beantwortet')+'</h2><p>'+(missed?'Sieh dir deine Fehler an und festige die Antworten im Fehlertraining.':'Starke Runde. Wiederhole die Inhalte später zur Festigung.')+'</p></div><div class="compact-result-percent" aria-label="'+percent+' Prozent richtig">'+percent+'<span>%</span></div></div>'+
+  '<div class="compact-result-meter" role="progressbar" aria-label="Richtig beantwortet" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+score+'"><span style="width:'+percent+'%"></span></div>'+
+  '<div class="compact-result-stats"><div><strong>'+score+'</strong><small>Richtig</small></div><div><strong>'+missed+'</strong><small>Fehler / Offen</small></div><div><strong>'+total+'</strong><small>Fragen gesamt</small></div></div>'+
+  '<div class="compact-result-buttons">'+(missed?'<button class="primary" data-action="mistake-training" data-id="'+esc(r.id)+'">Fehlertraining starten '+icon('arrow')+'</button>':'<button class="primary" data-action="start-learn" data-course="'+esc(r.course||'gabelstapler')+'">Neue Lernrunde '+icon('arrow')+'</button>')+
+  '<a class="secondary" href="#ergebnisse">Zur Lernhistorie</a></div><p class="form-caption">Übungsergebnis · kein offizieller Prüfungsnachweis.</p></section>'+
+  '<section class="compact-result-review" aria-label="Fehlerübersicht"><div class="compact-result-review-heading"><div><span class="overline">Deine Nachbereitung</span><h2>Fehler ansehen <span>('+missed+')</span></h2></div><small>Zum Öffnen antippen</small></div>'+reviewCards(r)+'</section></div>';
 }
 function results() {
   const list=data.results.filter(r=>r.student===student().id).slice().reverse();
@@ -296,6 +330,7 @@ document.addEventListener('click',async event=>{
   else if(action==='finish')completeRun();
   else if(action==='exit-run'){pendingRoute='start';askExit();}
   else if(action==='confirm-exit'){run=null;close();go(pendingRoute||'start');pendingRoute=null;}
+  else if(action==='mistake-training'){const r=data.results.find(r=>r.id===el.dataset.id&&r.student===student().id);startMistakeTraining(r);}
   else if(action==='review-result'){latestResult=data.results.find(r=>r.id===el.dataset.id);go('ergebnis');}
   else if(action==='install')install();
   else if(action==='install-tab')install(el.dataset.platform);
