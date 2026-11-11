@@ -157,3 +157,55 @@
 .review-run-intro{font-size:14px;color:#667671;padding:2px 3px 12px}
 @media(max-width:600px){.mock-exam-banner{gap:11px;padding:15px}.mock-exam-seal{flex-basis:39px;height:39px}.mock-exam-banner strong{font-size:20px}.mock-exam-points{padding-left:9px}.mock-exam-points strong{font-size:28px}.mock-exam-status{font-size:13px;line-height:1.45}.mock-exam-summary{padding:13px}.repeat-wrong-button{width:100%}}
 @media(prefers-reduced-motion:reduce){.mock-exam-banner,.quiz-shell-exam .question-card{transition:none}}
+
+/* Compact result screen: high-contrast overview and progressive question disclosure. */
+.compact-result-page{display:grid;gap:22px;max-width:1050px;margin:24px auto 50px}
+.compact-result-summary{background:#f0ece0;color:#192f35;border:1px solid #ded9ca;border-radius:22px;padding:clamp(22px,4vw,38px);box-shadow:0 14px 38px #263b3710}
+.compact-result-intro{margin-bottom:23px}.compact-result-kicker{display:block;font-size:12px;font-weight:800;letter-spacing:.12em;color:#7e6943;margin-bottom:9px}
+.compact-result-intro h2{font-size:clamp(26px,3.2vw,36px);letter-spacing:-.035em;line-height:1.14;margin:0 0 7px;color:#1c353c}
+.compact-result-intro p{font-size:15px;color:#65716d;margin:0}
+.compact-result-metrics{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:11px;margin-bottom:19px}
+.compact-result-stat{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:115px;padding:18px 20px;border-radius:15px;background:#fffefa;border:1px solid #e3e0d6}
+.compact-result-stat-main{background:#1d3c43;color:#fff;border-color:#1d3c43}
+.compact-result-stat strong{font:800 clamp(32px,4vw,46px)/1 Barlow,'Segoe UI',sans-serif;letter-spacing:-.04em}
+.compact-result-stat span{display:block;margin-top:10px;font-size:13px;font-weight:700;color:#67716b}
+.compact-result-stat-main span{color:#d5dedb}
+.compact-result-meter{height:9px;overflow:hidden;border-radius:999px;background:#d6d7c9}
+.compact-result-meter>span{display:block;height:100%;border-radius:999px;background:#3a9677;max-width:100%;transition:width .3s ease}
+.compact-result-footnote{font-size:13px;color:#61716a;margin-top:10px}
+.compact-result-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:26px}
+.compact-result-actions .primary,.compact-result-actions .secondary{min-height:46px;display:inline-flex;align-items:center;gap:9px}
+.compact-retry-cta{background:#193b43;color:#fff}
+.compact-retry-cta svg{height:18px;width:18px}
+.compact-result-back{color:#3d625c;font-size:14px;font-weight:650;padding:10px 4px;text-decoration:underline;text-underline-offset:4px}
+.compact-result-disclaimer{font-size:13px;line-height:1.5;color:#72736d;margin:21px 0 0}
+.compact-review{background:#fffefa;border:1px solid #dedfd7;border-radius:22px;padding:clamp(20px,3.6vw,34px)}
+.compact-review-heading{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:18px}
+.compact-review-heading h2{font-size:clamp(22px,2.6vw,29px);letter-spacing:-.035em;line-height:1.2;margin:7px 0 0}
+.compact-review-heading .overline{color:#788273;font-size:12px;letter-spacing:.08em}
+.compact-review-count{white-space:nowrap;border-radius:999px;background:#faf0dc;color:#8c6630;padding:7px 12px;font-size:12px;font-weight:750}
+.compact-review-list{display:grid;gap:9px}
+.compact-review-item{background:#faf9f4;border:1px solid #e1e2d9;border-radius:13px;overflow:hidden}
+.compact-review-item[open]{border-color:#c6d5c7;background:#fffefa}
+.compact-review-item>summary{display:flex;align-items:center;gap:15px;list-style:none;min-height:65px;padding:13px 18px;cursor:pointer}
+.compact-review-item>summary::-webkit-details-marker{display:none}
+.compact-review-item>summary:focus-visible,.compact-review-correct-group>summary:focus-visible{outline:3px solid #cba438;outline-offset:-3px}
+.compact-review-number{color:#98744a;font:750 13px Barlow,sans-serif;flex:0 0 24px}
+.compact-review-title{font-size:16px;font-weight:700;line-height:1.38;flex:1;color:#223c40}
+.compact-review-item>summary svg,.compact-review-correct-group>summary svg:last-child{width:17px;height:17px;flex:none;color:#6a847a;transition:transform .18s ease}
+.compact-review-item[open]>summary svg,.compact-review-correct-group[open]>summary svg:last-child{transform:rotate(90deg)}
+.compact-review-body{padding:0 19px 20px 57px;border-top:1px solid #e7e9de}
+.compact-review-body p{font-size:15px;line-height:1.55;color:#465e58;margin:7px 0 14px}
+.compact-review-body .compact-review-label{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#827f70;margin:17px 0 3px}
+.compact-review-choice{color:#a15a3f!important}
+.compact-review-correct{color:#28684e!important;font-weight:750}
+.compact-review-correct-group{margin-top:16px;padding-top:16px;border-top:1px solid #e4e6dc}
+.compact-review-correct-group>summary{display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;color:#3b6e54;font-size:14px;font-weight:750}
+.compact-review-correct-group>summary::-webkit-details-marker{display:none}
+.compact-review-correct-group>summary svg{width:17px;height:17px}
+.compact-review-correct-group>summary svg:last-child{margin-left:auto}
+.compact-review-list-right{margin-top:14px}
+.compact-review-empty{display:flex;align-items:center;gap:10px;color:#28684e;font-weight:650}
+.compact-review-empty svg{width:20px;height:20px}
+@media(max-width:700px){.compact-result-page{margin-top:15px;gap:16px}.compact-result-summary,.compact-review{border-radius:17px}.compact-result-metrics{gap:7px}.compact-result-stat{min-height:90px;padding:13px 11px;border-radius:12px}.compact-result-stat strong{font-size:clamp(27px,8vw,40px)}.compact-result-stat span{font-size:11px}.compact-result-actions{display:grid;grid-template-columns:1fr}.compact-result-actions .primary,.compact-result-actions .secondary{width:100%;justify-content:center}.compact-result-back{text-align:center}.compact-review-heading{align-items:start}.compact-review-item>summary{padding:13px 12px;gap:9px}.compact-review-title{font-size:15px}.compact-review-body{padding:0 13px 16px 46px}}
+@media(prefers-reduced-motion:reduce){.compact-result-meter>span,.compact-review-item>summary svg{transition:none}}
