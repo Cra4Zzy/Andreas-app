@@ -169,12 +169,12 @@ function home() {
 function learning() {
  const cards=COURSES.map((course,i)=>
  '<article class="qualification-card '+(course.active?'qualification-available':'qualification-upcoming')+'">'+
- '<div class="qualification-top"><span class="qualification-index">0'+(i+1)+' / 05</span><span class="qualification-badge '+(course.active?'live':'upcoming')+'">'+(courseQuestions(course.id).length+' Übungsfragen')+'</span></div>'+
+ '<div class="qualification-top"><span class="qualification-index">0'+(i+1)+' / 05</span><span class="qualification-badge '+(course.active?'live':'upcoming')+'">'+(courseQuestions(course.id).length+' Fragen im Pool')+'</span></div>'+
  '<div class="qualification-symbol '+course.color+'">'+icon(course.icon)+'</div>'+
  '<h2>'+esc(course.name)+'</h2>'+
  '<p>'+esc(course.desc)+'</p>'+
  '<div class="qualification-footer">'+(course.active
-  ?'<button class="primary qualification-cta" data-action="start-learn" data-course="'+esc(course.id)+'">'+courseQuestions(course.id).length+' Übungsfragen '+icon('arrow')+'</button><button class="text-link" data-action="start-exam" data-course="'+esc(course.id)+'">Prüfungstraining '+icon('arrow')+'</button>'+(course.id==='gabelstapler'?'<a class="text-link" href="#lernfragen">52 Originalfragen (unbewertet) '+icon('arrow')+'</a>':'')
+  ?'<button class="primary qualification-cta" data-action="start-learn" data-course="'+esc(course.id)+'">'+Math.min(ROUND_QUESTION_LIMIT,courseQuestions(course.id).length)+' Fragen üben '+icon('arrow')+'</button><button class="text-link" data-action="start-exam" data-course="'+esc(course.id)+'">Prüfungstraining '+icon('arrow')+'</button>'+(course.id==='gabelstapler'?'<a class="text-link" href="#lernfragen">52 Originalfragen (unbewertet) '+icon('arrow')+'</a>':'')
   :'<span class="qualification-awaiting">Lernmaterial noch nicht verfügbar</span>')+'</div>'+
  '<p class="form-caption">Fachliche Grundlage: <a href="'+esc(PRACTICE_BANK.courses[course.id].url)+'" target="_blank" rel="noopener noreferrer">'+esc(PRACTICE_BANK.courses[course.id].source)+'</a></p>'+
  '</article>'
@@ -185,15 +185,40 @@ function learning() {
  '<section class="learning-tip"><img src="./assets/theorie-schulung.webp" alt="Teilnehmer bei einer Theorie-Schulung" loading="lazy" width="1100" height="825"><div><h3>Lernmaterial nach Ausbildungsbereich</h3><p>Die Themen sind nach Ausbildungsbereichen gegliedert. Diese Übungsfragen ersetzen keine verbindliche Abschlussprüfung.</p><a class="text-link" href="#pruefung">Zum Prüfungstraining '+icon('arrow')+'</a></div></section>';
 }
 function examStart() {
-  const name=courseLabel(activeCourseId),count=courseQuestions(activeCourseId).length;
+  const name=courseLabel(activeCourseId),pool=courseQuestions(activeCourseId).length,count=Math.min(ROUND_QUESTION_LIMIT,pool);
   return heading(name+' · Prüfungsvorbereitung','Prüfungsvorbereitung','Wähle eine Übungsform.',accessLine())+
-  '<div class="mode-grid"><section class="mode-card"><span class="mode-icon">'+icon('book')+'</span><h2>Mit Rückmeldung üben</h2><p>Nach jeder Frage erhältst du eine Erklärung.</p><div class="mode-features"><span>'+icon('check')+'Erklärung direkt nach jeder Frage</span><span>'+icon('check')+'Ohne Zeitlimit üben</span><span>'+icon('check')+count+' Übungsfragen</span></div><button class="secondary" data-action="start-learn" data-course="'+esc(activeCourseId)+'">Lernrunde starten '+icon('arrow')+'</button></section><section class="mode-card focus"><span class="mode-icon">'+icon('file')+'</span><h2>Den Ablauf kennenlernen</h2><p>Beantworte zunächst alle Fragen. Die Auswertung erfolgt nach dem Abschluss.</p><div class="mode-features"><span>'+icon('check')+'Antworten vor der Abgabe ändern</span><span>'+icon('check')+'Auswertung nach dem Abschluss</span><span>'+icon('check')+count+' Übungsfragen · ohne Zeitlimit</span></div><button class="primary gold" data-action="start-exam" data-course="'+esc(activeCourseId)+'">Prüfungstraining starten '+icon('arrow')+'</button></section></div><p class="exam-disclaimer">Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt. Die fachliche Freigabe der neuen Übungsfragen durch die Fahrschule steht noch aus.</p>';
+  '<div class="mode-grid"><section class="mode-card"><span class="mode-icon">'+icon('book')+'</span><h2>Mit Rückmeldung üben</h2><p>Nach jeder Frage erhältst du eine Erklärung.</p><div class="mode-features"><span>'+icon('check')+'Erklärung direkt nach jeder Frage</span><span>'+icon('check')+'Ohne Zeitlimit üben</span><span>'+icon('check')+count+' zufällige Fragen pro Runde aus '+pool+' Übungsfragen</span></div><button class="secondary" data-action="start-learn" data-course="'+esc(activeCourseId)+'">Lernrunde starten '+icon('arrow')+'</button></section><section class="mode-card focus"><span class="mode-icon">'+icon('file')+'</span><h2>Den Ablauf kennenlernen</h2><p>Beantworte zunächst alle Fragen. Die Auswertung erfolgt nach dem Abschluss.</p><div class="mode-features"><span>'+icon('check')+'Antworten vor der Abgabe ändern</span><span>'+icon('check')+'Auswertung nach dem Abschluss</span><span>'+icon('check')+count+' zufällige Fragen · ohne Zeitlimit</span></div><button class="primary gold" data-action="start-exam" data-course="'+esc(activeCourseId)+'">Prüfungstraining starten '+icon('arrow')+'</button></section></div><p class="exam-disclaimer">Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt. Die fachliche Freigabe der neuen Übungsfragen durch die Fahrschule steht noch aus.</p>';
+}
+const ROUND_QUESTION_LIMIT=20;
+// The server-backed result history prevents identical sets on consecutive completed rounds.
+// Shuffle first to avoid a predictable order even when two candidates have the same exposure score.
+function shuffled(items){
+  const copy=[...items];
+  for(let i=copy.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [copy[i],copy[j]]=[copy[j],copy[i]];
+  }
+  return copy;
+}
+function selectRoundQuestions(courseId,topicId){
+  const available=courseQuestions(courseId).filter(q=>!topicId||q.topic===topicId);
+  if(available.length<=1)return available.map(q=>q.id);
+  const history=data.results.filter(r=>r.student===student().id&&r.course===courseId&&r.mode!=='legacy')
+    .slice(-8).reverse();
+  const exposure=new Map();
+  history.forEach((round,i)=>{
+    const weight=[1000,160,65,30,15,8,4,2][i]||1;
+    for(const id of round.ids||[])exposure.set(id,(exposure.get(id)||0)+weight);
+  });
+  const limit=Math.min(ROUND_QUESTION_LIMIT,available.length);
+  const ranked=shuffled(available).sort((a,b)=>(exposure.get(a.id)||0)-(exposure.get(b.id)||0));
+  return shuffled(ranked.slice(0,limit)).map(q=>q.id);
 }
 function startRun(mode,topicId,courseId) {
   if(courseId&&COURSES.some(c=>c.id===courseId))activeCourseId=courseId;
   if(!active(student())) { access(); return; }
   if(run) { modal('Eine Runde läuft noch',`<p>Du kannst deine laufende Runde fortsetzen oder sie beenden und neu anfangen.</p><div class="modal-actions"><button class="primary" data-action="continue-run">Weiterlernen ${icon('arrow')}</button><button class="text-link" data-action="replace-run" data-mode="${mode}" data-topic="${topicId||''}" data-course="${activeCourseId}">Neu beginnen</button></div>`); return; }
-  run={mode,course:activeCourseId,ids:courseQuestions(activeCourseId).filter(q=>!topicId||q.topic===topicId).map(q=>q.id),index:0,answers:{},checked:[],at:new Date().toISOString()};
+  run={mode,course:activeCourseId,ids:selectRoundQuestions(activeCourseId,topicId),index:0,answers:{},checked:[],at:new Date().toISOString()};
   close(); go('uebung');
 }
 function quizView() {
