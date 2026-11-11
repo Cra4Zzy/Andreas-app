@@ -225,12 +225,44 @@ async function completeRun() {
     toast('Ergebnis noch nicht gespeichert. Die Runde bleibt erhalten – bitte Verbindung prüfen und erneut abschließen.');
   }finally{completingRun=false;}
 }
-function reviewCards(result) { return (result.ids||[]).map(id=>{const q=question(id);if(!q)return '';const choice=result.answers[id],correct=choice===q.correct;return `<article class="review-card ${correct?'':'wrong'}"><header>${icon(correct?'check':'help')}<h3>${q.title}</h3></header><p>${q.why}</p><p class="your-answer">Deine Antwort: ${choice===undefined?'Nicht beantwortet':esc(q.answers[choice])}</p></article>`;}).join(''); }
+function resultBreakdown(result){
+  const all=(result.ids||[]).map(id=>({id,q:question(id),choice:result.answers?.[id]})).filter(item=>item.q);
+  return {
+    all,
+    wrong:all.filter(item=>item.choice!==item.q.correct),
+    right:all.filter(item=>item.choice===item.q.correct)
+  };
+}
+function reviewCards(result) {
+  const {wrong,right}=resultBreakdown(result);
+  const cards=items=>items.map(({id,q,choice},index)=>{
+    const answer=choice===undefined?'Nicht beantwortet':(q.answers[choice]??'Ungültige Antwort');
+    return '<details class="compact-review-item" data-question-id="'+esc(id)+'"><summary><span class="compact-review-number">'+String(index+1).padStart(2,'0')+'</span><span class="compact-review-title">'+esc(q.title)+'</span>'+icon('arrow')+'</summary><div class="compact-review-body"><p class="compact-review-label">Deine Antwort</p><p class="compact-review-choice">'+esc(answer)+'</p><p class="compact-review-label">Richtige Antwort</p><p class="compact-review-correct">'+esc(q.answers[q.correct])+'</p><p class="compact-review-label">Erklärung</p><p>'+esc(q.why)+'</p></div></details>';
+  }).join('');
+  return '<section class="compact-review" aria-label="Fehleranalyse"><div class="compact-review-heading"><div><span class="overline">DEINE FEHLERANALYSE</span><h2>'+wrong.length+' '+(wrong.length===1?'Frage':'Fragen')+' zum Wiederholen</h2></div><span class="compact-review-count">'+wrong.length+' offen</span></div>'+
+    (wrong.length?'<div class="compact-review-list">'+cards(wrong)+'</div>':'<p class="compact-review-empty">'+icon('check')+'Du hast alle Fragen dieser Runde richtig beantwortet.</p>')+
+    (right.length?'<details class="compact-review-correct-group"><summary>'+icon('check')+' '+right.length+' richtig beantwortete '+(right.length===1?'Frage':'Fragen')+' anzeigen '+icon('arrow')+'</summary><div class="compact-review-list compact-review-list-right">'+cards(right)+'</div></details>':'')+
+    '</section>';
+}
 function resultView() {
   if(!latestResult)return results(); const r=latestResult;
-  const wrongIds=(r.ids||[]).filter(id=>{const q=question(id);return q&&r.answers[id]!==q.correct;});
+  const {wrong,right}=resultBreakdown(r);
+  const wrongIds=wrong.map(item=>item.id);
   const percentage=r.total?Math.round(100*r.score/r.total):0;
-  return heading(esc(courseLabel(r.course))+' · Lernrunde abgeschlossen','Deine Auswertung','Prüfe deine Antworten und die zugehörigen Erläuterungen.')+`<div class="result-layout"><section class="result-main"><span class="overline">${r.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><div class="result-mark">${r.score}<span> / ${r.total} Punkte</span></div>${r.mode==='exam'?`<div class="mock-exam-summary"><strong>${percentage}%</strong><span>${r.score} richtige · ${wrongIds.length} falsche bzw. offene Antworten</span><small>Übungsauswertung · keine offizielle Bestehensgrenze</small></div>`:''}<h2>${r.score===r.total?'Alle Fragen richtig beantwortet.':'Ergebnis deiner Übungsrunde'}</h2><p>${r.score===r.total?'Alle Antworten richtig. Wiederhole die Themen später noch einmal.':'Lies die Erklärungen und übe die schwierigen Themen gezielt.'}</p><div class="result-actions">${wrongIds.length?`<button class="primary repeat-wrong-button" data-action="retry-wrong" aria-label="${wrongIds.length} falsch beantwortete Fragen erneut üben">${icon('book')} ${wrongIds.length} Fehler gezielt wiederholen ${icon('arrow')}</button>`:`<span class="result-perfect">${icon('check')} Keine falschen Antworten – sehr gut!</span>`}<button class="secondary" data-action="start-learn" data-course="${esc(r.course)}">Neue vollständige Runde</button><a class="secondary" href="#start">Zum Start</a></div><p class="form-caption">Dieses Ergebnis ist kein Prüfungsnachweis.</p></section><section class="review-list" aria-label="Erklärungen zu deinen Antworten">${reviewCards(r)}</section></div>`;
+  const label=r.mode==='exam'?'Prüfungssimulation':'Lernrunde';
+  return heading(esc(courseLabel(r.course))+' · '+label+' abgeschlossen','Deine Auswertung','Dein Ergebnis auf einen Blick. Öffne nur die Fragen, die du genauer ansehen möchtest.')+
+    '<div class="compact-result-page"><section class="compact-result-summary" aria-label="Ergebnisübersicht">'+
+    '<div class="compact-result-intro"><span class="compact-result-kicker">ABBATE · '+label+'</span><h2>'+esc(courseLabel(r.course))+'</h2><p>Auswertung deiner abgeschlossenen Runde</p></div>'+
+    '<div class="compact-result-metrics">'+
+    '<div class="compact-result-stat compact-result-stat-main"><strong>'+percentage+' %</strong><span>Ergebnis</span></div>'+
+    '<div class="compact-result-stat"><strong>'+right.length+'</strong><span>Richtig</span></div>'+
+    '<div class="compact-result-stat"><strong>'+wrong.length+'</strong><span>Wiederholen</span></div>'+
+    '</div><div class="compact-result-meter" role="progressbar" aria-label="Richtig beantwortete Fragen" aria-valuemin="0" aria-valuemax="'+r.total+'" aria-valuenow="'+right.length+'"><span style="width:'+percentage+'%"></span></div>'+
+    '<div class="compact-result-footnote">'+r.score+' von '+r.total+' Punkten · '+(wrong.length?'Wiederhole gezielt deine Fehler.':'Alles richtig beantwortet!')+'</div>'+
+    '<div class="compact-result-actions">'+(wrongIds.length?'<button class="primary compact-retry-cta" data-action="retry-wrong">'+icon('book')+' '+wrongIds.length+' '+(wrongIds.length===1?'Fehler':'Fehler')+' erneut üben '+icon('arrow')+'</button>':'<p class="result-perfect">'+icon('check')+'Keine Fehler – stark gemacht!</p>')+
+    '<button class="secondary" data-action="start-learn" data-course="'+esc(r.course)+'">Neue vollständige Runde</button><a class="compact-result-back" href="#start">Zur Übersicht</a></div>'+
+    '<p class="compact-result-disclaimer">'+(r.mode==='exam'?'Dies ist eine Übungssimulation ohne offizielle Bestehensgrenze. ':'')+'Dieses Ergebnis ist kein Prüfungsnachweis.</p></section>'+
+    reviewCards(r)+'</div>';
 }
 function results() {
   const list=data.results.filter(r=>r.student===student().id).slice().reverse();
