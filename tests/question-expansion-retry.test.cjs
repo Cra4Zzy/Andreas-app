@@ -56,7 +56,7 @@ test('simulation keeps scoring transparent and never claims official certificati
  assert.match(app,/mock-exam-banner/);
  assert.match(app,/MAXIMAL/);
  assert.match(app,/1 Punkt je richtige Antwort/);
- assert.match(app,/mock-exam-summary/);
+ assert.match(app,/compact-result-metrics/);
  assert.match(app,/keine offizielle Bestehensgrenze/);
  assert.match(css,/quiz-shell-exam/);
 });
