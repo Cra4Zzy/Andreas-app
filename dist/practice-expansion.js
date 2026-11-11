@@ -590,7 +590,7 @@
     ]
   }
 };
- const added=Object.entries(extra.rows).flatMap(([course,items])=>items.map(([id,topic,title,context,a,b,c,correct,why])=>Object.freeze({id,course,topic,title,context,answers:Object.freeze([a,b,c]),correct,why,source:extra.sources[course][0],sourceUrl:extra.sources[course][1]})));
+ const added=Object.entries(extra.rows).flatMap(([course,items])=>items.map(([id,topic,title,context,a,b,c,correct,why])=>Object.freeze({id,course,topic,title,context,answers:Object.freeze([a,b,c]),correct,why,source:current.courses[course].source,sourceUrl:extra.sources[course][1]})));
  const ids=new Set(current.questions.map(q=>q.id));
  if(added.length!==50||added.some(q=>{if(ids.has(q.id))return true;ids.add(q.id);return false;}))throw Error('Duplicate or incomplete expansion');
  globalThis.ABBATE_PRACTICE_BANK=Object.freeze({courses:current.courses,questions:Object.freeze([...current.questions,...added])});
