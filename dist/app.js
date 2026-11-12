@@ -32,6 +32,36 @@ function installPlatform() {
 }
 const PRACTICE_BANK=globalThis.ABBATE_PRACTICE_BANK;
 if(!PRACTICE_BANK||!Array.isArray(PRACTICE_BANK.questions))throw Error('Question bank not loaded');
+// Stable question IDs and numeric answer keys always come from the German
+// source. Only the six visible text fields are replaced by static locale packs.
+const QUESTION_LOCALES=globalThis.ABBATE_QUESTION_TRANSLATIONS||(globalThis.ABBATE_QUESTION_TRANSLATIONS=Object.create(null));
+const questionLocaleRequests=new Map();
+async function ensureQuestionLocale(code){
+  if(code==='de')return true;
+  if(!supportedLanguage(code))return false;
+  if(QUESTION_LOCALES[code])return Object.keys(QUESTION_LOCALES[code]).length===PRACTICE_BANK.questions.length;
+  if(!questionLocaleRequests.has(code)){
+    const promise=new Promise(resolve=>{
+      const script=document.createElement('script');
+      script.src='./practice-translations/'+code+'.js?v=1';
+      script.async=true;
+      script.onload=()=>resolve(Boolean(QUESTION_LOCALES[code]&&Object.keys(QUESTION_LOCALES[code]).length===PRACTICE_BANK.questions.length));
+      script.onerror=()=>resolve(false);
+      document.head.appendChild(script);
+    });
+    questionLocaleRequests.set(code,promise);
+  }
+  const available=await questionLocaleRequests.get(code);
+  if(!available)questionLocaleRequests.delete(code);
+  return available;
+}
+function localizedQuestion(q){
+  if(!q||selectedLanguage==='de')return q;
+  const fields=QUESTION_LOCALES[selectedLanguage]?.[q.id];
+  if(!Array.isArray(fields)||fields.length!==6||fields.some(t=>typeof t!=='string'||!t.trim()))return q;
+  return {...q,title:fields[0],context:fields[1],answers:fields.slice(2,5),why:fields[5]};
+}
+
 // Fifty explicitly graded, course-scoped exercises per area. The legacy six demo questions are retired.
 const LEGACY_GRADED_QUESTIONS = [
   {id:'check',topic:'grundlagen',title:'Beim Fahrzeugcheck bemerkst du einen sicherheitsrelevanten Mangel. Was machst du?',context:'Du willst gerade mit deiner Arbeit beginnen. Eine Funktion arbeitet nicht zuverlässig.',answers:['Ich arbeite vorsichtig weiter und melde den Mangel später.','Ich benutze das Gerät nicht weiter und melde den Mangel der zuständigen Person.','Ich lasse eine andere Person damit weiterfahren.'],correct:1,why:'Sicherheitsrelevante Mängel müssen gemeldet werden. Ein Fahrzeug mit solchen Mängeln darf nicht weiter eingesetzt werden.'},
@@ -135,7 +165,7 @@ function learning() {
  '</article>'
  ).join('');
  return heading('Deine Ausbildung','Was möchtest du lernen?','Wähle deinen Ausbildungsbereich. Alle fünf Bereiche enthalten Übungsfragen. Die fachliche Freigabe durch die Fahrschule steht noch aus.',accessLine())+
- (selectedLanguage==='de'?'':'<p class="form-caption">Neue Übungsfragen liegen derzeit nur auf Deutsch vor. Fachlich geprüfte Übersetzungen fehlen noch.</p>')+
+ (selectedLanguage==='de'||QUESTION_LOCALES[selectedLanguage]?'':'<p class="form-caption">Übersetzung der Übungsfragen momentan nicht verfügbar; deutsche Texte werden angezeigt.</p>')+
   '<section class="qualification-grid" aria-label="Ausbildungsbereiche">'+cards+'</section>'+
  '<section class="learning-tip"><img src="./assets/theorie-schulung.webp" alt="Teilnehmer bei einer Theorie-Schulung" loading="lazy" width="1100" height="825"><div><h3>Lernmaterial nach Ausbildungsbereich</h3><p>Die Themen sind nach Ausbildungsbereichen gegliedert. Diese Übungsfragen ersetzen keine verbindliche Abschlussprüfung.</p><a class="text-link" href="#pruefung">Zum Prüfungstraining '+icon('arrow')+'</a></div></section>';
 }
@@ -220,8 +250,8 @@ function startRun(mode,topicId,courseId) {
 }
 function quizView() {
   if(!run)return examStart();
-  const q=question(run.ids[run.index]), t=q.course==='gabelstapler'?topic(q.topic):null, courseName=courseLabel(q.course||run.course), categoryLabel=t?.name||courseName, chosen=run.answers[q.id], checked=run.checked.includes(q.id), correct=chosen===q.correct;
-  return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.training?'Dein Fehlertraining':run.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${esc(categoryLabel)}</span><span>${run.index+1} / ${run.ids.length}</span></div>${selectedLanguage==='de'?'':'<p class="question-language-notice" role="note">Die Fachfragen und Antworten liegen derzeit nur auf Deutsch vor. Eine fachlich geprüfte Übersetzung für diese Sprache fehlt.</p>'}<h1>${esc(q.title)}</h1><p class="question-context">${esc(q.context)}</p><div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${answer}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${esc(q.why)}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
+  const q=localizedQuestion(question(run.ids[run.index])), t=q.course==='gabelstapler'?topic(q.topic):null, courseName=courseLabel(q.course||run.course), categoryLabel=t?.name||courseName, chosen=run.answers[q.id], checked=run.checked.includes(q.id), correct=chosen===q.correct;
+  return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.training?'Dein Fehlertraining':run.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${esc(categoryLabel)}</span><span>${run.index+1} / ${run.ids.length}</span></div>${selectedLanguage==='de'||QUESTION_LOCALES[selectedLanguage]?.[q.id]?'':'<p class="question-language-notice" role="note">Übersetzung nicht verfügbar – diese Frage wird auf Deutsch angezeigt.</p>'}<h1>${esc(q.title)}</h1><p class="question-context">${esc(q.context)}</p><div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${esc(answer)}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${esc(q.why)}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
 }
 function rememberCorrect(id) { const list=data.mastered[student().id]||[]; if(!list.includes(id))list.push(id); data.mastered[student().id]=list; }
 let completingRun=false;
@@ -264,7 +294,7 @@ function reviewCards(result) {
   const ids=wrongQuestionIds(result);
   if(!ids.length)return '<div class="result-clean">'+icon('check')+'<div><strong>Keine Fehler in dieser Runde.</strong><p>Alle Fragen wurden richtig beantwortet.</p></div></div>';
   return '<div class="result-error-list">'+ids.map((id,i)=>{
-    const q=question(id),choice=result.answers?.[id];
+    const q=localizedQuestion(question(id)),choice=result.answers?.[id];
     const selected=Number.isInteger(choice)&&q.answers?.[choice]!==undefined?esc(q.answers[choice]):'Nicht beantwortet';
     return '<details class="result-error"><summary><span class="result-error-index">'+String(i+1).padStart(2,'0')+'</span><span class="result-error-title">'+esc(q.title)+'</span><span class="result-error-chevron" aria-hidden="true">⌄</span></summary><div class="result-error-detail"><div><small>Deine Antwort</small><p class="result-answer-wrong">'+selected+'</p></div><div><small>Richtige Antwort</small><p class="result-answer-correct">'+esc(q.answers[q.correct])+'</p></div><p class="result-error-explanation">'+esc(q.why)+'</p></div></details>';
   }).join('')+'</div>';
@@ -335,6 +365,7 @@ document.addEventListener('click',async event=>{
     close();toast(I18N.t(178));
     try{
       await I18N.load(nextLanguage);
+      await ensureQuestionLocale(nextLanguage);
       selectedLanguage=nextLanguage;
       localStorage.setItem(LANGUAGE_STORE,selectedLanguage);
       render();toast(`${languageConfig().name} · ${tr('selected')}`);
@@ -406,7 +437,9 @@ async function boot(){
   data.selected=B.me.id;
   try{
     const practice=practicePayload(await B.loadPractice());data.results=practice.results;data.mastered={[B.me.id]:practice.mastered};
-    await I18N.load(selectedLanguage);render();document.documentElement.removeAttribute('data-loading');
+    await I18N.load(selectedLanguage);
+    await ensureQuestionLocale(selectedLanguage);
+    render();document.documentElement.removeAttribute('data-loading');
   }catch{document.documentElement.removeAttribute('data-loading');$('#main').innerHTML='<section class="empty-state"><h1>Dein Lernbereich konnte nicht geladen werden.</h1><a class="primary" href="./index.html">Erneut versuchen</a></section>';}
 }
 boot();
