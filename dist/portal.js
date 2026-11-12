@@ -209,7 +209,7 @@
   root.addEventListener('click',async event=>{
     if(event.target.closest('[data-refresh]')){await render();return;}
     if(event.target.closest('[data-recovery]')){location.hash='passwort';recovery();return;}
-    if(event.target.closest('[data-logout]')){await B.client.auth.signOut();location.replace('./konto.html');return;}
+    if(event.target.closest('[data-logout]')){await B.client.auth.signOut({scope:'local'});location.replace('./konto.html');return;}
     if(view!=='admin'||!B.isStaff(state?.me))return;
     const person=event.target.closest('[data-person]');if(person){selected=person.dataset.person;document.querySelector('#account-list').innerHTML=peopleList();renderDetail();return;}
     const qrButton=event.target.closest('#download-qr, #download-qr-svg');
