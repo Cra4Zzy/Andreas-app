@@ -5,3 +5,21 @@ const ASSETS=["./styles.css?v=18","./experience.css?v=4","./i18n-packs.js?v=9","
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>(k.startsWith('andreas-demo-shell-')||k.startsWith('abbate-learning-'))&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||e.request.mode==='navigate')return;const url=new URL(e.request.url);if(url.origin!==self.location.origin||!ASSETS.some(a=>new URL(a,self.registration.scope).pathname===url.pathname))return;e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)))});
+
+// Cache the selected translated question pack after its first successful
+// download; do not force every learner to download 25 languages on install.
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET')return;
+  const url=new URL(event.request.url);
+  const prefix=new URL('./practice-translations/',self.registration.scope).pathname;
+  if(url.origin!==self.location.origin||!url.pathname.startsWith(prefix)||!url.pathname.endsWith('.js'))return;
+  event.respondWith(caches.open(CACHE).then(async cache=>{
+    try{
+      const response=await fetch(event.request);
+      if(response.ok)await cache.put(event.request,response.clone());
+      return response;
+    }catch{
+      return await cache.match(event.request)||Response.error();
+    }
+  }));
+});
