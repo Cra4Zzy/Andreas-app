@@ -13,6 +13,9 @@
    window.name=WINDOW_PREFIX+windowId;
  }
  const storageKey='abbate-auth-window-v2:'+windowId;
+ // Remove legacy shared credentials once; never import them into a separate window.
+ // Users must sign in again after this one-time migration.
+ try{globalThis.localStorage.removeItem('abbate-auth-v1');}catch{}
  const client=globalThis.AbbateSupabase.createClient(C.url,C.publishableKey,{
    auth:{storageKey,storage:globalThis.sessionStorage,persistSession:true,
      autoRefreshToken:true,detectSessionInUrl:true}
