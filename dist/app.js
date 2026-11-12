@@ -32,21 +32,14 @@ function installPlatform() {
 }
 const PRACTICE_BANK=globalThis.ABBATE_PRACTICE_BANK;
 if(!PRACTICE_BANK||!Array.isArray(PRACTICE_BANK.questions))throw Error('Question bank not loaded');
-const QUESTIONS = [
-  {id:'check',topic:'grundlagen',title:'Beim Fahrzeugcheck bemerkst du einen sicherheitsrelevanten Mangel. Was machst du?',context:'Du willst gerade mit deiner Arbeit beginnen. Eine Funktion arbeitet nicht zuverlässig.',answers:['Ich arbeite vorsichtig weiter und melde den Mangel später.','Ich benutze das Gerät nicht weiter und melde den Mangel der zuständigen Person.','Ich lasse eine andere Person damit weiterfahren.'],correct:1,why:'Sicherheitsrelevante Mängel müssen gemeldet werden. Ein Fahrzeug mit solchen Mängeln darf nicht weiter eingesetzt werden.'},
-  {id:'auftrag',topic:'grundlagen',title:'Wer darf einen Gabelstapler mit Fahrersitz selbstständig führen?',context:'Es geht um den selbstständigen Einsatz im Betrieb.',answers:['Wer volljährig, geeignet und ausgebildet ist, seine Befähigung nachgewiesen hat und schriftlich beauftragt wurde.','Jede Person, die einen Pkw-Führerschein besitzt.','Jede Person, die schon einmal mitgefahren ist.'],correct:0,why:'Ein Pkw-Führerschein allein genügt nicht. Erforderlich sind Eignung, Ausbildung, Befähigungsnachweis und schriftliche Beauftragung.'},
-  {id:'traglast',topic:'lasten',title:'Worauf kommt es vor dem Aufnehmen einer Last an?',context:'Du möchtest sicher sein, dass du die Last mit diesem Fahrzeug bewegen darfst.',answers:['Ich schätze das Gewicht und orientiere mich nur an der Fahrzeuggröße.','Ich nehme die Last kurz hoch und beobachte, was passiert.','Ich halte die zulässige Belastung des Fahrzeugs ein.'],correct:2,why:'Flurförderzeuge dürfen nicht überlastet werden. Entscheidend ist die zulässige Belastung.'},
-  {id:'unter-last',topic:'lasten',title:'Eine Last ist angehoben. Was gilt für den Bereich darunter?',context:'Eine Person möchte direkt unter der angehobenen Last hindurchgehen.',answers:['Der Bereich darunter bleibt frei; dort darf sich niemand aufhalten.','Ein kurzer Aufenthalt ist in Ordnung, wenn die Last stillsteht.','Der Aufenthalt ist erlaubt, wenn die Person einen Helm trägt.'],correct:0,why:'Unter angehobenen Lasten darf sich niemand aufhalten. Auch ein Helm macht diesen Bereich nicht sicher.'},
-  {id:'sicht',topic:'betrieb',title:'Die Last versperrt dir die Sicht auf den Fahrweg. Wie gehst du vor?',context:'Du musst den Fahrweg und mögliche Gefahren zuverlässig erkennen können.',answers:['Ich fahre besonders schnell durch den unübersichtlichen Bereich.','Ich sorge für ausreichende Sicht oder lasse mich nach betrieblicher Vorgabe einweisen.','Ich hupe und fahre ohne freie Sicht weiter.'],correct:1,why:'Du brauchst ausreichende Sicht oder eine sichere Einweisung. Hupen ersetzt beides nicht.'},
-  {id:'verlassen',topic:'betrieb',title:'Du verlässt das Fahrzeug. Was ist dabei wichtig?',context:'Dein Arbeitsschritt ist beendet und du steigst aus.',answers:['Der nächste Fahrer wird das Fahrzeug schon sichern.','Es reicht, wenn das Fahrzeug gerade stillsteht.','Ich sichere es gegen unbeabsichtigtes Bewegen und unbefugtes Benutzen.'],correct:2,why:'Vor dem Verlassen muss das Fahrzeug gegen unbeabsichtigtes Bewegen und unbefugtes Benutzen gesichert werden.'},
-  ...PRACTICE_BANK.questions
-];
+// Fifty explicitly graded, course-scoped exercises per area. The legacy six demo questions are retired.
+const QUESTIONS = [...PRACTICE_BANK.questions];
 const TOPICS = [
   {id:'grundlagen',name:'Fahrzeug & Verantwortung',description:'Gut vorbereitet starten: Was du vor dem Einsatz wissen und prüfen solltest.',short:'Dein sicherer Einstieg',icon:'shield',color:''},
   {id:'lasten',name:'Lasten & Grenzen',description:'Lasten richtig einschätzen und die Grenzen des Fahrzeugs beachten.',short:'Mit Überblick bewegen',icon:'file',color:'sand'},
   {id:'betrieb',name:'Sicher im Arbeitsalltag',description:'Sicht, Zusammenarbeit und ein sicher abgestelltes Fahrzeug.',short:'Auf dich und andere achten',icon:'users',color:'blue'}
 ];
-const COURSES=[{"id":"gabelstapler","name":"Gabelstapler","desc":"Fahrbetrieb, Fahrzeugcheck und Lastaufnahme. 52 Originalfragen ohne bestätigte Lösungen; zusätzlich bewertete Übungsaufgaben.","sub":"52 originale Lernfragen","icon":"shield","color":"","active":true},{"id":"hebebuehnen","name":"Hebebühnen","desc":"Sicheres Arbeiten mit Hubarbeitsbühnen: Vorbereitung, Standsicherheit und Bedienung.","sub":"Lernmaterial folgt","icon":"users","color":"blue","active":false},{"id":"krane","name":"Krane","desc":"Kranbetrieb, Signale, Arbeitsbereich und sichere Lastbewegungen.","sub":"Lernmaterial folgt","icon":"file","color":"sand","active":false},{"id":"lasten","name":"Anschlagen von Lasten","desc":"Lasten richtig anschlagen, Anschlagmittel beurteilen und sicher kommunizieren.","sub":"Lernmaterial folgt","icon":"book","color":"","active":false},{"id":"bagger","name":"Erdbaumaschinen & Bagger","desc":"Bedienung von Erdbaumaschinen, Sicherheitsabstände und Gefahrenbereiche.","sub":"Lernmaterial folgt","icon":"shield","color":"blue","active":false}].map(course=>({...course,active:true,sub:course.id==='gabelstapler'?'52 Originalfragen · '+(PRACTICE_BANK.questions.filter(q=>q.course==='gabelstapler').length+6)+' Übungsfragen':PRACTICE_BANK.questions.filter(q=>q.course===course.id).length+' Übungsfragen'}));
+const COURSES=[{"id":"gabelstapler","name":"Gabelstapler","desc":"Fahrbetrieb, Fahrzeugcheck und Lastaufnahme. 50 bewertbare Übungsfragen.","sub":"50 Lernfragen","icon":"shield","color":"","active":true},{"id":"hebebuehnen","name":"Hebebühnen","desc":"Sicheres Arbeiten mit Hubarbeitsbühnen: Vorbereitung, Standsicherheit und Bedienung.","sub":"Lernmaterial folgt","icon":"users","color":"blue","active":false},{"id":"krane","name":"Krane","desc":"Kranbetrieb, Signale, Arbeitsbereich und sichere Lastbewegungen.","sub":"Lernmaterial folgt","icon":"file","color":"sand","active":false},{"id":"lasten","name":"Anschlagen von Lasten","desc":"Lasten richtig anschlagen, Anschlagmittel beurteilen und sicher kommunizieren.","sub":"Lernmaterial folgt","icon":"book","color":"","active":false},{"id":"bagger","name":"Erdbaumaschinen & Bagger","desc":"Bedienung von Erdbaumaschinen, Sicherheitsabstände und Gefahrenbereiche.","sub":"Lernmaterial folgt","icon":"shield","color":"blue","active":false}].map(course=>({...course,active:true,sub:PRACTICE_BANK.questions.filter(q=>q.course===course.id).length+' Übungsfragen'}));
 // Every qualification has its own materials. Never reuse forklift content for cranes or earthmovers.
 let activeCourseId='gabelstapler';
 const courseQuestions=id=>QUESTIONS.filter(q=>(q.course||'gabelstapler')===id);
@@ -74,59 +67,12 @@ function modal(title,content) { $('#modal-content').innerHTML=`<div class="modal
 function close() { $('#modal').close(); }
 let route='start';
 
-/* Gabelstapler source questions from Supabase: ungraded, no answer key, not a certified exam. */
-const theoryStudy={items:null,loading:false,error:false,index:0,choices:Object.create(null)};
-const theoryLang=()=>selectedLanguage==='ro'?'ro':'de';
-function theoryIntro(){
- const ro=theoryLang()==='ro';
- return '<section class="theory-intro"><div><span class="theory-intro-eyebrow">Gabelstapler · '+(ro?'Materiale de învățare':'Lernunterlagen')+'</span><h2>'+(ro?'Întrebări teoretice':'Originalfragen von Andreas')+'</h2><p>'+(ro?'52 de întrebări pentru pregătire. Răspunsurile nu sunt încă evaluate.':'52 Fragen aus dem Schulungsbogen von Andreas. Gehe sie Schritt für Schritt durch – vorerst ohne Bewertung.')+'</p><small>52 '+(ro?'întrebări':'Lernfragen')+' · '+(ro?'ianuarie 2019':'Januar 2019')+'</small></div><a class="primary" href="#lernfragen">'+(ro?'Începe învățarea':'Fragen durchgehen')+' →</a></section>';
-}
-function theoryView(){
- const state=theoryStudy,ro=theoryLang()==='ro';
- const ttl=ro?'Întrebări teoretice':'Gabelstapler · Theoriefragen';
- const pre=heading('Gabelstapler',ttl,'',accessLine());
- if(state.loading)return pre+'<div class="theory-study-message" role="status">'+(ro?'Se încarcă întrebările …':'Lernfragen werden geladen …')+'</div>';
- if(!state.items||state.error)return pre+'<div class="theory-study-message"><p>'+(ro?'Întrebările nu sunt disponibile.':'Die Lernfragen konnten nicht geladen werden.')+'</p><button class="secondary" data-action="theory-reload">'+(ro?'Reîncarcă':'Erneut laden')+'</button></div>';
- const list=state.items,n=Math.max(0,Math.min(list.length-1,state.index));state.index=n;
- const q=list[n],t=q.translations?.[theoryLang()]||q.translations?.de;
- if(!t)return pre+'<p role="alert">Der Fragetext fehlt.</p>';
- const selected=state.choices[q.question_no],visual=!!q.requires_diagram;
- const options=Array.isArray(t.answers)?t.answers:[];
- const answerHtml=options.length?'<div class="theory-answers">'+options.map((option,i)=>'<button type="button" class="theory-option'+(selected===i?' selected':'')+'" data-action="theory-select" data-choice="'+i+'" aria-pressed="'+(selected===i)+'"'+(visual?' disabled':'')+'><span>'+String.fromCharCode(65+i)+'</span><span>'+esc(option)+'</span></button>').join('')+'</div>':
- '<label class="theory-number-label">'+(ro?'Răspunsul tău':'Deine Antwort')+'<input type="text" inputmode="numeric" data-action="theory-number" value="'+esc(selected??'')+'"'+(visual?' disabled':'')+'></label>';
- const diagram=visual?'<div class="theory-diagram" role="note">'+icon('help')+'<span>'+(ro?'Pentru această întrebare lipsește încă figura sau diagrama originală.':'Für diese Aufgabe fehlt noch die zugehörige Originalabbildung bzw. das Traglastdiagramm.')+'</span></div>':'';
- const note=selectedLanguage!=='de'&&selectedLanguage!=='ro'?'<p class="theory-translation" role="note">Dieser Fragenkatalog ist derzeit nur auf Deutsch und Rumänisch übersetzt. Die deutsche Arbeitsübersetzung wird angezeigt.</p>':'';
- return pre+'<div class="theory-study">'+note+'<div class="theory-study-top"><a class="text-link" href="#lernen">← '+(ro?'Înapoi la învățare':'Zum Lernbereich')+'</a><span>'+(n+1)+' / '+list.length+'</span></div>'+
- '<div class="theory-progress" role="progressbar" aria-label="Fragenfortschritt" aria-valuemin="1" aria-valuemax="'+list.length+'" aria-valuenow="'+(n+1)+'"><span style="width:'+((n+1)/list.length*100)+'%"></span></div>'+
- '<article class="theory-question"><div class="theory-question-meta"><strong>'+(ro?'Întrebarea':'Frage')+' '+String(q.question_no).padStart(2,'0')+'</strong><span>'+(ro?'Pagina':'Originalseite')+' '+q.source_page+'</span></div><h2>'+esc(t.title)+'</h2>'+diagram+answerHtml+
- '<p class="theory-answer-note">'+(ro?'Nu există încă o evaluare sau răspunsuri oficiale confirmate.':'Die richtige Antwort wurde noch nicht von Andreas bestätigt. Deine Auswahl wird nicht bewertet.')+'</p></article>'+
- '<div class="theory-study-actions"><button class="secondary" data-action="theory-prev"'+(n===0?' disabled':'')+'>'+(ro?'Înapoi':'Zurück')+'</button>'+
- (n===list.length-1?'<a class="primary" href="#lernen">'+(ro?'Înapoi la învățare':'Zum Lernbereich')+' →</a>':'<button class="primary" data-action="theory-next">'+(ro?'Întrebarea următoare':'Nächste Frage')+' →</button>')+'</div>'+
- '<p class="theory-draft-note">'+(ro?'Materialele din 2019 trebuie revizuite înainte de utilizarea la un examen oficial.':'Die Originalunterlagen von 2019 müssen vor einer offiziellen Prüfung fachlich geprüft werden.')+'</p></div>';
-}
-async function loadTheory(force=false){
- if(theoryStudy.loading||(!force&&theoryStudy.items))return;
- if(!B.me||!active(B.me))return;
- theoryStudy.loading=true;theoryStudy.error=false;if(route==='lernfragen')render();
- try{
-  const {data,error}=await B.client.from('abbate_theory_questions')
-   .select('question_no,source_page,requires_diagram,translations')
-   .eq('school_id',B.me.school).eq('document_key','theorie-ro-2019')
-   .order('question_no',{ascending:true});
-  if(error)throw error;
-  if(!Array.isArray(data)||data.length!==52)throw Error('Incomplete theory catalogue');
-  theoryStudy.items=data;
- }catch(error){
-  theoryStudy.error=true;theoryStudy.items=null;console.warn('Failed to load theory questions',error?.code||'network');
- }finally{theoryStudy.loading=false;if(route==='lernfragen')render();}
-}
-
-const routeMap={start:'Start',lernen:'Lernen',lernfragen:'Gabelstapler Lernfragen',pruefung:'Prüfung',ergebnisse:'Ergebnisse',verwaltung:'Verwaltung',uebung:'Training',ergebnis:'Dein Ergebnis'};
+const routeMap={start:'Start',lernen:'Lernen',pruefung:'Prüfung',ergebnisse:'Ergebnisse',verwaltung:'Verwaltung',uebung:'Training',ergebnis:'Dein Ergebnis'};
 function accessLine() { const s=student(); return `<span class="access-line ${active(s)?'':'expired'}">${icon(active(s)?'check':'lock')}${active(s)?s.until?`Zugang aktiv · ${daysLeft(s.until)} Tage`:'Zugang aktiv':s.access==='pending'?'Wartet auf Freischaltung':s.access==='paused'?'Zugang pausiert':'Zugang abgelaufen'}</span>`; }
 function heading(label,title,description='',action='') { return `<div class="page-heading"><div><div class="overline">${icon('book')}${label}</div><h1>${title}</h1>${description?`<p>${description}</p>`:''}</div>${action}</div>`; }
 function navigation() {
   const nav=[['start','home',tr('home')],['lernen','book',tr('learn')],['pruefung','file',tr('exam')],['ergebnisse','chart',tr('results')]];
-  const current=route==='uebung'?(run?.mode==='learn'?'lernen':'pruefung'):route==='lernfragen'?'lernen':route==='ergebnis'?'ergebnisse':route;
+  const current=route==='uebung'?(run?.mode==='learn'?'lernen':'pruefung'):route==='ergebnis'?'ergebnisse':route;
   $('#desktop-nav').innerHTML=nav.map(([id,,name])=>`<a href="#${id}" class="${current===id?'active':''}" ${current===id?'aria-current="page"':''}>${name}</a>`).join('')+`<a href="./nachweise.html">${esc(passLabel())}</a>`;
   $('#mobile-nav').innerHTML=nav.map(([id,i,name])=>`<a href="#${id}" class="${current===id?'active':''}" ${current===id?'aria-current="page"':''}>${icon(i)}${name}</a>`).join('')+`<a href="./nachweise.html">${icon('shield')}${esc(passLabel())}</a>`;
   document.documentElement.lang=selectedLanguage;
@@ -174,7 +120,7 @@ function learning() {
  '<h2>'+esc(course.name)+'</h2>'+
  '<p>'+esc(course.desc)+'</p>'+
  '<div class="qualification-footer">'+(course.active
-  ?'<button class="primary qualification-cta" data-action="start-learn" data-course="'+esc(course.id)+'">'+Math.min(ROUND_QUESTION_LIMIT,courseQuestions(course.id).length)+' Fragen üben '+icon('arrow')+'</button><button class="text-link" data-action="start-exam" data-course="'+esc(course.id)+'">Prüfungstraining '+icon('arrow')+'</button>'+(course.id==='gabelstapler'?'<a class="text-link" href="#lernfragen">52 Originalfragen (unbewertet) '+icon('arrow')+'</a>':'')
+  ?'<button class="primary qualification-cta" data-action="start-learn" data-course="'+esc(course.id)+'">'+Math.min(ROUND_QUESTION_LIMIT,courseQuestions(course.id).length)+' Fragen üben '+icon('arrow')+'</button><button class="text-link" data-action="start-exam" data-course="'+esc(course.id)+'">Prüfungstraining '+icon('arrow')+'</button>'
   :'<span class="qualification-awaiting">Lernmaterial noch nicht verfügbar</span>')+'</div>'+
  '<p class="form-caption">Fachliche Grundlage: <a href="'+esc(PRACTICE_BANK.courses[course.id].url)+'" target="_blank" rel="noopener noreferrer">'+esc(PRACTICE_BANK.courses[course.id].source)+'</a></p>'+
  '</article>'
@@ -265,8 +211,8 @@ function startRun(mode,topicId,courseId) {
 }
 function quizView() {
   if(!run)return examStart();
-  const q=question(run.ids[run.index]), t=topic(q.topic)||COURSES.find(c=>c.id===q.course), chosen=run.answers[q.id], checked=run.checked.includes(q.id), correct=chosen===q.correct;
-  return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.training?'Dein Fehlertraining':run.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${t.name}</span><span>${run.index+1} / ${run.ids.length}</span></div><h1>${q.title}</h1><p class="question-context">${q.context}</p><div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${answer}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${q.why}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
+  const q=question(run.ids[run.index]), t=q.course==='gabelstapler'?topic(q.topic):null, courseName=courseLabel(q.course||run.course), categoryLabel=t?.name||courseName, chosen=run.answers[q.id], checked=run.checked.includes(q.id), correct=chosen===q.correct;
+  return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.training?'Dein Fehlertraining':run.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${esc(categoryLabel)}</span><span>${run.index+1} / ${run.ids.length}</span></div>${selectedLanguage==='de'?'':'<p class="question-language-notice" role="note">Die Fachfragen und Antworten liegen derzeit nur auf Deutsch vor. Eine fachlich geprüfte Übersetzung für diese Sprache fehlt.</p>'}<h1>${esc(q.title)}</h1><p class="question-context">${esc(q.context)}</p><div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${answer}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${esc(q.why)}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
 }
 function rememberCorrect(id) { const list=data.mastered[student().id]||[]; if(!list.includes(id))list.push(id); data.mastered[student().id]=list; }
 let completingRun=false;
@@ -345,9 +291,9 @@ function results() {
   }).join('')+'</div>';
 }
 function admin(){if(B.isStaff(B.me)){location.href='./verwaltung.html';return '';}return heading('Verwaltung','Kein Verwaltungszugang.','Dieser Bereich ist nur für berechtigte Mitarbeiter zugänglich.');}
-function render() { navigation();const content=route==='start'?home():route==='lernen'?learning():route==='pruefung'?examStart():route==='ergebnisse'?results():route==='verwaltung'?admin():route==='lernfragen'?theoryView():route==='uebung'?quizView():resultView();$('#main').innerHTML=`<div class="page-enter">${content}</div>`;I18N.localize(document.body);navigation(); }
+function render() { navigation();const content=route==='start'?home():route==='lernen'?learning():route==='pruefung'?examStart():route==='ergebnisse'?results():route==='verwaltung'?admin():route==='uebung'?quizView():resultView();$('#main').innerHTML=`<div class="page-enter">${content}</div>`;I18N.localize(document.body);navigation(); }
 function go(next) { if(location.hash==='#'+next){route=next;render();window.scrollTo({top:0,behavior:'auto'});}else location.hash=next; }
-window.addEventListener('hashchange',()=>{let next=location.hash.slice(1);if(next==='verlauf')next='ergebnisse';if(!Object.hasOwn(routeMap,next))next='start';if(next==='uebung'&&!run)next='pruefung';if(next==='ergebnis'&&!latestResult)next='ergebnisse';route=next;render();if(next==='lernfragen'&&!theoryStudy.items)loadTheory();window.scrollTo({top:0,behavior:'auto'});$('#main').focus({preventScroll:true});});
+window.addEventListener('hashchange',()=>{let next=location.hash.slice(1);if(next==='verlauf')next='ergebnisse';if(!Object.hasOwn(routeMap,next))next='start';if(next==='uebung'&&!run)next='pruefung';if(next==='ergebnis'&&!latestResult)next='ergebnisse';route=next;render();window.scrollTo({top:0,behavior:'auto'});$('#main').focus({preventScroll:true});});
 function profile(){
   const s=student();
   modal('Dein Profil & Zugang',`<div class="profile-summary"><span class="profile-avatar">${esc(initials(s.name))}</span><div><strong>${esc(s.name)}</strong><p>${esc(s.email)}</p></div></div><p>Dein Zugang ist aktiv${s.until?' bis einschließlich '+fmtDate(s.until):'.'}.</p><div class="profile-actions"><button class="secondary" data-action="language">🌐 ${esc(languageConfig().name)}</button><a class="secondary" href="./nachweise.html">${esc(passLabel())}</a><a class="secondary" href="./konto.html#einstellungen">Konto & Datenschutz</a></div><div class="profile-footer">${B.isStaff(B.me)?'<a class="text-link" href="./verwaltung.html">Zur Verwaltung ↗</a>':''}<button class="text-link" data-action="logout">Abmelden</button></div>`);
@@ -373,11 +319,6 @@ document.addEventListener('click',async event=>{
   const action=el.dataset.action;
   if(action==='close'||action==='close-modal')close();
   else if(action==='about')about();
-   else if(action==='theory-reload')loadTheory(true);
-   else if(action==='theory-next'&&theoryStudy.items){theoryStudy.index=Math.min(theoryStudy.items.length-1,theoryStudy.index+1);render();window.scrollTo({top:0,behavior:'auto'});}
-   else if(action==='theory-prev'&&theoryStudy.items){theoryStudy.index=Math.max(0,theoryStudy.index-1);render();window.scrollTo({top:0,behavior:'auto'});}
-   else if(action==='theory-select'&&theoryStudy.items){const q=theoryStudy.items[theoryStudy.index];if(!q.requires_diagram){theoryStudy.choices[q.question_no]=Number(el.dataset.choice);render();}}
-
   else if(action==='language')languagePicker();
   else if(action==='set-language'){
     const nextLanguage=el.dataset.language;
@@ -397,7 +338,7 @@ document.addEventListener('click',async event=>{
   else if(action==='profile')profile();
   else if(action==='access')access();
   else if(action==='admin'){location.href='./verwaltung.html';}
-  else if(action==='logout'){await B.client.auth.signOut();location.replace('./konto.html');}
+  else if(action==='logout'){await B.client.auth.signOut({scope:'local'});location.replace('./konto.html');}
   else if(action==='topic')topicInfo(el.dataset.topic);
   else if(action==='start-learn')startRun('learn',el.dataset.topic,el.dataset.course);
   else if(action==='start-exam')startRun('exam',undefined,el.dataset.course);
@@ -456,7 +397,7 @@ async function boot(){
   data.selected=B.me.id;
   try{
     const practice=practicePayload(await B.loadPractice());data.results=practice.results;data.mastered={[B.me.id]:practice.mastered};
-    await I18N.load(selectedLanguage);render();document.documentElement.removeAttribute('data-loading');if(route==='lernfragen')loadTheory();
+    await I18N.load(selectedLanguage);render();document.documentElement.removeAttribute('data-loading');
   }catch{document.documentElement.removeAttribute('data-loading');$('#main').innerHTML='<section class="empty-state"><h1>Dein Lernbereich konnte nicht geladen werden.</h1><a class="primary" href="./index.html">Erneut versuchen</a></section>';}
 }
 boot();
