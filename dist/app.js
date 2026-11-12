@@ -187,11 +187,15 @@ function learning() {
 function examStart() {
   const name=courseLabel(activeCourseId),pool=courseQuestions(activeCourseId).length,count=Math.min(ROUND_QUESTION_LIMIT,pool);
   return heading(name+' · Prüfungsvorbereitung','Prüfungsvorbereitung','Wähle eine Übungsform.',accessLine())+
-  '<div class="mode-grid"><section class="mode-card"><span class="mode-icon">'+icon('book')+'</span><h2>Mit Rückmeldung üben</h2><p>Nach jeder Frage erhältst du eine Erklärung.</p><div class="mode-features"><span>'+icon('check')+'Erklärung direkt nach jeder Frage</span><span>'+icon('check')+'Ohne Zeitlimit üben</span><span>'+icon('check')+count+' zufällige Fragen pro Runde aus '+pool+' Übungsfragen</span></div><button class="secondary" data-action="start-learn" data-course="'+esc(activeCourseId)+'">Lernrunde starten '+icon('arrow')+'</button></section><section class="mode-card focus"><span class="mode-icon">'+icon('file')+'</span><h2>Den Ablauf kennenlernen</h2><p>Beantworte zunächst alle Fragen. Die Auswertung erfolgt nach dem Abschluss.</p><div class="mode-features"><span>'+icon('check')+'Antworten vor der Abgabe ändern</span><span>'+icon('check')+'Auswertung nach dem Abschluss</span><span>'+icon('check')+count+' zufällige Fragen · ohne Zeitlimit</span></div><button class="primary gold" data-action="start-exam" data-course="'+esc(activeCourseId)+'">Prüfungstraining starten '+icon('arrow')+'</button></section></div><p class="exam-disclaimer">Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt. Die fachliche Freigabe der neuen Übungsfragen durch die Fahrschule steht noch aus.</p>';
+  '<p class="adaptive-learning-note">Deine Auswahl passt sich an: Neue Fragen zuerst, Fehler zeitversetzt wiederholen und sicher beantwortete Fragen in größeren Abständen auffrischen.</p><div class="mode-grid"><section class="mode-card"><span class="mode-icon">'+icon('book')+'</span><h2>Mit Rückmeldung üben</h2><p>Nach jeder Frage erhältst du eine Erklärung.</p><div class="mode-features"><span>'+icon('check')+'Erklärung direkt nach jeder Frage</span><span>'+icon('check')+'Ohne Zeitlimit üben</span><span>'+icon('check')+count+' individuell gemischte Fragen aus '+pool+' Übungsfragen</span></div><button class="secondary" data-action="start-learn" data-course="'+esc(activeCourseId)+'">Lernrunde starten '+icon('arrow')+'</button></section><section class="mode-card focus"><span class="mode-icon">'+icon('file')+'</span><h2>Den Ablauf kennenlernen</h2><p>Beantworte zunächst alle Fragen. Die Auswertung erfolgt nach dem Abschluss.</p><div class="mode-features"><span>'+icon('check')+'Antworten vor der Abgabe ändern</span><span>'+icon('check')+'Auswertung nach dem Abschluss</span><span>'+icon('check')+count+' individuell gemischte Fragen · ohne Zeitlimit</span></div><button class="primary gold" data-action="start-exam" data-course="'+esc(activeCourseId)+'">Prüfungstraining starten '+icon('arrow')+'</button></section></div><p class="exam-disclaimer">Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt. Die fachliche Freigabe der neuen Übungsfragen durch die Fahrschule steht noch aus.</p>';
 }
 const ROUND_QUESTION_LIMIT=20;
-// The server-backed result history prevents identical sets on consecutive completed rounds.
-// Shuffle first to avoid a predictable order even when two candidates have the same exposure score.
+const DAY_MS=86400000;
+// Adaptive spacing based only on the signed-in learner's saved, completed rounds.
+// Correct streaks are revisited after 1, 3, 7, 14, 30 and 60 days;
+// wrong or unanswered questions become due again on the following day.
+// These intervals are a transparent product heuristic, not a validated exam score.
+const CORRECT_REVIEW_DAYS=[1,3,7,14,30,60];
 function shuffled(items){
   const copy=[...items];
   for(let i=copy.length-1;i>0;i--){
@@ -200,19 +204,57 @@ function shuffled(items){
   }
   return copy;
 }
-function selectRoundQuestions(courseId,topicId){
+function questionLearningState(courseId,now=Date.now()){
+  const states=new Map();
+  const history=data.results
+    .filter(r=>r.student===student().id&&r.course===courseId&&['learn','exam'].includes(r.mode)&&
+      Array.isArray(r.ids)&&Number.isFinite(Date.parse(r.at)))
+    .slice().sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));
+  for(const round of history){
+    const at=Date.parse(round.at);
+    for(const id of round.ids){
+      const q=question(id);
+      if(!q||(q.course||'gabelstapler')!==courseId)continue;
+      const previous=states.get(id);
+      const correct=round.answers?.[id]===q.correct;
+      const streak=correct?(previous?.streak||0)+1:0;
+      const interval=correct?CORRECT_REVIEW_DAYS[Math.min(streak-1,CORRECT_REVIEW_DAYS.length-1)]:1;
+      states.set(id,{streak,correct,attempts:(previous?.attempts||0)+1,
+        lastAt:at,dueAt:at+interval*DAY_MS,overdueDays:Math.max(0,(now-at-interval*DAY_MS)/DAY_MS)});
+    }
+  }
+  return states;
+}
+function selectRoundQuestions(courseId,topicId,now=Date.now()){
   const available=courseQuestions(courseId).filter(q=>!topicId||q.topic===topicId);
-  if(available.length<=1)return available.map(q=>q.id);
-  const history=data.results.filter(r=>r.student===student().id&&r.course===courseId&&r.mode!=='legacy')
-    .slice(-8).reverse();
-  const exposure=new Map();
-  history.forEach((round,i)=>{
-    const weight=[1000,160,65,30,15,8,4,2][i]||1;
-    for(const id of round.ids||[])exposure.set(id,(exposure.get(id)||0)+weight);
-  });
   const limit=Math.min(ROUND_QUESTION_LIMIT,available.length);
-  const ranked=shuffled(available).sort((a,b)=>(exposure.get(a.id)||0)-(exposure.get(b.id)||0));
-  return shuffled(ranked.slice(0,limit)).map(q=>q.id);
+  if(!limit)return [];
+  const states=questionLearningState(courseId,now);
+  const previous=data.results.filter(r=>r.student===student().id&&r.course===courseId&&
+    ['learn','exam'].includes(r.mode)&&Array.isArray(r.ids))
+    .slice().sort((a,b)=>Date.parse(b.at)-Date.parse(a.at))[0];
+  const recentlySeen=new Set(previous?.ids||[]);
+  // First exhaust unseen questions, then due mistakes, then due correct answers.
+  // Questions not yet due are fillers only when needed to reach 20.
+  const pools=[[],[],[],[],[]];
+  for(const q of shuffled(available)){
+    const state=states.get(q.id);
+    const group=!state?0:!state.correct?(now>=state.dueAt?1:3):
+      (now>=state.dueAt?2:4);
+    pools[group].push(q.id);
+  }
+  // Prefer questions absent from the previous completed round within each category.
+  const selected=[];
+  for(const pool of pools){
+    const fresh=pool.filter(id=>!recentlySeen.has(id));
+    const repeated=pool.filter(id=>recentlySeen.has(id));
+    for(const id of [...fresh,...repeated]){
+      if(selected.length===limit)break;
+      selected.push(id);
+    }
+    if(selected.length===limit)break;
+  }
+  return shuffled(selected);
 }
 function startRun(mode,topicId,courseId) {
   if(courseId&&COURSES.some(c=>c.id===courseId))activeCourseId=courseId;
