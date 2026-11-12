@@ -92,7 +92,7 @@ test('cached PWA shell uses current app JavaScript and CSS',()=>{
   assert.match(read('dist/index.html'),/experience\.css\?v=2/);
   assert.match(read('dist/sw.js'),/experience\.css\?v=2/);
   assert.match(read('dist/index.html'),/practice-bank\.js\?v=1/);
-  assert.match(read('dist/sw.js'),/abbate-learning-v36/);
+  assert.match(read('dist/sw.js'),/abbate-learning-v37/);
   const html=read('dist/index.html'),worker=read('dist/sw.js');
   for(const file of ['i18n-ru.js?v=1','i18n-uk.js?v=1','i18n-modern.js?v=2','i18n.js?v=12']){
     assert.ok(html.includes(file),'HTML missing '+file);
