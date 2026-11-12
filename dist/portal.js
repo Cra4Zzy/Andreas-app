@@ -89,7 +89,10 @@
   const authReturn = globalThis.ABBATE_AUTH_RETURN || {recovery:false, failed:false};
   const recoveryLinkAttempt = authReturn.recovery === true;
   const failedAuthLink = authReturn.failed === true;
-  let recoveryMode = false;
+  let recoveryMode = false, passwordResetCompleted = false;
+  function passwordResetSuccess(){
+    root.innerHTML=`<section class="portal-empty portal-reset-success" role="status"><span class="portal-reset-success-icon" aria-hidden="true">✓</span><span class="portal-eyebrow">Passwort erfolgreich geändert</span><h1>Dein neues Passwort ist gespeichert.</h1><p>Du kannst dich jetzt mit deinem neuen Passwort bei Abbate Lernraum anmelden.</p><a class="primary" href="./konto.html">Jetzt anmelden ↗</a></section>`;
+  }
   function invalidResetLink(){
     root.innerHTML=`<section class="portal-empty"><span class="portal-eyebrow">Dein Zugang</span><h1>Dieser Link ist nicht mehr gültig.</h1><p>Der Link wurde möglicherweise bereits verwendet oder ist abgelaufen. Fordere bitte einen neuen Link an, um dein Passwort sicher zurückzusetzen.</p><a class="primary" href="./konto.html?reset=neu#passwort">Neuen Link anfordern</a><a class="portal-text" href="./konto.html">Zur Anmeldung</a></section>`;
   }
@@ -99,6 +102,11 @@
       // Handle auth callbacks BEFORE resolving profiles or performing signed-in redirects.
       // A replayed/expired recovery link must never fall through to the account page,
       // even when the browser still holds a perfectly valid prior session.
+      // A successful password update must win over the old one-time recovery token.
+      // SIGNED_OUT may fire before location.replace and trigger another render.
+      if(view==='login' && (passwordResetCompleted || (location.hash==='#passwort-gesetzt'&&!failedAuthLink))){
+        passwordResetSuccess();return;
+      }
       if(view==='login' && failedAuthLink){invalidResetLink();return;}
       if(view==='login' && (recoveryLinkAttempt || recoveryMode)){
         // A session from an earlier login is NOT proof of a fresh recovery link.
@@ -159,6 +167,8 @@
         result=await B.client.auth.updateUser({password:values.password});if(result.error)throw result.error;
         recoveryMode=false;
         if(form.id==='password-form'){
+          passwordResetCompleted=true;
+          passwordResetSuccess();
           // Password recovery invalidates existing refresh sessions across devices.
           // The learner must authenticate again with the new password.
           const signOutResult=await B.client.auth.signOut({scope:'global'});
@@ -224,11 +234,11 @@
     const revoke=event.target.closest('[data-revoke]');if(revoke){revoke.disabled=true;try{await B.updateRecord(revoke.dataset.revoke,{revoked_at:new Date().toISOString()});await load();renderDetail();notice('Fehleintrag zurückgezogen. Er erscheint nicht mehr beim Teilnehmer.');}catch(error){notice(B.message(error));revoke.disabled=false;}}
   });
   B.client.auth.onAuthStateChange(event=>{
-    if(event==='PASSWORD_RECOVERY' && !failedAuthLink && view==='login'){
+    if(event==='PASSWORD_RECOVERY' && !failedAuthLink && !passwordResetCompleted && view==='login'){
       recoveryMode=true;
       setTimeout(render,0);
     }
-    if(event==='SIGNED_OUT')setTimeout(render,0);
+    if(event==='SIGNED_OUT'&&!passwordResetCompleted)setTimeout(render,0);
   });
   addEventListener('hashchange',()=>{if(view==='login')render();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&view!=='admin')render();});
