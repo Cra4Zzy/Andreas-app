@@ -44,9 +44,9 @@ test('critical German source format variables remain available for all 3 languag
    }
  }
 });
-test('the original 52 theory questions are not falsely presented as reviewed translations',()=>{
+test('retired unanswered theory catalogue is hidden and new exercise translations are disclosed as pending',()=>{
   const source=read('dist/app.js');
   assert.doesNotMatch(source,/theoryLang/,'Ungraded legacy catalogue is no longer in learner navigation');
   assert.match(source,/Die Fachfragen und Antworten liegen derzeit nur auf Deutsch vor/);
-  assert.match(source,/Die richtige Antwort wurde noch nicht von Andreas bestätigt/);
+  assert.doesNotMatch(source,/52 Originalfragen|theoryStudy|#lernfragen/);
 });
