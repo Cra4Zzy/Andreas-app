@@ -33,6 +33,15 @@ function installPlatform() {
 const PRACTICE_BANK=globalThis.ABBATE_PRACTICE_BANK;
 if(!PRACTICE_BANK||!Array.isArray(PRACTICE_BANK.questions))throw Error('Question bank not loaded');
 // Fifty explicitly graded, course-scoped exercises per area. The legacy six demo questions are retired.
+const LEGACY_GRADED_QUESTIONS = [
+  {id:'check',topic:'grundlagen',title:'Beim Fahrzeugcheck bemerkst du einen sicherheitsrelevanten Mangel. Was machst du?',context:'Du willst gerade mit deiner Arbeit beginnen. Eine Funktion arbeitet nicht zuverlässig.',answers:['Ich arbeite vorsichtig weiter und melde den Mangel später.','Ich benutze das Gerät nicht weiter und melde den Mangel der zuständigen Person.','Ich lasse eine andere Person damit weiterfahren.'],correct:1,why:'Sicherheitsrelevante Mängel müssen gemeldet werden. Ein Fahrzeug mit solchen Mängeln darf nicht weiter eingesetzt werden.'},
+  {id:'auftrag',topic:'grundlagen',title:'Wer darf einen Gabelstapler mit Fahrersitz selbstständig führen?',context:'Es geht um den selbstständigen Einsatz im Betrieb.',answers:['Wer volljährig, geeignet und ausgebildet ist, seine Befähigung nachgewiesen hat und schriftlich beauftragt wurde.','Jede Person, die einen Pkw-Führerschein besitzt.','Jede Person, die schon einmal mitgefahren ist.'],correct:0,why:'Ein Pkw-Führerschein allein genügt nicht. Erforderlich sind Eignung, Ausbildung, Befähigungsnachweis und schriftliche Beauftragung.'},
+  {id:'traglast',topic:'lasten',title:'Worauf kommt es vor dem Aufnehmen einer Last an?',context:'Du möchtest sicher sein, dass du die Last mit diesem Fahrzeug bewegen darfst.',answers:['Ich schätze das Gewicht und orientiere mich nur an der Fahrzeuggröße.','Ich nehme die Last kurz hoch und beobachte, was passiert.','Ich halte die zulässige Belastung des Fahrzeugs ein.'],correct:2,why:'Flurförderzeuge dürfen nicht überlastet werden. Entscheidend ist die zulässige Belastung.'},
+  {id:'unter-last',topic:'lasten',title:'Eine Last ist angehoben. Was gilt für den Bereich darunter?',context:'Eine Person möchte direkt unter der angehobenen Last hindurchgehen.',answers:['Der Bereich darunter bleibt frei; dort darf sich niemand aufhalten.','Ein kurzer Aufenthalt ist in Ordnung, wenn die Last stillsteht.','Der Aufenthalt ist erlaubt, wenn die Person einen Helm trägt.'],correct:0,why:'Unter angehobenen Lasten darf sich niemand aufhalten. Auch ein Helm macht diesen Bereich nicht sicher.'},
+  {id:'sicht',topic:'betrieb',title:'Die Last versperrt dir die Sicht auf den Fahrweg. Wie gehst du vor?',context:'Du musst den Fahrweg und mögliche Gefahren zuverlässig erkennen können.',answers:['Ich fahre besonders schnell durch den unübersichtlichen Bereich.','Ich sorge für ausreichende Sicht oder lasse mich nach betrieblicher Vorgabe einweisen.','Ich hupe und fahre ohne freie Sicht weiter.'],correct:1,why:'Du brauchst ausreichende Sicht oder eine sichere Einweisung. Hupen ersetzt beides nicht.'},
+  {id:'verlassen',topic:'betrieb',title:'Du verlässt das Fahrzeug. Was ist dabei wichtig?',context:'Dein Arbeitsschritt ist beendet und du steigst aus.',answers:['Der nächste Fahrer wird das Fahrzeug schon sichern.','Es reicht, wenn das Fahrzeug gerade stillsteht.','Ich sichere es gegen unbeabsichtigtes Bewegen und unbefugtes Benutzen.'],correct:2,why:'Vor dem Verlassen muss das Fahrzeug gegen unbeabsichtigtes Bewegen und unbefugtes Benutzen gesichert werden.'},
+ ];
+
 const QUESTIONS = [...PRACTICE_BANK.questions];
 const TOPICS = [
   {id:'grundlagen',name:'Fahrzeug & Verantwortung',description:'Gut vorbereitet starten: Was du vor dem Einsatz wissen und prüfen solltest.',short:'Dein sicherer Einstieg',icon:'shield',color:''},
@@ -47,7 +56,7 @@ const courseLabel=id=>COURSES.find(c=>c.id===id)?.name||'Gabelstapler';
 let data={selected:null,students:[],results:[],mastered:{}};
 let run=null, latestResult=null, search='', deferredInstall=null, toastTimer=null, pendingRoute=null;
 const student = () => data.students.find(s=>s.id===data.selected)||{id:'guest',name:'Gast',email:'',until:offsetDate(-1),access:'pending'};
-const question = id => QUESTIONS.find(q=>q.id===id);
+const question = id => QUESTIONS.find(q=>q.id===id)||LEGACY_GRADED_QUESTIONS.find(q=>q.id===id);
 const topic = id => TOPICS.find(t=>t.id===id);
 const mastered = () => (data.mastered[student().id]||[]).filter(id=>question(id));
 let saveTimer,saveQueue=Promise.resolve(),saveRevision=0,savedRevision=0;
