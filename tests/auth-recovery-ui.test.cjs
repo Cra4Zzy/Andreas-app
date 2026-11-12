@@ -7,7 +7,7 @@ const path=require('node:path');
 
 const portal=fs.readFileSync(path.join(__dirname,'../dist/portal.js'),'utf8');
 const wait=()=>new Promise(resolve=>setImmediate(resolve));
-function simulate({recovery=true,failed=false}={}){
+function simulate({recovery=true,failed=false,hash='#type=recovery'}={}){
   const root={
     innerHTML:'',
     setAttribute(){},
@@ -27,7 +27,7 @@ function simulate({recovery=true,failed=false}={}){
     state:async()=>{loadCount++;return {me:{id:uid},students:[]}},
     termsAccepted:async()=>true
   };
-  const location={hash:'#type=recovery',search:'',replace(){throw Error('Unexpected account redirect')}};
+  const location={hash,search:'',replace(){throw Error('Unexpected account redirect')}};
   const document={
     body:{dataset:{view:'login'}},
     querySelector:selector=>selector==='#portal-content'?root:{textContent:''},
@@ -74,4 +74,18 @@ test('an error-flagged expired link cannot be reused despite a recovery callback
 
 test('password-reset success revokes refresh sessions globally',()=>{
   assert.match(portal,/auth\.signOut\(\{scope:'global'\}\)/);
+});
+
+test('successful recovery callback shows a dedicated confirmation instead of expired-link error',async()=>{
+  const scene=simulate({recovery:true,failed:false,hash:'#passwort-gesetzt'});
+  await wait();
+  assert.match(scene.root.innerHTML,/Dein neues Passwort ist gespeichert/);
+  assert.match(scene.root.innerHTML,/Jetzt anmelden/);
+  assert.doesNotMatch(scene.root.innerHTML,/Dieser Link ist nicht mehr gültig/);
+  assert.equal(scene.loadCount(),0,'Success confirmation does not require a signed-in session');
+});
+test('success state wins over stale recovery URL while genuine invalid links remain blocked',()=>{
+  assert.match(portal,/passwordResetCompleted=true;\s*passwordResetSuccess\(\);/);
+  assert.match(portal,/if\(event==='SIGNED_OUT'&&!passwordResetCompleted\)/);
+  assert.match(portal,/location\.replace\('\.\/konto\.html#passwort-gesetzt'\)/);
 });
