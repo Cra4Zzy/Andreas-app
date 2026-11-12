@@ -83,8 +83,8 @@ test('download cards retain live download logic without redundant update callout
 });
 
 test('cached PWA shell uses current app JavaScript and CSS',()=>{
-  assert.match(read('dist/index.html'),/app\.js\?v=32/);
-  assert.match(read('dist/sw.js'),/app\.js\?v=32/);
+  assert.match(read('dist/index.html'),/app\.js\?v=33/);
+  assert.match(read('dist/sw.js'),/app\.js\?v=33/);
   assert.match(read('dist/sw.js'),/styles\.css\?v=18/);
   assert.match(read('dist/sw.js'),/practice-bank\.js\?v=1/);
   assert.match(read('dist/index.html'),/practice-expansion\.js\?v=1/);
