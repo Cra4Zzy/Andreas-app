@@ -1,8 +1,21 @@
 'use strict';
 (() => {
  const C=globalThis.ABBATE_CONFIG;
+ // A browser tab/window is an independent account context. We deliberately do
+ // not reuse the legacy localStorage session shared between all open tabs.
+ // window.name persists during same-tab navigation (login -> learning -> records),
+ // while a newly opened window receives a separate name and auth BroadcastChannel.
+ const WINDOW_PREFIX='abbate-auth-window:';
+ let windowId=typeof window.name==='string'&&window.name.startsWith(WINDOW_PREFIX)
+   ?window.name.slice(WINDOW_PREFIX.length):'';
+ if(!/^[a-zA-Z0-9-]{20,80}$/.test(windowId)){
+   windowId=globalThis.crypto.randomUUID();
+   window.name=WINDOW_PREFIX+windowId;
+ }
+ const storageKey='abbate-auth-window-v2:'+windowId;
  const client=globalThis.AbbateSupabase.createClient(C.url,C.publishableKey,{
-   auth:{storageKey:'abbate-auth-v1',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+   auth:{storageKey,storage:globalThis.sessionStorage,persistSession:true,
+     autoRefreshToken:true,detectSessionInUrl:true}
  });
  const fail=error=>{if(error)throw error;};
  const person=(membership,profile)=>({id:membership.user_id,school:membership.school_id,
@@ -52,7 +65,7 @@
    if(!['admin','trainer'].includes(user.role)){staffIdle=null;return true;}
    const sid=staffSessionId(session);
    if(!sid)return true; // Supabase session IDs are present in current access tokens.
-   const key='abbate-staff-idle-v1:'+user.id;
+   const key='abbate-staff-idle-v2:'+user.id+':'+sid;
    if(!staffIdle||staffIdle.session!==sid||staffIdle.key!==key){
      staffIdle={key,session:sid,fallbackAt:Date.now(),lastWrite:0};
      const previous=idleRecord();
