@@ -508,6 +508,762 @@
    "Ein Werkzeug als Warnsignal in ihre Richtung fallen lassen.",
    "Eine Absperrung ersetzt nicht die Beobachtung des Gefahrenbereichs während des Betriebs."
   ]
+ ],
+ "krane": [
+  [
+   "k2-arbeitsplanung",
+   "grundlagen",
+   "Was gehört vor einem Kraneinsatz zur Arbeitsvorbereitung?",
+   "Last, Standort und Transportweg sind noch nicht abgestimmt.",
+   "Tragfähigkeit, Anschlagmittel, Lastweg und Gefahrenbereich vorab klären.",
+   "Zuerst die schwerste Last ohne weitere Planung anheben.",
+   "Nur den kürzesten Weg auf dem Hallenboden markieren.",
+   "Eine geplante Kranbewegung benötigt geeignete Lastaufnahme, sichere Wege und abgestimmte Schutzmaßnahmen."
+  ],
+  [
+   "k2-hakenposition",
+   "lasten",
+   "Wie wird der Kranhaken vor dem Anheben über der Last positioniert?",
+   "Die Anschlagpunkte liegen unterhalb des Krans.",
+   "Möglichst senkrecht über dem Lastschwerpunkt entsprechend der Anschlagung.",
+   "Weit seitlich versetzt, damit die Last schneller einschwenkt.",
+   "In jedem Fall am äußeren Rand der Last, unabhängig vom Schwerpunkt.",
+   "Senkrechte Krafteinleitung und geeignete Anschlagpunkte vermindern seitliches Wegschlagen und unkontrollierte Bewegungen."
+  ],
+  [
+   "k2-hakengabel",
+   "grundlagen",
+   "Ein Lasthaken zeigt eine auffällige Verformung. Was gilt?",
+   "Der Haken sieht gegenüber seinem üblichen Zustand aufgebogen aus.",
+   "Kranbetrieb unterbrechen und den Haken fachkundig überprüfen lassen.",
+   "Die Verformung mit der nächsten Last zurückbiegen.",
+   "Nur noch leichte Lasten anhängen und weiterarbeiten.",
+   "Verformungen können die Sicherheit des Hakens beeinträchtigen; eine eigenmächtige Weiterbenutzung ist nicht zulässig."
+  ],
+  [
+   "k2-zugueberlast",
+   "lasten",
+   "Die Last ist schwerer als zunächst angenommen. Was tust du?",
+   "Bei der Vorbereitung ergeben sich neue Gewichtsangaben.",
+   "Tatsächliche Last bestimmen und Tragfähigkeitsgrenzen erneut prüfen.",
+   "Die Sicherheitsreserve durch schnelleres Heben ersetzen.",
+   "Das Lastgewicht durch Anschlagen an einem anderen Punkt ignorieren.",
+   "Sicheres Heben erfordert verlässliche Lastdaten und die Einhaltung aller relevanten Tragfähigkeiten."
+  ],
+  [
+   "k2-arbeitskorb",
+   "betrieb",
+   "Darf ein gewöhnlicher Kranhaken ohne Weiteres Personen befördern?",
+   "Eine Person möchte an eine hoch gelegene Arbeitsstelle gelangen.",
+   "Nein, Personentransport erfordert dafür zulässige besondere Einrichtungen und Maßnahmen.",
+   "Ja, wenn sich die Person am Anschlagseil festhält.",
+   "Ja, sobald der Hub besonders langsam ausgeführt wird.",
+   "Das Befördern von Personen ist nur unter besonderen, hierfür vorgesehenen Bedingungen zulässig."
+  ],
+  [
+   "k2-bruecke",
+   "betrieb",
+   "Ein Brückenkran fährt auf einem gemeinsam genutzten Hallenweg. Was ist wichtig?",
+   "Unter dem Transportweg halten sich Beschäftigte auf.",
+   "Lastweg und Verkehrsbereich wirksam freihalten beziehungsweise absichern.",
+   "Mit der Last knapp über den Köpfen der Beschäftigten fahren.",
+   "Nur die Warnhupe statt weiterer Maßnahmen benutzen.",
+   "Gefährdete Personen dürfen sich nicht unter schwebenden Lasten oder in deren Transportweg befinden."
+  ],
+  [
+   "k2-zweitekrane",
+   "betrieb",
+   "Zwei Krane arbeiten in einem überschneidenden Bereich. Was ist notwendig?",
+   "Ausleger oder Lasten könnten miteinander kollidieren.",
+   "Einsätze koordinieren und geeignete Maßnahmen gegen gegenseitige Gefährdung treffen.",
+   "Beide Kranführer arbeiten ohne Absprache gleichzeitig.",
+   "Die Bewegungen werden bewusst beschleunigt, um Kreuzungen zu vermeiden.",
+   "Überlappende Arbeitsbereiche erfordern eine abgestimmte Betriebsorganisation und geeignete Sicherungen."
+  ],
+  [
+   "k2-pruefbuch",
+   "grundlagen",
+   "Welche Bedeutung hat die vorgeschriebene wiederkehrende Kranprüfung?",
+   "Die Maschine wird regelmäßig im Betrieb eingesetzt.",
+   "Sie ergänzt die Betriebskontrolle durch die vorgeschriebene fachkundige Prüfung.",
+   "Sie ersetzt jede Sichtprüfung vor Arbeitsbeginn dauerhaft.",
+   "Sie ist nur nach einem Absturz erforderlich.",
+   "Wiederkehrende Prüfungen und laufende Einsatzkontrollen haben unterschiedliche Aufgaben."
+  ],
+  [
+   "k2-absetzflaeche",
+   "lasten",
+   "Die vorgesehene Absetzfläche ist uneben. Wie handelst du?",
+   "Die Last könnte beim Aufsetzen kippen.",
+   "Geeignete tragfähige und stabile Unterlagen beziehungsweise Fläche vorbereiten.",
+   "Last auf einer Ecke absetzen und unverändert hängen lassen.",
+   "Eine Person während des Absetzens unter die Last stellen.",
+   "Absetzflächen müssen die Last sicher aufnehmen und gefährliche Kipp- oder Rollbewegungen verhindern."
+  ],
+  [
+   "k2-anfahrbereich",
+   "betrieb",
+   "Vor dem Anfahren des Krans befindet sich eine Person im Fahrbereich. Was tust du?",
+   "Der Fahrweg ist durch eine Person blockiert.",
+   "Bewegung erst starten, wenn der Gefahrenbereich frei und sicher ist.",
+   "Die Person durch eine kleine Probefahrt zur Seite drängen.",
+   "Ohne Sichtkontrolle allein anhand des Endschalters anfahren.",
+   "Fahr- und Schwenkbewegungen dürfen keine Menschen gefährden."
+  ],
+  [
+   "k2-schlaffseil",
+   "lasten",
+   "Warum darf das Hubseil beim Absetzen nicht unkontrolliert schlaff werden?",
+   "Die Last liegt auf, der Haken wird weiter abgesenkt.",
+   "Damit Seil und Haken nicht verklemmen oder unkontrolliert belastet werden.",
+   "Damit die Last anschließend durch das Seil seitlich gezogen werden kann.",
+   "Damit sich Anschlagmittel selbstständig vom Haken lösen.",
+   "Unkontrollierte Seilführung kann zu Verwicklungen und gefährlichen Lastbewegungen führen."
+  ],
+  [
+   "k2-pendel",
+   "betrieb",
+   "Eine transportierte Last gerät ins Pendeln. Was ist richtig?",
+   "Die Last bewegt sich seitlich stärker als geplant.",
+   "Bewegungen kontrolliert reduzieren und Pendeln ohne Personen im Gefahrenbereich beruhigen.",
+   "Mit schnellen Gegenbewegungen und voller Fahrt kompensieren.",
+   "Die schwingende Last mit bloßen Händen festhalten.",
+   "Pendelnde Lasten können Personen und Einrichtungen treffen; ruhige Bewegungen vermindern das Risiko."
+  ],
+  [
+   "k2-funkakku",
+   "grundlagen",
+   "Die Funksteuerung eines Krans hat eine schwache Batterie. Was gilt?",
+   "Die Verbindung könnte während des Hebens abbrechen.",
+   "Vor dem Einsatz eine zuverlässige Steuerverbindung sicherstellen.",
+   "Noch schnell eine Last heben, bevor die Steuerung ausfällt.",
+   "Bei Verbindungsverlust die Last durch Ziehen am Anschlagmittel bewegen.",
+   "Zuverlässige Steuerung und Kommunikation sind Voraussetzung für kontrollierte Kranbewegungen."
+  ],
+  [
+   "k2-mehrereanschlaeger",
+   "betrieb",
+   "Zwei Personen geben dem Kranführer gleichzeitig unterschiedliche Zeichen. Was ist richtig?",
+   "Die Zeichen widersprechen einander.",
+   "Bewegung unterbrechen und eindeutige Zuständigkeit klären.",
+   "Das Zeichen der weiter entfernten Person bevorzugen.",
+   "Die Bewegung nach eigenem Gefühl fortsetzen.",
+   "Kranführer benötigen klare und eindeutige Verständigung, insbesondere bei unübersichtlichen Lastwegen."
+  ],
+  [
+   "k2-endabschaltung",
+   "grundlagen",
+   "Warum darf eine Endabschaltung nicht als normale Hubbegrenzung missbraucht werden?",
+   "Die Last wird häufig bis zum maximalen Hubweg bewegt.",
+   "Endschalter sind Sicherheitseinrichtungen und ersetzen keine kontrollierte Bedienung.",
+   "Endschalter erlauben grundsätzlich schnelleres Heben ohne Sicht.",
+   "Sie sollen bei jedem Hub möglichst hart angefahren werden.",
+   "Sicherheitseinrichtungen dienen dem Schutz vor Gefahren und dürfen nicht planmäßig überbeansprucht werden."
+  ],
+  [
+   "k2-wetterbeobachtung",
+   "betrieb",
+   "Der Wind nimmt bei einer großflächigen Last deutlich zu. Was ist erforderlich?",
+   "Eine große Bauteilfläche wirkt wie ein Segel.",
+   "Wind- und Einsatzgrenzen beurteilen und gegebenenfalls das Heben einstellen.",
+   "Die Last immer höher heben, damit der Wind weniger wirkt.",
+   "Die Anschlagmittel durch dünnere ersetzen.",
+   "Wind kann besonders bei großflächigen Lasten erhebliche Zusatzkräfte und Pendelbewegungen erzeugen."
+  ],
+  [
+   "k2-ortswechsel",
+   "grundlagen",
+   "Was ist beim Versetzen eines Mobilkrans an einen neuen Standort wichtig?",
+   "Untergrund und Stützbedingungen verändern sich.",
+   "Standplatz und Abstützung vor erneuter Lastaufnahme prüfen.",
+   "Die Einstellungen des vorherigen Standorts ungeprüft übernehmen.",
+   "Die Abstützung während des Hebens nachjustieren lassen.",
+   "Jeder Aufstellort kann andere Boden- und Stützlastbedingungen aufweisen."
+  ],
+  [
+   "k2-betriebsbereich",
+   "betrieb",
+   "Ein Kran soll über eine Straße hinweg arbeiten. Was ist zu klären?",
+   "Dritte könnten in den Gefahrenbereich gelangen.",
+   "Erforderliche Sperrungen, Abstimmungen und Schutzmaßnahmen vor dem Hub.",
+   "Die Fahrbahn nur mit einer Warnhupe sichern.",
+   "Die Last ohne Sicherung möglichst schnell über Fahrzeuge heben.",
+   "Eine sichere Verkehrsführung verhindert unzulässige Gefährdung Dritter durch Lasten und Kranbewegungen."
+  ],
+  [
+   "k2-hochheben",
+   "lasten",
+   "Nach dem Probehub hängt eine Last deutlich schief. Was ist richtig?",
+   "Der Schwerpunkt wurde offenbar falsch eingeschätzt.",
+   "Last sicher absetzen und Anschlagung sowie Schwerpunkt erneut prüfen.",
+   "Weiterheben, damit sich die Schieflage von selbst ausgleicht.",
+   "Eine Person an der schiefen Last ziehen lassen.",
+   "Der Probehub dient dazu, falsche Anschlagung und instabile Lastlage vor dem Transport zu erkennen."
+  ],
+  [
+   "k2-schwebelast",
+   "betrieb",
+   "Darfst du eine angehobene Last unbeaufsichtigt hängen lassen?",
+   "Die Schicht endet, aber die Last hängt noch am Haken.",
+   "Nein, Last sicher absetzen und Kran ordnungsgemäß sichern.",
+   "Ja, wenn der Kran gegen Wegfahren verriegelt wird.",
+   "Ja, sofern ein Warnschild am Boden steht.",
+   "Schwebende Lasten sind grundsätzlich nicht unbeaufsichtigt zu belassen."
+  ],
+  [
+   "k2-mitnahme",
+   "betrieb",
+   "Ein Kollege möchte auf einer Kranlast mitfahren. Was gilt?",
+   "Die Last soll zu einem höher gelegenen Punkt transportiert werden.",
+   "Personen dürfen nicht auf oder an gewöhnlichen Lasten mitbefördert werden.",
+   "Mitfahren ist zulässig, wenn der Kollege einen Helm trägt.",
+   "Mitfahren ist immer erlaubt, sobald der Kollege dem Kranführer bekannt ist.",
+   "Das Mitnehmen von Personen an Lasten führt zu erheblichen Absturz- und Quetschgefahren."
+  ],
+  [
+   "k2-warnsignal",
+   "betrieb",
+   "Eine betriebliche Warnanlage am Kran fällt aus. Was ist richtig?",
+   "Vor dem Anfahren ist kein vorgesehener Warnhinweis mehr möglich.",
+   "Sicherheitsrelevanten Ausfall melden und Betrieb gemäß Vorgaben unterbrechen.",
+   "Die Anlage ignorieren, wenn der Motor läuft.",
+   "Die Warnung dauerhaft durch Klopfen auf das Gehäuse ersetzen.",
+   "Erforderliche Warneinrichtungen müssen funktionsfähig sein, damit Personen rechtzeitig geschützt werden."
+  ],
+  [
+   "k2-schneekante",
+   "grundlagen",
+   "Ein Autokran soll auf gefrorenem unebenem Boden abgestützt werden. Was gilt?",
+   "Der Boden kann beim Auftauen an Tragfähigkeit verlieren.",
+   "Tragfähigkeit und Stützsituation unter den tatsächlichen Bedingungen beurteilen.",
+   "Gefrorener Boden ist immer beliebig tragfähig.",
+   "Stützen ausschließlich auf kleine Steine stellen.",
+   "Temperatur, Feuchte und Untergrundaufbau beeinflussen die Tragfähigkeit von Kranstandorten."
+  ],
+  [
+   "k2-laufkatze",
+   "betrieb",
+   "Eine Laufkatze fährt auf ein Hindernis zu. Wie handelst du?",
+   "Im Fahrbereich steht ein Gegenstand.",
+   "Bewegung rechtzeitig stoppen und Hindernis sicher beseitigen lassen.",
+   "Den Gegenstand mit der Last langsam wegdrücken.",
+   "Mit erhöhter Geschwindigkeit am Hindernis vorbeifahren.",
+   "Kranbewegungen müssen so geführt werden, dass keine Kollisionen mit Hindernissen auftreten."
+  ],
+  [
+   "k2-anschlagaufnahme",
+   "lasten",
+   "Du sollst eine Last an einer nicht ausgewiesenen Öse aufnehmen. Was ist richtig?",
+   "Die Öse könnte nur zur Montage einer Abdeckung bestimmt sein.",
+   "Tragfähigkeit und Eignung des Anschlagpunkts vor Benutzung verifizieren.",
+   "Jede Öse ist für volle Krantraglast geeignet.",
+   "Die Öse nur mit zwei Personen gleichzeitig belasten.",
+   "Nicht jede vorhandene Öse ist ein tragfähiger Anschlagpunkt für Kranlasten."
+  ]
+ ],
+ "lasten": [
+  [
+   "l2-seilbruch",
+   "grundlagen",
+   "Ein Drahtseil zeigt mehrere gebrochene Einzeldrähte. Was ist richtig?",
+   "Die Bruchstellen liegen im tragenden Seilbereich.",
+   "Anschlagmittel nicht weiterbenutzen und fachgerecht beurteilen lassen.",
+   "Die Drahtenden mit bloßen Händen zurückbiegen.",
+   "Das Seil weiterverwenden, wenn die Last besonders leicht ist.",
+   "Drahtbrüche können ein Ablegekriterium darstellen; beschädigte Seile müssen sachkundig beurteilt werden."
+  ],
+  [
+   "l2-schaekel",
+   "grundlagen",
+   "Was ist bei der Verwendung eines Schäkels entscheidend?",
+   "Ein Schäkel verbindet Anschlagmittel und Last.",
+   "Geeignete Tragfähigkeit, unbeschädigten Zustand und ordnungsgemäßen Bolzen prüfen.",
+   "Den Bolzen durch einen beliebigen Nagel ersetzen.",
+   "Die Tragfähigkeit anhand der Farbe abschätzen.",
+   "Schäkel müssen passend dimensioniert, vollständig und in der vorgesehenen Belastungsrichtung genutzt werden."
+  ],
+  [
+   "l2-tragfaehigkeit",
+   "lasten",
+   "Was musst du bei einer mehrsträngigen Anschlagung beachten?",
+   "Die Stränge verlaufen schräg zur Senkrechten.",
+   "Tragfähigkeit der gesamten Anschlagart und Winkel berücksichtigen.",
+   "Die Tragfähigkeit jedes Strangs einfach beliebig addieren.",
+   "Die Last ausschließlich am leichtesten Strang einhängen.",
+   "Neigungswinkel und wirksame Strangzahl beeinflussen die zulässige Belastung erheblich."
+  ],
+  [
+   "l2-schweissnaht",
+   "grundlagen",
+   "Darf ein improvisierter Anschlagpunkt an eine Last geschweißt werden?",
+   "Für die Last fehlen geeignete ausgewiesene Aufnahmepunkte.",
+   "Nur fachgerecht ausgelegte und freigegebene Anschlagpunkte verwenden.",
+   "Eine beliebige Schweißnaht genügt ohne Prüfung.",
+   "Einen Haken durch eine Öffnung im Blech stecken.",
+   "Anschlagpunkte müssen nachweislich für die Kräfte beim Heben geeignet sein."
+  ],
+  [
+   "l2-einseitig",
+   "lasten",
+   "Eine Last ist auf einer Seite deutlich schwerer. Wie gehst du vor?",
+   "Der Schwerpunkt liegt außerhalb der geometrischen Mitte.",
+   "Schwerpunkt ermitteln und Anschlagung darauf abstimmen.",
+   "Alle Stränge unabhängig vom Schwerpunkt gleich lang lassen.",
+   "Die Last zuerst bis zur vollen Hubhöhe anheben.",
+   "Bei außermittigem Schwerpunkt können Lasten unerwartet kippen oder einzelne Stränge überlastet werden."
+  ],
+  [
+   "l2-kettenriss",
+   "grundlagen",
+   "Was gilt für eine Anschlagkette mit sichtbaren Rissen?",
+   "An einem Kettenglied fällt ein Riss auf.",
+   "Kette sofort aussondern und zuständige Person informieren.",
+   "Den Riss mit Farbe markieren und unverändert heben.",
+   "Das Glied mit Draht umwickeln und weiterverwenden.",
+   "Risse an tragenden Kettengliedern sind sicherheitsrelevante Schäden und erfordern die Außerbetriebnahme."
+  ],
+  [
+   "l2-lastfuehrung",
+   "betrieb",
+   "Wie führst du eine große Last bei Drehgefahr?",
+   "Die Last kann während des Anhebens seitlich ausschwenken.",
+   "Geeignete vorgesehene Führungsmittel und sicheren Abstand benutzen.",
+   "Die Last während der Fahrt direkt zwischen den Händen halten.",
+   "Unter die Last treten und sie von unten ausrichten.",
+   "Lastführung darf nicht dazu führen, dass Hände oder Körper in den Gefahrenbereich geraten."
+  ],
+  [
+   "l2-schnueren",
+   "lasten",
+   "Was ist bei der Schnürgang-Anschlagung wichtig?",
+   "Das Anschlagmittel wird um ein Bauteil geführt.",
+   "Eignung der Anschlagart und zulässige Belastung gemäß Kennzeichnung beachten.",
+   "Die gleiche Tragfähigkeit wie bei jeder anderen Anschlagart annehmen.",
+   "Das Anschlagmittel ungeprüft beliebig stark zusammenziehen.",
+   "Die Schnürgang-Anschlagart kann die zulässige Tragfähigkeit ändern und muss korrekt angewendet werden."
+  ],
+  [
+   "l2-winkelmesser",
+   "lasten",
+   "Warum darfst du einen flachen Strangwinkel nicht ignorieren?",
+   "Zwei Anschlagstränge laufen nahezu waagerecht zur Last.",
+   "Hohe Strangkräfte können die zulässige Tragfähigkeit überschreiten.",
+   "Ein flacher Winkel macht den Strang automatisch stärker.",
+   "Die Last verteilt sich unabhängig vom Winkel stets gleich.",
+   "Bei zunehmendem Winkel zur Senkrechten steigen die Beanspruchungen der Stränge."
+  ],
+  [
+   "l2-heisse-last",
+   "grundlagen",
+   "Was musst du bei einer heißen Last prüfen?",
+   "Ein Stahlteil wurde kurz zuvor wärmebehandelt.",
+   "Temperaturgrenzen der Anschlagmittel und geeignete Auswahl beachten.",
+   "Jedes textile Anschlagmittel verträgt beliebige Temperaturen.",
+   "Die Kennzeichnung spielt bei Hitze keine Rolle.",
+   "Temperatur kann die zulässige Belastbarkeit von Anschlagmitteln beeinträchtigen."
+  ],
+  [
+   "l2-abstand",
+   "betrieb",
+   "Darfst du beim Absetzen mit den Fingern unter die Last greifen?",
+   "Die Last soll millimetergenau auf einer Unterlage landen.",
+   "Nein, Abstand halten und geeignete Hilfsmittel verwenden.",
+   "Ja, wenn du Arbeitshandschuhe trägst.",
+   "Ja, wenn die Kranbewegung besonders langsam ist.",
+   "Körperteile zwischen Last und Unterlage können eingeklemmt werden."
+  ],
+  [
+   "l2-verbindung",
+   "grundlagen",
+   "Ein Verbindungsglied der Anschlagkette ist nicht verriegelt. Was gilt?",
+   "Die Sicherung des Verbindungselements fehlt.",
+   "Nicht anschlagen, bis das Verbindungselement korrekt gesichert ist.",
+   "Den Bolzen ohne Verriegelung benutzen, sofern niemand zusieht.",
+   "Das Element mit Klebeband verschließen.",
+   "Verbindungselemente müssen vollständig und entsprechend ihrer Bauart gesichert sein."
+  ],
+  [
+   "l2-lasthaken",
+   "lasten",
+   "Was prüfst du beim Einhängen in einen Kranhaken?",
+   "Mehrere Anschlagmittel sollen in den Haken geführt werden.",
+   "Sicheren Sitz und Eignung von Haken und Aufhängung sicherstellen.",
+   "Anschlagmittel an der Hakenspitze auflegen.",
+   "Die Hakensicherung durch einen Kabelbinder ersetzen.",
+   "Die Kraft muss bestimmungsgemäß in den dafür vorgesehenen Bereichen eingeleitet werden."
+  ],
+  [
+   "l2-fasern",
+   "grundlagen",
+   "Ein Hebeband zeigt starke Aufrauhung und Faserschäden. Was ist richtig?",
+   "Tragende Fasern sind sichtbar beschädigt.",
+   "Hebeband aussondern und fachkundig überprüfen lassen.",
+   "Mit einem weiteren Knoten die Schäden verdecken.",
+   "Die Last anschließend schneller anheben.",
+   "Beschädigte tragende Fasern können die Belastbarkeit eines Hebebands erheblich mindern."
+  ],
+  [
+   "l2-anheben",
+   "betrieb",
+   "Was gilt unmittelbar beim ersten Zentimeter des Anhebens?",
+   "Die Last hebt gerade von ihrer Unterlage ab.",
+   "Sitz der Anschlagung, Gleichgewicht und Bewegungsverhalten prüfen.",
+   "Die Last ohne Kontrolle bis zur vollen Höhe ziehen.",
+   "Unter der Last schauen, ob die Anschlagmittel gespannt sind.",
+   "Ein kontrollierter Probehub macht mögliche Instabilitäten vor dem weiteren Transport sichtbar."
+  ],
+  [
+   "l2-lastgewichte",
+   "lasten",
+   "Das Lastgewicht ist unbekannt. Was ist richtig?",
+   "Das Bauteil besitzt keine Gewichtskennzeichnung.",
+   "Belastbares Gewicht ermitteln, bevor Anschlagmittel ausgewählt werden.",
+   "Das Gewicht anhand der Farbe der Last schätzen.",
+   "Ein beliebiges Anschlagmittel mit doppelter Länge verwenden.",
+   "Ohne bekanntes oder zuverlässig bestimmtes Gewicht lässt sich die Eignung der Anschlagmittel nicht sicher prüfen."
+  ],
+  [
+   "l2-lose-teile",
+   "betrieb",
+   "Auf der zu hebenden Last liegen lose Werkzeuge. Was tust du?",
+   "Beim Anheben könnten Werkzeuge herunterfallen.",
+   "Lose Gegenstände vor dem Hub entfernen oder wirksam sichern.",
+   "Werkzeuge bei der Fahrt mit einer Hand auffangen.",
+   "Die Last etwas schneller anheben, damit nichts verrutscht.",
+   "Lose Gegenstände können herabfallen und Personen im Umfeld gefährden."
+  ],
+  [
+   "l2-wind",
+   "betrieb",
+   "Eine großflächige Last wird bei starkem Wind angeschlagen. Was gilt?",
+   "Das Bauteil bietet dem Wind eine große Angriffsfläche.",
+   "Windverhältnisse beurteilen und bei unsicherer Lage den Hub unterlassen.",
+   "Die Last ohne Rücksicht auf Pendelbewegungen anheben.",
+   "Zusätzliche Personen sollen die Last direkt festhalten.",
+   "Windkräfte können die Lastführung und die Standsicherheit beim Transport beeinträchtigen."
+  ],
+  [
+   "l2-unterlage",
+   "betrieb",
+   "Warum sind geeignete Unterlagen beim Absetzen wichtig?",
+   "Eine runde Last würde auf dem Boden wegrollen.",
+   "Last standsicher absetzen und gegebenenfalls gegen Rollen sichern.",
+   "Die Last direkt auf den Anschlagmitteln stehen lassen.",
+   "Die Unterlagen erst nach dem Absetzen unter die Last schieben.",
+   "Geeignete Auflagen verhindern Umkippen und ungewollte Bewegungen beim Absetzen."
+  ],
+  [
+   "l2-transportweg",
+   "betrieb",
+   "Was muss vor dem Lasttransport abgestimmt werden?",
+   "Die Last wird über mehrere Arbeitsbereiche bewegt.",
+   "Sicherer Lastweg, Verständigung und notwendige Absperrungen.",
+   "Nur die voraussichtliche Dauer des Hubs.",
+   "Eine Person soll unter der Last den Weg anzeigen.",
+   "Der Lasttransport erfordert sichere Verkehrswege und eine eindeutige Koordination."
+  ],
+  [
+   "l2-schutzschlauch",
+   "lasten",
+   "Was ist bei Anschlagmitteln mit Schutzschlauch zu beachten?",
+   "Ein Band liegt an einer rauen Kante an.",
+   "Schutzmittel entsprechend Eignung und Einsatzvorgaben auswählen.",
+   "Jeder dünne Stofflappen ersetzt einen geeigneten Kantenschutz.",
+   "Ein Schutzschlauch hebt jede zulässige Belastungsgrenze auf.",
+   "Schutzmittel müssen zum Material, zur Kante und zum vorgesehenen Belastungsfall passen."
+  ],
+  [
+   "l2-reinigung",
+   "grundlagen",
+   "Ein Hebeband wurde mit unbekannter Chemikalie verschmutzt. Was ist richtig?",
+   "Das Band ist nicht mehr eindeutig zu beurteilen.",
+   "Benutzung stoppen und Verträglichkeit beziehungsweise Zustand fachgerecht klären.",
+   "Mit beliebigem Lösungsmittel reinigen und sofort weiterheben.",
+   "Die Chemikalie ignorieren, solange das Band trocken ist.",
+   "Chemikalien können die Festigkeit textiler Anschlagmittel beeinträchtigen."
+  ],
+  [
+   "l2-aufhaengung",
+   "lasten",
+   "Was prüfst du bei mehreren Strängen am Aufhängeglied?",
+   "Zwei Stränge werden gemeinsam in eine Aufhängung gelegt.",
+   "Alle Verbindungselemente müssen geeignet und bestimmungsgemäß angeordnet sein.",
+   "Ein Strang darf beliebig in die Hakenspitze ausweichen.",
+   "Ein Ring mit Riss kann bei kleinen Lasten verwendet werden.",
+   "Anschlag- und Verbindungselemente müssen tragfähig und korrekt angeordnet sein."
+  ],
+  [
+   "l2-einweiserrolle",
+   "betrieb",
+   "Was gilt, wenn Anschläger und Kranführer keine Sichtverbindung haben?",
+   "Ein Träger versperrt die Sicht auf den Absetzpunkt.",
+   "Eindeutige sichere Kommunikation organisieren und bei Unklarheit stoppen.",
+   "Durch Zuruf mehrerer Personen ohne Zuständigkeit koordinieren.",
+   "Die Last ohne Einweisung anhand von Geräuschen bewegen.",
+   "Fehlende Sicht muss durch wirksame Abstimmung und sichere Kommunikation ausgeglichen werden."
+  ],
+  [
+   "l2-ausserbetrieb",
+   "grundlagen",
+   "Ein beschädigtes Anschlagmittel wurde aussortiert. Was ist zusätzlich wichtig?",
+   "Es liegt weiterhin frei zugänglich neben einsatzbereiten Mitteln.",
+   "Gegen erneute versehentliche Verwendung sichern und zuständige Person informieren.",
+   "Das Mittel unmarkiert in den Bestand zurücklegen.",
+   "Es nur bei einer besonders leichten Last noch einmal benutzen.",
+   "Abgelegte Anschlagmittel müssen vor einer weiteren Benutzung zuverlässig geschützt werden."
+  ]
+ ],
+ "bagger": [
+  [
+   "b2-schwenkradius",
+   "betrieb",
+   "Warum ist der hintere Schwenkradius eines Baggers kritisch?",
+   "Das Heck bewegt sich über eine begrenzte Arbeitsfläche.",
+   "Dritte können vom schwenkenden Oberwagen erfasst werden.",
+   "Der Schwenkradius hat keinen Einfluss auf Personen neben der Maschine.",
+   "Das Heck bewegt sich immer nur in Fahrtrichtung.",
+   "Beim Schwenken entsteht ein Gefahrenbereich auch hinter der Maschine."
+  ],
+  [
+   "b2-verkehrseinweiser",
+   "betrieb",
+   "Wie wird eine Fahrbewegung bei verdeckter Sicht abgesichert?",
+   "Ein Bagger soll hinter einem Hindernis rangieren.",
+   "Bei Bedarf geeignete Einweisung mit klarer Verständigung organisieren.",
+   "Ohne Sicht auf die Signale des Einweisers fahren.",
+   "Die Rückwärtsfahrt nur durch einmaliges Hupen absichern.",
+   "Unübersichtliche Fahrwege erfordern wirksame Maßnahmen gegen Anfahren und Einklemmen."
+  ],
+  [
+   "b2-standplatz",
+   "grundlagen",
+   "Was gilt für einen Baggerstandplatz am Hang?",
+   "Der Boden ist geneigt und möglicherweise rutschig.",
+   "Standsicherheit und Betriebsgrenzen der Maschine vor dem Einsatz prüfen.",
+   "Bei jeder Neigung darf die Maschine beliebig weit ausfahren.",
+   "Den Bagger grundsätzlich auf einer gelösten Erdschicht aufstellen.",
+   "Böschungsneigung und Untergrund beeinflussen die Standsicherheit erheblich."
+  ],
+  [
+   "b2-oberleitung",
+   "betrieb",
+   "Warum muss der Abstand des Auslegers zu Stromleitungen geplant werden?",
+   "Der Ausleger kann beim Schwenken in Leitungsnähe kommen.",
+   "Elektrischer Überschlag ist auch ohne direkten Kontakt möglich.",
+   "Nur die Schaufel kann Strom leiten, nicht der Ausleger.",
+   "Mit trockener Erde ist jeder Abstand automatisch sicher.",
+   "Einsatzgrenzen und Schutzabstände müssen vor Annäherung an elektrische Anlagen geklärt werden."
+  ],
+  [
+   "b2-fremdperson",
+   "betrieb",
+   "Ein Passant betritt die Baustelle im Schwenkbereich. Was ist richtig?",
+   "Die Person steht plötzlich nahe der Baggerschaufel.",
+   "Bewegung sofort unterbrechen und Bereich räumen lassen.",
+   "Die Schaufel hochheben und über die Person schwenken.",
+   "Die Person nur aus dem Seitenfenster weiter beobachten.",
+   "Personen im Gefahrenbereich dürfen nicht durch Arbeitsbewegungen gefährdet werden."
+  ],
+  [
+   "b2-parkstellung",
+   "grundlagen",
+   "Wie wird eine Erdbaumaschine nach Arbeitsende gesichert?",
+   "Der Bagger bleibt unbeaufsichtigt auf der Baustelle.",
+   "Arbeitsgerät absetzen, Maschine sichern und unbefugte Nutzung verhindern.",
+   "Den Löffel in Kopfhöhe stehen lassen.",
+   "Den Motor unbeaufsichtigt durchlaufen lassen.",
+   "Eine ordnungsgemäße Abstellung vermindert unbeabsichtigte Bewegungen und Zugang für Unbefugte."
+  ],
+  [
+   "b2-eigenlast",
+   "lasten",
+   "Warum sind Gerätegrenzen beim Heben mit einem Bagger entscheidend?",
+   "Eine schwere Last soll am Ausleger aufgenommen werden.",
+   "Standsicherheit und zulässige Lastaufnahme können sonst überschritten werden.",
+   "Jede Maschine darf jede Last heben, solange die Schaufel passt.",
+   "Nur die Länge des Anschlagseils entscheidet über das Risiko.",
+   "Hebe- und Tragfähigkeitsangaben sind abhängig von Ausrüstung und Einsatzsituation."
+  ],
+  [
+   "b2-untergrundhohlraum",
+   "grundlagen",
+   "Der Boden über einem alten Keller könnte hohl sein. Was tust du?",
+   "Du sollst mit dem Bagger den Bereich befahren.",
+   "Tragfähigkeit und mögliche Hohlräume vor dem Befahren klären.",
+   "Die Stelle mit maximalem Schwung überqueren.",
+   "Einfach eine schwere Last auf dem Untergrund ablegen.",
+   "Hohlräume können unter Maschinengewicht einbrechen und die Maschine zum Absturz bringen."
+  ],
+  [
+   "b2-feuchtigkeit",
+   "grundlagen",
+   "Nach Starkregen wird die Böschung weich. Was ist richtig?",
+   "Ein Bagger arbeitet nahe der Böschungskante.",
+   "Boden- und Standsicherheitsverhältnisse erneut beurteilen.",
+   "Die Maschine näher an die Kante setzen, um die Reichweite zu erhöhen.",
+   "Die Veränderungen bis zum Schichtende ignorieren.",
+   "Durchfeuchtung kann die Tragfähigkeit und Standsicherheit von Böschungen verändern."
+  ],
+  [
+   "b2-bodenprobe",
+   "grundlagen",
+   "Warum müssen Leitungspläne vor dem Aushub geprüft werden?",
+   "Unter dem geplanten Aushub könnten Kabel verlaufen.",
+   "Damit Leitungen erkannt und geeignete Sicherungsmaßnahmen geplant werden.",
+   "Damit der Aushub unabhängig von fremden Anlagen schneller erfolgt.",
+   "Weil Maschinen nie in der Nähe von Leitungen eingesetzt werden dürfen.",
+   "Unterirdische Versorgungsleitungen erfordern eine zuverlässige Lageklärung vor Erdarbeiten."
+  ],
+  [
+   "b2-maschinenzugang",
+   "grundlagen",
+   "Was gilt beim Ein- und Aussteigen an der Erdbaumaschine?",
+   "Die Maschine steht auf unebenem Gelände.",
+   "Vorgesehene Aufstiege benutzen und sicheren Halt gewährleisten.",
+   "An der Hydraulikleitung aus der Kabine hinunterrutschen.",
+   "Mit laufender Maschine auf den Schwenkarm springen.",
+   "Sichere Aufstiege und geeignete Haltepunkte vermindern Sturz- und Quetschgefahren."
+  ],
+  [
+   "b2-kupplung",
+   "grundlagen",
+   "Wie kontrollierst du einen neuen Tieflöffel nach dem Anbau?",
+   "Der Löffel ist über den Schnellwechsler angeschlossen.",
+   "Korrekte Verriegelung und vorgeschriebene Kontrollschritte sicherstellen.",
+   "Den Löffel nur optisch aus größerer Entfernung beurteilen.",
+   "Direkt unter den angehobenen Löffel treten.",
+   "Fehlerhaft verriegelte Anbaugeräte können sich lösen und Menschen gefährden."
+  ],
+  [
+   "b2-hydraulikwartung",
+   "grundlagen",
+   "Warum dürfen Hydraulikleitungen nicht unter Druck geöffnet werden?",
+   "Ein Schlauch muss ausgetauscht werden.",
+   "Austretende Flüssigkeit kann mit hohem Druck schwere Verletzungen verursachen.",
+   "Der Druck verhindert stets das Austreten von Öl.",
+   "Eine offene Leitung kann gefahrlos mit den Händen geprüft werden.",
+   "Hochdruckflüssigkeit kann in Gewebe eindringen und erfordert sichere Druckentlastung."
+  ],
+  [
+   "b2-fahrweg",
+   "betrieb",
+   "Du musst über eine provisorische Baustellenbrücke fahren. Was prüfst du?",
+   "Die Brücke ist nur für bestimmte Lasten ausgelegt.",
+   "Tragfähigkeit und Eignung für Gewicht und Abmessungen der Maschine.",
+   "Ob die Brücke farblich zur Maschine passt.",
+   "Nur ob ein leichter Pkw die Brücke bereits befahren hat.",
+   "Behelfsbauwerke dürfen nur innerhalb ihrer nachgewiesenen Tragfähigkeit genutzt werden."
+  ],
+  [
+   "b2-baggertransport",
+   "betrieb",
+   "Was ist beim Transport eines Baggers auf einem Tieflader wichtig?",
+   "Die Maschine wird zur nächsten Baustelle gebracht.",
+   "Maschine gemäß Transportvorgaben sichern und Ladeeinrichtung prüfen.",
+   "Die Arbeitsausrüstung lose über den Rand hinausragen lassen.",
+   "Während der Fahrt die Kabinentür offen halten.",
+   "Transportsicherung und geeignete Ladeeinrichtungen verhindern Verrutschen und Herabfallen."
+  ],
+  [
+   "b2-schaufelfuellung",
+   "lasten",
+   "Warum darf ein Radlader mit hoch gehobener Schaufel nicht schnell fahren?",
+   "Die Last ist schwer und der Untergrund uneben.",
+   "Ein hoher Schwerpunkt kann Kippgefahr und Sichtprobleme verstärken.",
+   "Die Schaufel stabilisiert bei hoher Fahrtgeschwindigkeit automatisch.",
+   "Die Schaufelhöhe ist für die Standsicherheit ohne Bedeutung.",
+   "Ein angehobener Schwerpunkt verschlechtert typischerweise die Stabilität bei Fahrt und Kurven."
+  ],
+  [
+   "b2-fussgaenger",
+   "betrieb",
+   "Wie verhältst du dich beim Rangieren neben Fußgängern?",
+   "Der Baustellenzugang ist gleichzeitig ein Fußweg.",
+   "Fahrbewegung erst bei sicher freiem und überschaubarem Bereich ausführen.",
+   "Mit der Schaufel Fußgänger zur Seite dirigieren.",
+   "Nur einmal hupen und ohne Sicht langsam weiterfahren.",
+   "Fahr- und Personenverkehr müssen wirksam getrennt oder sicher koordiniert werden."
+  ],
+  [
+   "b2-ueberlastwarnung",
+   "lasten",
+   "Beim Heben meldet die Maschine Überlast. Was tust du?",
+   "Eine angehobene Last erreicht die zulässigen Grenzen.",
+   "Gefährdende Bewegung stoppen und Lastsituation sicher korrigieren.",
+   "Die Warnung abschalten und unverändert weiterheben.",
+   "Die Last bei laufender Maschine ruckartig anziehen.",
+   "Überlastwarnungen weisen auf mögliche Grenzüberschreitungen und Standsicherheitsrisiken hin."
+  ],
+  [
+   "b2-wasserleitung",
+   "grundlagen",
+   "Beim Graben wird eine unbekannte Leitung freigelegt. Was gilt?",
+   "Die Leitung ist nicht in den Bauplänen verzeichnet.",
+   "Arbeiten im betroffenen Bereich stoppen und Leitung fachgerecht identifizieren lassen.",
+   "Die Leitung mit der Baggerschaufel probeweise verschieben.",
+   "Ohne Prüfung direkt unter der Leitung weitergraben.",
+   "Unbekannte Leitungen können elektrische, gas- oder wassertechnische Gefahren verursachen."
+  ],
+  [
+   "b2-hangefahrt",
+   "betrieb",
+   "Wie verfährst du einen Bagger auf einer starken Geländeneigung?",
+   "Die geplante Fahrtroute führt an einem Hang entlang.",
+   "Zulässige Neigung und vorgeschriebene Fahrweise der Maschine beachten.",
+   "Unabhängig von den Herstellergrenzen quer zum Hang fahren.",
+   "Den Ausleger weit nach außen schwenken, um das Fahrzeug auszugleichen.",
+   "Die zulässige Hanglage hängt von Maschine, Untergrund und Herstellerangaben ab."
+  ],
+  [
+   "b2-schlechtebeleuchtung",
+   "betrieb",
+   "Beim Arbeiten in einer dunklen Grube ist die Sicht unzureichend. Was ist richtig?",
+   "Du kannst Personen und Hindernisse kaum erkennen.",
+   "Arbeit unterbrechen, bis die Gefahrenbereiche ausreichend sichtbar sind.",
+   "Die Grabgeschwindigkeit erhöhen, um den Einsatz schnell zu beenden.",
+   "Auf die Beleuchtung verzichten, solange der Motor läuft.",
+   "Sichere Sicht auf Fahr- und Arbeitsbereiche ist für kontrollierte Maschinenbewegungen erforderlich."
+  ],
+  [
+   "b2-kettenverschleiss",
+   "grundlagen",
+   "Beim täglichen Check fällt ein beschädigter Raupenstrang auf. Was tust du?",
+   "Eine Kettenverbindung zeigt deutliche Schäden.",
+   "Maschine nicht unkontrolliert weiterbenutzen und Schäden melden.",
+   "Mit hoher Geschwindigkeit weiterfahren, damit sich die Kette richtet.",
+   "Nur auf weichem Boden ohne Prüfung weiterarbeiten.",
+   "Beschädigungen am Laufwerk können Steuerbarkeit und Standsicherheit beeinträchtigen."
+  ],
+  [
+   "b2-ladearbeiten",
+   "betrieb",
+   "Du belädst einen Lkw mit dem Bagger. Was ist wichtig?",
+   "Der Lkw-Fahrer hält sich nahe am Ladebereich auf.",
+   "Aufenthalt von Personen im Gefahrenbereich verhindern und Abläufe abstimmen.",
+   "Mit der Schaufel über die ungeschützte Fahrerkabine schwenken.",
+   "Die Beladung ohne Verständigung mit dem Fahrer beginnen.",
+   "Beim Laden besteht Gefahr durch herabfallendes Material und Schwenkbewegungen."
+  ],
+  [
+   "b2-arbeitsunterbrechung",
+   "betrieb",
+   "Du unterbrichst Baggerarbeiten für eine Besprechung. Was gilt?",
+   "Die Maschine soll mehrere Minuten ohne Bedienung stehen.",
+   "Arbeitsgerät sicher absetzen und Maschine gegen unbeabsichtigte Nutzung sichern.",
+   "Die angehobene Schaufel als Markierung stehen lassen.",
+   "Die Maschine unbeaufsichtigt mit eingelegtem Fahrantrieb lassen.",
+   "Auch kurze Unterbrechungen erfordern einen sicheren Maschinenzustand."
+  ],
+  [
+   "b2-rollmaterial",
+   "lasten",
+   "Beim Transport mit dem Radlader kann loses Material herunterfallen. Was ist richtig?",
+   "Der Lader fährt nahe an Beschäftigten vorbei.",
+   "Ladung sicher aufnehmen und eine sichere Fahrweise mit geeigneter Schaufelstellung wählen.",
+   "Die Schaufel maximal hochheben, damit die Umgebung freie Sicht hat.",
+   "Die Ladung ohne Begrenzung der Schaufelfüllung aufnehmen.",
+   "Lose Ladung, hohe Schaufelstellung und schlechte Sicht können Personen und Verkehr gefährden."
+  ]
  ]
 };
  const ids=new Set(current.questions.map(q=>q.id));
