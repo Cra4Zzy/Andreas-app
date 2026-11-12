@@ -187,3 +187,6 @@ main{max-width:1500px;padding:clamp(27px,3.6vw,51px) clamp(22px,4.2vw,68px) 56px
 .adaptive-learning-note{display:flex;align-items:center;gap:12px;max-width:940px;margin:0 0 23px;padding:16px 19px;background:#e7efe5;border:1px solid #d4e5d6;border-radius:14px;color:#3b6855;font-size:15px;line-height:1.48}
 .adaptive-learning-note:before{content:"✦";display:grid;place-items:center;flex:0 0 32px;height:32px;border-radius:10px;background:#d5e5d6;color:#275e4d;font-size:19px}
 @media(max-width:650px){.adaptive-learning-note{font-size:14px;padding:14px 15px;align-items:flex-start}}
+
+/* Safety-critical question content remains German until approved translations are supplied. */
+.question-language-notice{background:#fff3d5;border:1px solid #e7cc85;border-radius:12px;color:#5a4519;font-size:15px;line-height:1.5;padding:13px 16px;margin:12px 0 19px}
