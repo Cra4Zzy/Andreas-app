@@ -88,6 +88,6 @@ test('admin role controls require explicit confirmation and prevent self-changes
   assert.match(sql(page),page==='dist/konto.html'?/backend\.js\?v=7/:/backend\.js\?v=6/);
  }
  for(const page of ['dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
-  assert.match(sql(page),page==='dist/konto.html'?/portal\.js\?v=14/:/portal\.js\?v=13/);
+  assert.match(sql(page),page==='dist/konto.html'?/portal\.js\?v=15/:/portal\.js\?v=13/);
  }
 });
