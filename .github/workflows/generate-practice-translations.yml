@@ -14,42 +14,61 @@ concurrency:
 jobs:
   translate:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        locale: [uk, ru, cs, bg, hr, da, nl, en, et, fi, fr, el, hu, ga, it, lv, lt, mt, pl, pt, ro, sk, sl, es, sv]
     steps:
       - uses: actions/checkout@v4
-        with:
-          persist-credentials: true
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify translation service and question segmentation
+      - name: Translate all 250 questions to one language
         env:
-          TRANSLATE_SMOKE: "1"
-          TRANSLATE_WORKERS: "2"
-        run: node scripts/generate-practice-translations.cjs en
-      - name: Generate every supported language
-        env:
-          TRANSLATE_WORKERS: "6"
-        run: node scripts/generate-practice-translations.cjs
-      - name: Validate exact translated-question coverage
+          TRANSLATE_WORKERS: "4"
+        run: node scripts/generate-practice-translations.cjs ${{ matrix.locale }}
+      - name: Export completed language pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: abbate-language-${{ matrix.locale }}
+          path: dist/practice-translations/${{ matrix.locale }}.js
+          if-no-files-found: error
+          retention-days: 7
+  publish:
+    needs: translate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: abbate-language-*
+          path: dist/practice-translations/
+          merge-multiple: true
+      - name: Validate the exact 250 x 25 translated question entries
         run: |
           node - <<'NODE'
           const fs=require('node:fs'),vm=require('node:vm');
-          const languages=['uk','ru','cs','bg','hr','da','nl','en','et','fi','fr','el','hu','ga','it','lv','lt','mt','pl','pt','ro','sk','sl','es','sv'];
-          for(const lang of languages){
+          const codes=['uk','ru','cs','bg','hr','da','nl','en','et','fi','fr','el','hu','ga','it','lv','lt','mt','pl','pt','ro','sk','sl','es','sv'];
+          for(const code of codes){
             const ctx={};ctx.globalThis=ctx;
-            vm.runInNewContext(fs.readFileSync('dist/practice-translations/'+lang+'.js','utf8'),ctx);
-            const pack=ctx.ABBATE_QUESTION_TRANSLATIONS?.[lang];
-            if(!pack || Object.keys(pack).length!==250)throw Error('Incomplete locale: '+lang);
-            for(const fields of Object.values(pack))if(!Array.isArray(fields)||fields.length!==6||fields.some(s=>typeof s!=='string'||s.length<3))throw Error('Corrupt locale: '+lang);
+            vm.runInNewContext(fs.readFileSync('dist/practice-translations/'+code+'.js','utf8'),ctx);
+            const pack=ctx.ABBATE_QUESTION_TRANSLATIONS?.[code];
+            if(!pack||Object.keys(pack).length!==250)throw Error('Incomplete locale: '+code);
+            for(const fields of Object.values(pack))if(!Array.isArray(fields)||fields.length!==6||fields.some(s=>typeof s!=='string'||s.length<3))throw Error('Corrupt locale: '+code);
           }
-          console.log('250 exercises including answer options in all 25 locales verified');
+          console.log('Validated 250 questions, five visible fields and explanation, across 25 locales');
           NODE
-      - name: Publish translation data to repository
+      - name: Publish fully generated packs
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add dist/practice-translations/
           git diff --cached --quiet && exit 0
-          git commit -m 'i18n: publish complete machine translations for all graded practice questions'
+          git commit -m 'i18n: publish machine-translated study questions in 25 languages'
+          git pull --rebase origin main
           git push origin HEAD:main
