@@ -40,7 +40,8 @@ test('same window preserves auth context across page navigation and reload',()=>
   const before=openWindow('',storage);
   const after=openWindow(before.page.name,storage);
   assert.equal(before.authOptions.storageKey,after.authOptions.storageKey);
-  assert.equal(before.authOptions.storage,after.authOptions.storage);
+  before.authOptions.storage.setItem(before.authOptions.storageKey,'persisted-token');
+  assert.equal(after.authOptions.storage.getItem(after.authOptions.storageKey),'persisted-token');
 });
 test('a signed-out window cannot clear a second window session storage',()=>{
   const one={};const two={};
