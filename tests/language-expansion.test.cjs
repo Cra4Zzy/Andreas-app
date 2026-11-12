@@ -46,7 +46,7 @@ test('critical German source format variables remain available for all 3 languag
 });
 test('the original 52 theory questions are not falsely presented as reviewed translations',()=>{
   const source=read('dist/app.js');
-  assert.match(source,/theoryLang/);
+  assert.doesNotMatch(source,/theoryLang/,'Ungraded legacy catalogue is no longer in learner navigation');
   assert.match(source,/Dieser Fragenkatalog ist derzeit nur auf Deutsch und Rumänisch übersetzt/);
   assert.match(source,/Die richtige Antwort wurde noch nicht von Andreas bestätigt/);
 });
