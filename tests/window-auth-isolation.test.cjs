@@ -4,10 +4,10 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const code=fs.readFileSync('dist/backend.js','utf8');
+let sequence=0;
 function openWindow(name='',storage={}){
   let authOptions;
   let removed=null;
-  let sequence=0;
   const page={name};
   const browserStorage={
     getItem:key=>storage[key]??null,
@@ -28,7 +28,8 @@ function openWindow(name='',storage={}){
 test('new browser windows use different auth storage keys and never reuse old shared localStorage',()=>{
   const a=openWindow(),b=openWindow();
   assert.notEqual(a.authOptions.storageKey,b.authOptions.storageKey);
-  assert.equal(a.authOptions.storage,a.storage && a.authOptions.storage);
+  assert.equal(typeof a.authOptions.storage.getItem,'function');
+  assert.equal(typeof a.authOptions.storage.setItem,'function');
   assert.equal(a.authOptions.persistSession,true);
   assert.equal(a.authOptions.detectSessionInUrl,true);
   assert.equal(a.removed,'abbate-auth-v1');
