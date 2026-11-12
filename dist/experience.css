@@ -83,13 +83,13 @@ main{max-width:1500px;padding:clamp(27px,3.6vw,51px) clamp(22px,4.2vw,68px) 56px
 .progress-count{font-size:13px}
 .qualification-grid{gap:16px}
 .qualification-card{border:1px solid #e0e8df;border-radius:22px;min-height:285px;padding:30px;background:#fffefa!important;box-shadow:0 8px 28px #153b3306}
-.qualification-card:nth-child(3),.qualification-card:nth-child(4),.qualification-card:nth-child(5){background:#fffefa!important}
+.qualification-card.qualification-upcoming:nth-child(3),.qualification-card.qualification-upcoming:nth-child(4),.qualification-card.qualification-upcoming:nth-child(5){background:#fffefa!important}
 .qualification-card h2{font-size:clamp(30px,2.6vw,39px)}
 .qualification-card p{color:#6d7f72;font-size:16px;line-height:1.48}
-.qualification-available{background:linear-gradient(122deg,#173d40,#285956)!important;border:0;min-height:340px}
+.qualification-card.qualification-available{background:linear-gradient(122deg,#173d40,#285956)!important;border:0;min-height:340px;color:#fff}
 .qualification-available:before{width:340px;height:340px;right:-64px;top:28px;border-color:#f5cf621a}
-.qualification-available h2{font-size:clamp(43px,4.7vw,68px);color:white}
-.qualification-available p{font-size:18px;color:#cfdfd7}
+.qualification-card.qualification-available h2{font-size:clamp(43px,4.7vw,68px);color:#fff}
+.qualification-card.qualification-available p{font-size:18px;color:#cfdfd7}
 .qualification-badge.live{background:#f3cd5c}
 .qualification-symbol{background:#ebf0e8;color:#417461}
 .qualification-available .qualification-symbol{background:#ffffff17;color:#f4cc59}
