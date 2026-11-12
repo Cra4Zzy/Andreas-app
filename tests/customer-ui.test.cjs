@@ -27,7 +27,7 @@ test('customer portal remains accessible to authenticated users',()=>{
   for(const p of ['dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
     const text=read(p);
     assert.match(text,/id="portal-content"/,p);
-    assert.match(text,p==='dist/konto.html'?/portal\.js\?v=15/:/portal\.js\?v=13/,p);
+    assert.match(text,p==='dist/konto.html'?/portal\.js\?v=16/:/portal\.js\?v=16/,p);
     assert.doesNotMatch(text,/class="portal-preview"/,p);
   }
 });
