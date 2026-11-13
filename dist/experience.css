@@ -190,3 +190,9 @@ main{max-width:1500px;padding:clamp(27px,3.6vw,51px) clamp(22px,4.2vw,68px) 56px
 
 /* Safety-critical question content remains German until approved translations are supplied. */
 .question-language-notice{background:#fff3d5;border:1px solid #e7cc85;border-radius:12px;color:#5a4519;font-size:15px;line-height:1.5;padding:13px 16px;margin:12px 0 19px}
+
+/* Accessible app design credit underneath the learner identity. */
+.page-footer .footer-signature{display:flex;flex-direction:column;gap:5px}
+.page-footer .footer-signature small{font-size:13px;line-height:1.5;color:#647b70}
+.page-footer .footer-signature a{font-weight:650;color:#225e51;text-underline-offset:3px}
+.page-footer .footer-signature a:hover{text-decoration:underline}
