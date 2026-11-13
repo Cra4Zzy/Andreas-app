@@ -32,7 +32,7 @@ test('learning, account, records and admin share all 26 native-language options'
     assert.match(html,/i18n\.js\?v=12/);
     assert.match(html,/portal-language\.js\?v=3/);
     assert.match(html,file==='dist/konto.html'?/portal\.js\?v=16/:/portal\.js\?v=16/);
-    assert.match(html,file==='dist/konto.html'?/portal\.css\?v=8/:/portal\.css\?v=7/);
+    assert.match(html,/portal\.css\?v=9/);
     assert.doesNotMatch(html,/<select id="portal-language"/,'Outdated four-language selector in '+file);
   }
 });
