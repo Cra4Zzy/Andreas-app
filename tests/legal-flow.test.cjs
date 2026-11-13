@@ -9,7 +9,7 @@ test('three public legal pages are reachable and share navigation',()=>{
  for(const p of ['agb','datenschutz','widerruf']){
    const body=file('dist/'+p+'.html');
    assert.match(body,/<html lang="de">/);
-   assert.match(body, /legal\.css\?v=1/);
+   assert.match(body, /legal\.css\?v=2/);
    for(const link of ['./agb.html','./datenschutz.html','./widerruf.html'])assert.ok(body.includes(link),p+' missing '+link);
  }
  assert.match(file('index.html'),/dist\/agb\.html/);
