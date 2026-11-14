@@ -12,7 +12,7 @@ for(const file of ['practice-bank.js','practice-expansion.js','practice-expansio
   vm.runInNewContext(fs.readFileSync(path.join(root,'dist',file),'utf8'),ctx,{filename:file});
 }
 const source=ctx.ABBATE_PRACTICE_BANK.questions;
-if(source.length!==250)throw Error('Expected exactly 250 questions');
+if(source.length!==300)throw Error('Expected exactly 300 questions');
 const outputDir=path.join(root,'dist','practice-translations');
 fs.mkdirSync(outputDir,{recursive:true});
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -73,7 +73,7 @@ async function runLocale(lang,limit=source.length){
   }
   await Promise.all(Array.from({length:Math.min(concurrency,pending.length)},()=>worker()));
   writeFile();
-  if(limit===source.length && Object.keys(translated).length!==250)throw Error('Incomplete '+lang);
+  if(limit===source.length && source.some(q=>!Array.isArray(translated[q.id])||translated[q.id].length!==6))throw Error('Incomplete '+lang);
   process.stdout.write(lang+' complete: '+Object.keys(translated).length+' questions\n');
 }
 (async()=>{

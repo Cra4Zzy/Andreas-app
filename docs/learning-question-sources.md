@@ -27,3 +27,14 @@ Stand 6. November 2026. Diese Datei dokumentiert die Quellenbasis des eigenstän
 3. Stimmen Hersteller-, Betriebs-, Geräte- und Sonderfallvorbehalte?
 4. Ist die Formulierung für die Zielgruppe verständlich?
 5. Sind Quellenfassung und Datum noch aktuell?
+
+## Ergänzung 14. November 2026: Ladungssicherung
+
+50 eigenständige Übungsfragen zur Sicherung von Ladegut im deutschen Straßenverkehr. Grundlagen: [§ 22 StVO](https://www.gesetze-im-internet.de/stvo_2013/__22.html), [§ 23 StVO](https://www.gesetze-im-internet.de/stvo_2013/__23.html), [DGUV Regel 114-615](https://publikationen.dguv.de/widgets/pdf/download/article/3696), [BG Verkehr: Lastverteilung und Ladungssicherung](https://www.bg-verkehr.de/arbeitssicherheit-gesundheit/branchen/gueterkraftverkehr/laden-und-sichern/lastverteilung-und-ladungssicherung) und [Be- und Entladen](https://www.bg-verkehr.de/arbeitssicherheit-gesundheit/branchen/gueterkraftverkehr/laden-und-sichern/be-und-entladen). 300 Fragen in sechs Kategorien nach dieser Erweiterung. Fachliche Freigabe einschließlich maschineller Übersetzungen steht aus; keine verbindliche Prüfung oder Unterweisung. Vor Auslieferung vollständige Sprachpakete, Kategoriegrenzen und PWA-Aktualisierung validieren.
+
+### Technischer Prüfstand der Erweiterung (14.11.2026)
+
+- 300 eindeutige Fragen-IDs, 50 je Kategorie. 25 nichtdeutsche statische Sprachpakete mit je 300 identischen IDs und sechs nichtleeren Textfeldern geprüft; in allen 50 neuen Fragen je Sprache drei unterschiedliche Antworttexte.
+- Adaptiver Auswahltest: zwei aufeinanderfolgende Runden mit je 20 unterschiedlichen Fragen aus Ladungssicherung, ohne Vermischung mit Gabelstapler.
+- Übersetzungslauf [43633691593](https://github.com/Cra4Zzy/Andreas-app/actions/runs/43633691593) erfolgreich; ursprünglich italienisches Anfrage-Limit im zweiten Versuch behoben.
+- Fachliche Quellen: [DGUV Regel 114-615 (04/2021)](https://publikationen.dguv.de/regelwerk/dguv-regeln/3696/branche-gueterkraftverkehr-guetertransport-im-strassenverkehr), §§ 22/23 StVO (geltende Fassung). Technische Validierung ist keine fachsprachliche Freigabe. Die Fahrschule muss die Fragen und Übersetzungen vor verbindlicher Verwendung prüfen; die App bleibt ein unverbindliches Lerntraining.

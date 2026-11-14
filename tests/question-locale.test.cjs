@@ -38,5 +38,5 @@ test('learning, history and language switching use translated question fields',(
   assert.match(app,/const q=localizedQuestion\(question\(id\)\),choice=result\.answers/);
   assert.match(app,/await ensureQuestionLocale\(nextLanguage\)/);
   assert.match(app,/await ensureQuestionLocale\(selectedLanguage\)/);
-  assert.match(app,/practice-translations\/.*\.js\?v=1/);
+  assert.match(app,/practice-translations\/.*\.js\?v=2/);
 });
