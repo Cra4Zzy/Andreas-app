@@ -43,7 +43,7 @@ async function ensureQuestionLocale(code){
   if(!questionLocaleRequests.has(code)){
     const promise=new Promise(resolve=>{
       const script=document.createElement('script');
-      script.src='./practice-translations/'+code+'.js?v=1';
+      script.src='./practice-translations/'+code+'.js?v=2';
       script.async=true;
       script.onload=()=>resolve(Boolean(QUESTION_LOCALES[code]&&Object.keys(QUESTION_LOCALES[code]).length===PRACTICE_BANK.questions.length));
       script.onerror=()=>resolve(false);
@@ -78,11 +78,11 @@ const TOPICS = [
   {id:'lasten',name:'Lasten & Grenzen',description:'Lasten richtig einschätzen und die Grenzen des Fahrzeugs beachten.',short:'Mit Überblick bewegen',icon:'file',color:'sand'},
   {id:'betrieb',name:'Sicher im Arbeitsalltag',description:'Sicht, Zusammenarbeit und ein sicher abgestelltes Fahrzeug.',short:'Auf dich und andere achten',icon:'users',color:'blue'}
 ];
-const COURSES=[{"id":"gabelstapler","name":"Gabelstapler","desc":"Fahrbetrieb, Fahrzeugcheck und Lastaufnahme. 50 bewertbare Übungsfragen.","sub":"50 Lernfragen","icon":"shield","color":"","active":true},{"id":"hebebuehnen","name":"Hebebühnen","desc":"Sicheres Arbeiten mit Hubarbeitsbühnen: Vorbereitung, Standsicherheit und Bedienung.","sub":"Lernmaterial folgt","icon":"users","color":"blue","active":false},{"id":"krane","name":"Krane","desc":"Kranbetrieb, Signale, Arbeitsbereich und sichere Lastbewegungen.","sub":"Lernmaterial folgt","icon":"file","color":"sand","active":false},{"id":"lasten","name":"Anschlagen von Lasten","desc":"Lasten richtig anschlagen, Anschlagmittel beurteilen und sicher kommunizieren.","sub":"Lernmaterial folgt","icon":"book","color":"","active":false},{"id":"bagger","name":"Erdbaumaschinen & Bagger","desc":"Bedienung von Erdbaumaschinen, Sicherheitsabstände und Gefahrenbereiche.","sub":"Lernmaterial folgt","icon":"shield","color":"blue","active":false}].map(course=>({...course,active:true,sub:PRACTICE_BANK.questions.filter(q=>q.course===course.id).length+' Übungsfragen'}));
+const COURSES=[{"id":"gabelstapler","name":"Gabelstapler","desc":"Fahrbetrieb, Fahrzeugcheck und Lastaufnahme. 50 bewertbare Übungsfragen.","sub":"50 Lernfragen","icon":"shield","color":"","active":true},{"id":"hebebuehnen","name":"Hebebühnen","desc":"Sicheres Arbeiten mit Hubarbeitsbühnen: Vorbereitung, Standsicherheit und Bedienung.","sub":"Lernmaterial folgt","icon":"users","color":"blue","active":false},{"id":"krane","name":"Krane","desc":"Kranbetrieb, Signale, Arbeitsbereich und sichere Lastbewegungen.","sub":"Lernmaterial folgt","icon":"file","color":"sand","active":false},{"id":"lasten","name":"Anschlagen von Lasten","desc":"Lasten richtig anschlagen, Anschlagmittel beurteilen und sicher kommunizieren.","sub":"Lernmaterial folgt","icon":"book","color":"","active":false},{"id":"bagger","name":"Erdbaumaschinen & Bagger","desc":"Bedienung von Erdbaumaschinen, Sicherheitsabstände und Gefahrenbereiche.","sub":"Lernmaterial folgt","icon":"shield","color":"blue","active":false},{"id":"ladungssicherung","name":"Ladungssicherung","desc":"Ladung sicher verteilen, verstauen und sichern.","sub":"50 Übungsfragen","icon":"shield","color":"sand","active":true}].map(course=>({...course,active:true,sub:PRACTICE_BANK.questions.filter(q=>q.course===course.id).length+' Übungsfragen'}));
 // Every qualification has its own materials. Never reuse forklift content for cranes or earthmovers.
 let activeCourseId='gabelstapler';
 const courseQuestions=id=>QUESTIONS.filter(q=>(q.course||'gabelstapler')===id);
-const courseLabel=id=>COURSES.find(c=>c.id===id)?.name||'Gabelstapler';
+const courseLabel=id=>I18N.text(COURSES.find(c=>c.id===id)?.name||'Gabelstapler');
 let data={selected:null,students:[],results:[],mastered:{}};
 let run=null, latestResult=null, search='', deferredInstall=null, toastTimer=null, pendingRoute=null;
 const student = () => data.students.find(s=>s.id===data.selected)||{id:'guest',name:'Gast',email:'',until:offsetDate(-1),access:'pending'};
@@ -164,7 +164,7 @@ function learning() {
  '<p class="form-caption">Fachliche Grundlage: <a href="'+esc(PRACTICE_BANK.courses[course.id].url)+'" target="_blank" rel="noopener noreferrer">'+esc(PRACTICE_BANK.courses[course.id].source)+'</a></p>'+
  '</article>'
  ).join('');
- return heading('Deine Ausbildung','Was möchtest du lernen?','Wähle deinen Ausbildungsbereich. Alle fünf Bereiche enthalten Übungsfragen. Die fachliche Freigabe durch die Fahrschule steht noch aus.',accessLine())+
+ return heading('Deine Ausbildung','Was möchtest du lernen?','Wähle deinen Ausbildungsbereich. Alle sechs Bereiche enthalten Übungsfragen. Die fachliche Freigabe durch die Fahrschule steht noch aus.',accessLine())+
  (selectedLanguage==='de'||QUESTION_LOCALES[selectedLanguage]?'':'<p class="form-caption">Übersetzung der Übungsfragen momentan nicht verfügbar; deutsche Texte werden angezeigt.</p>')+
   '<section class="qualification-grid" aria-label="Ausbildungsbereiche">'+cards+'</section>'+
  '<section class="learning-tip"><img src="./assets/theorie-schulung.webp" alt="Teilnehmer bei einer Theorie-Schulung" loading="lazy" width="1100" height="825"><div><h3>Lernmaterial nach Ausbildungsbereich</h3><p>Die Themen sind nach Ausbildungsbereichen gegliedert. Diese Übungsfragen ersetzen keine verbindliche Abschlussprüfung.</p><a class="text-link" href="#pruefung">Zum Prüfungstraining '+icon('arrow')+'</a></div></section>';
