@@ -1276,3 +1276,468 @@
  }));
  globalThis.ABBATE_PRACTICE_BANK=Object.freeze({courses:current.courses,questions:Object.freeze([...current.questions,...added])});
 })();
+
+;(function(){
+ const current=globalThis.ABBATE_PRACTICE_BANK;
+ const course='ladungssicherung';
+ const ref=Object.freeze({source:"DGUV Regel 114-615 – Gütertransport im Straßenverkehr; StVO §§ 22, 23",url:'https://publikationen.dguv.de/widgets/pdf/download/article/3696',reviewed:false});
+ const rows=[
+ [
+  "pflicht",
+  "Wann muss Ladung auch bei einer Fahrt sicher bleiben?",
+  "Du bereitest eine Fahrt auf öffentlichen Straßen vor.",
+  "Auch bei einer Vollbremsung oder plötzlichen Ausweichbewegung.",
+  "Nur beim gewöhnlichen Anfahren auf gerader Strecke.",
+  "Nur bei langsamer Fahrt innerorts.",
+  "Die StVO verlangt Sicherung auch bei starken Brems- und Ausweichmanövern."
+ ],
+ [
+  "fahrer",
+  "Was prüft der Fahrer vor der Abfahrt bezüglich der Ladung?",
+  "Ein anderer Mitarbeiter hat das Fahrzeug beladen.",
+  "Ob die Ladung vorschriftsmäßig gesichert ist und die Verkehrssicherheit nicht beeinträchtigt.",
+  "Ob der Verlader die geplante Ladezeit eingehalten hat.",
+  "Ob ein Kollege die Ware ohne eigene Kontrolle freigegeben hat.",
+  "Auch bei fremder Beladung bleibt der Fahrer für eine verkehrssichere Ladung verantwortlich."
+ ],
+ [
+  "kurzstrecke",
+  "Wie sicherst du Ladung für eine kurze Fahrt auf öffentlichen Straßen?",
+  "Der nächste Betrieb liegt nur wenige Minuten entfernt.",
+  "Nach denselben einschlägigen Anforderungen wie bei längeren Fahrten.",
+  "Nur gegen Bewegungen beim Anfahren.",
+  "Nur die größten Teile gegen Verschieben.",
+  "Auch auf kurzen Fahrten können starke Bremsungen und Ausweichmanöver nötig werden."
+ ],
+ [
+  "gewicht",
+  "Welche Gewichtsgrenzen gelten beim Beladen eines Lkw?",
+  "Mehrere schwere Paletten sollen transportiert werden.",
+  "Zulässige Gesamtmasse und relevante Achslasten.",
+  "Nur die zulässige Gesamtmasse.",
+  "Nur die Belastbarkeit des Laderaumbodens.",
+  "Auch bei zulässiger Gesamtmasse können einzelne Achsen überlastet sein."
+ ],
+ [
+  "lastplan",
+  "Wozu dient der Lastverteilungsplan eines Fahrzeugs?",
+  "Du möchtest schwere Güter richtig positionieren.",
+  "Um die Ladung so zu positionieren, dass die zulässigen Lastgrenzen eingehalten werden.",
+  "Um die Anzahl der Lieferscheine zu bestimmen.",
+  "Um die Fahrtziele unabhängig von den Achslasten zu ordnen.",
+  "Die Position der Ladung beeinflusst die Achslasten und damit die Verkehrssicherheit."
+ ],
+ [
+  "schwerpunkt",
+  "Wie sollte der Schwerpunkt einer gemischten Ladung möglichst liegen?",
+  "Du transportierst leichte und schwere Güter.",
+  "Möglichst niedrig und nahe der Längsmittellinie.",
+  "Möglichst hoch und weit an einer Fahrzeugseite.",
+  "Möglichst weit hinten unabhängig von den Achslasten.",
+  "Ein niedriger und mittig liegender Schwerpunkt unterstützt die Fahrzeugstabilität."
+ ],
+ [
+  "einseitig",
+  "Welche Gefahr geht von stark einseitiger Beladung aus?",
+  "Fast alle Güter stehen an einer Fahrzeugseite.",
+  "Das Fahrverhalten und die Stabilität können sich verschlechtern.",
+  "Die Belastung beider Seiten gleicht sich automatisch aus.",
+  "Die einseitige Beladung verbessert die Kurvenstabilität.",
+  "Ungleichmäßige Lastverteilung kann Wanken und instabiles Fahrverhalten begünstigen."
+ ],
+ [
+  "teilentladung",
+  "Was ist nach einer Teilentladung zu beachten?",
+  "Einige Paletten bleiben für die nächste Lieferung auf dem Fahrzeug.",
+  "Lastverteilung und Sicherung der verbleibenden Ladung neu prüfen.",
+  "Die Sicherung auch bei entstandenen Lücken unverändert lassen.",
+  "Nur das Gewicht der ausgeladenen Ware notieren.",
+  "Teilentladung verändert möglicherweise Lastverteilung, Ladelücken und Sicherungswirkung."
+ ],
+ [
+  "formschluss",
+  "Was bedeutet formschlüssige Ladungssicherung?",
+  "Du setzt geeignete feste Begrenzungen ein.",
+  "Bewegungen werden durch ausreichend belastbare Begrenzungen verhindert.",
+  "Bewegungen werden ausschließlich durch zusätzliche Reibung verhindert.",
+  "Bewegungen werden nur durch die Eigenmasse verhindert.",
+  "Formschluss nutzt tragfähige Begrenzungen oder geeignete Sperrelemente gegen Bewegungen."
+ ],
+ [
+  "kraftschluss",
+  "Wie wirkt Niederzurren grundsätzlich?",
+  "Ein Gurt verläuft über die Ladung zur Ladefläche.",
+  "Vorspannung erhöht den Anpressdruck und damit die Reibung.",
+  "Vorspannung erhöht die zulässige Gesamtmasse.",
+  "Vorspannung ersetzt die Prüfung der Tragfähigkeit des Bodens.",
+  "Beim Niederzurren wird die Reibung durch zusätzlichen Anpressdruck erhöht."
+ ],
+ [
+  "direkt",
+  "Was kennzeichnet das Direktzurren?",
+  "Zurrmittel verbinden vorgesehene Punkte von Ladung und Fahrzeug.",
+  "Zurrmittel nehmen Kräfte in den vorgesehenen Zugrichtungen auf.",
+  "Zurrmittel dienen nur als Polster unter der Ladung.",
+  "Zurrmittel wirken ausschließlich durch Anpressdruck auf den Boden.",
+  "Beim Direktzurren werden Kräfte über geeignete Verbindungen in das Fahrzeug geleitet."
+ ],
+ [
+  "luecke",
+  "Was machst du bei Lücken in einer formschlüssigen Sicherung?",
+  "Zwischen Paletten und tragfähigen Begrenzungen sind Freiräume.",
+  "Lücken mit geeigneten belastbaren Sicherungsmitteln schließen.",
+  "Lücken offen lassen, wenn die Ware schwer ist.",
+  "Lücken mit beliebigen Materialresten füllen.",
+  "Geeignete Füll- oder Sperrmittel verhindern Ladungsbewegungen in vorhandene Lücken."
+ ],
+ [
+  "aufbau",
+  "Wann darf ein Fahrzeugaufbau als Sicherung genutzt werden?",
+  "Ladung soll an einer Wand abgestützt werden.",
+  "Wenn die Begrenzung für die auftretenden Kräfte geeignet ist.",
+  "Wenn die Wand besonders massiv aussieht.",
+  "Wenn die Wand durch eine Plane verdeckt ist.",
+  "Entscheidend ist die tatsächliche Eignung und Belastbarkeit der jeweiligen Begrenzung."
+ ],
+ [
+  "plane",
+  "Was gilt für eine Wetterschutzplane ohne nachgewiesene Sicherungsfunktion?",
+  "Das Fahrzeug besitzt einen mit Plane geschlossenen Aufbau.",
+  "Die Plane ersetzt keine erforderliche Ladungssicherung.",
+  "Die Plane genügt als seitliche Sicherung schwerer Paletten.",
+  "Die Plane erhöht die Tragfähigkeit der Zurrpunkte.",
+  "Eine reine Wetterschutzplane ist nicht automatisch eine belastbare Ladungsbegrenzung."
+ ],
+ [
+  "reibung",
+  "Wozu dient eine geeignete Antirutschmatte?",
+  "Eine Palette soll auf der Ladefläche gesichert werden.",
+  "Sie erhöht die Reibung zwischen den Kontaktflächen.",
+  "Sie erhöht das zulässige Gewicht der Palette.",
+  "Sie macht eine hohe Palette automatisch kippsicher.",
+  "Rutschhemmende Materialien verbessern die Reibung; weitere Sicherungsmaßnahmen können nötig sein."
+ ],
+ [
+  "schmutz",
+  "Was ist vor dem Einsatz von Antirutschmatten auf verschmutzter Fläche zu tun?",
+  "Auf dem Boden liegen Schmutz und Ölreste.",
+  "Kontaktflächen reinigen und Eignung der Matten prüfen.",
+  "Matten auf Ölreste legen und die normale Reibung annehmen.",
+  "Nur die Oberseite der Ladung reinigen.",
+  "Verunreinigte Kontaktflächen können die Reibung und damit die Sicherung beeinträchtigen."
+ ],
+ [
+  "matten",
+  "Welche Antirutschmatten sind für eine Ladung geeignet?",
+  "Im Lager gibt es mehrere unterschiedliche Matten.",
+  "Matten passend zu Belastung, Zustand und Herstellerangaben.",
+  "Beliebige Gummireste ähnlicher Farbe.",
+  "Immer die dicksten verfügbaren Matten.",
+  "Die Wirksamkeit hängt von nachgewiesener Eignung und konkreten Einsatzbedingungen ab."
+ ],
+ [
+  "kantenschutz",
+  "Warum werden geeignete Kantenschützer verwendet?",
+  "Ein Gurt soll über eine scharfkantige Ladung laufen.",
+  "Sie schützen Zurrmittel und gegebenenfalls die Ladung vor Schäden.",
+  "Sie erhöhen automatisch die zulässige Zurrkraft des Gurts.",
+  "Sie ersetzen die Kontrolle des Gurtzustands.",
+  "Scharfe Kanten können Gurte beschädigen; geeigneter Kantenschutz vermindert dieses Risiko."
+ ],
+ [
+  "etikett",
+  "Warum muss das Kennzeichnungsetikett am Zurrgurt lesbar sein?",
+  "Du möchtest einen Gurt für neue Ladung auswählen.",
+  "Damit Belastungs- und Verwendungsangaben erkennbar sind.",
+  "Damit die Farbe des Gurtbandes eindeutig erkennbar ist.",
+  "Damit die Fahrzeuglänge abgelesen werden kann.",
+  "Die Kennzeichnung enthält Angaben für die sichere Auswahl und Verwendung des Zurrmittels."
+ ],
+ [
+  "lc",
+  "Was bedeutet die Angabe LC auf einem Zurrmittel?",
+  "Du vergleichst die Etiketten zweier Zurrgurte.",
+  "Die zulässige Zurrkraft des Zurrmittels.",
+  "Die normale Spannkraft beim Niederzurren.",
+  "Die zulässige Gesamtmasse des Fahrzeugs.",
+  "LC bezeichnet die zulässige Zurrkraft und ist von der Vorspannkraft STF zu unterscheiden."
+ ],
+ [
+  "stf",
+  "Welche Angabe ist für die Vorspannung beim Niederzurren wichtig?",
+  "Du liest das Etikett eines geeigneten Zurrgurts.",
+  "STF, die angegebene normale Spannkraft.",
+  "LC als direkter Ersatz für die Spannkraft.",
+  "Die Länge des Bands ohne weitere Angaben.",
+  "STF gibt die normale Spannkraft unter den definierten Betätigungsbedingungen an."
+ ],
+ [
+  "heben",
+  "Darf ein gewöhnlicher Zurrgurt zum Heben verwendet werden?",
+  "Ein Zurrgurt liegt neben einem Kran bereit.",
+  "Nein, zum Heben sind geeignete Anschlagmittel erforderlich.",
+  "Ja, wenn die LC das geschätzte Lastgewicht übersteigt.",
+  "Ja, wenn der Gurt durch die Ratsche gespannt wird.",
+  "Zurrmittel sind keine Anschlagmittel; ihre Belastungsdaten sind nicht austauschbar."
+ ],
+ [
+  "sichtcheck",
+  "Wann sind Zurrmittel auf erkennbare Mängel zu prüfen?",
+  "Du willst Gurte für eine neue Fahrt einsetzen.",
+  "Vor jedem Einsatz und zusätzlich nach den vorgeschriebenen Prüffristen.",
+  "Nur nach dem jährlichen Prüftermin.",
+  "Erst wenn sich die Ladung verschoben hat.",
+  "Eine Sichtkontrolle vor dem Einsatz hilft, beschädigte Sicherungsmittel rechtzeitig auszusondern."
+ ],
+ [
+  "riss",
+  "Was machst du mit einem deutlich eingerissenen Gurtband?",
+  "Der Schaden ist bei der Sichtkontrolle sichtbar.",
+  "Nicht verwenden und durch ein geeignetes unbeschädigtes Zurrmittel ersetzen.",
+  "Den Riss unter einem Kantenschützer verstecken.",
+  "Den beschädigten Abschnitt mit einem Knoten sichern.",
+  "Ein beschädigtes Gurtband kann seine Tragfähigkeit verlieren und darf so nicht verwendet werden."
+ ],
+ [
+  "ratsche",
+  "Was tust du bei einer defekten Zurrgurtratsche?",
+  "Die Ratsche lässt sich nicht zuverlässig schließen.",
+  "Das betroffene Zurrmittel außer Gebrauch nehmen.",
+  "Die Ratsche mit zusätzlichem Draht verschlossen halten.",
+  "Die Ratsche mit einem Hammer schließen.",
+  "Ein defektes Spannelement gewährleistet keine sichere Spannung und Verriegelung."
+ ],
+ [
+  "pruefung",
+  "Wie werden regelmäßige fachkundige Zurrmittelprüfungen nachvollziehbar gemacht?",
+  "Der Betrieb organisiert wiederkehrende Prüfungen.",
+  "Die Prüfungen fachgerecht durchführen und dokumentieren.",
+  "Nur das Beschaffungsdatum im Lagerbuch notieren.",
+  "Die Prüfungen ausschließlich mündlich bestätigen.",
+  "Dokumentierte Prüfungen machen den Zustand und die Einhaltung der Prüffristen nachvollziehbar."
+ ],
+ [
+  "zurrpunkt",
+  "Worauf kommt es bei der Auswahl eines Zurrpunkts an?",
+  "Das Fahrzeug hat verschiedene Ösen und Bauteile.",
+  "Der Punkt muss für vorgesehene Kräfte und Zugrichtungen geeignet sein.",
+  "Der Punkt muss möglichst nahe an der Ladung liegen.",
+  "Der Punkt muss nur eine ausreichend große Öffnung haben.",
+  "Geeignete Zurrpunkte übertragen die vorgesehenen Kräfte sicher in den Fahrzeugaufbau."
+ ],
+ [
+  "haken",
+  "Wie muss ein Zurrhaken an einem geeigneten Zurrpunkt sitzen?",
+  "Du befestigst einen Gurt an der Ladefläche.",
+  "Entsprechend seiner Bauart sicher eingehängt und belastet.",
+  "Möglichst nur mit der Hakenspitze anliegend.",
+  "Quer gegen die vorgesehene Belastungsrichtung gedrückt.",
+  "Eine falsche Belastung oder unvollständiges Einhängen gefährdet die Verbindung."
+ ],
+ [
+  "knoten",
+  "Wie gehst du mit überschüssigem Gurtband um?",
+  "Nach dem Spannen bleibt ein langes loses Ende.",
+  "Das freie Ende sicher unterbringen.",
+  "Das tragende Band mit einem Knoten verkürzen.",
+  "Das Ende über den Fahrzeugrand hängen lassen.",
+  "Lose Enden müssen gesichert werden; Knoten im tragenden Band sind kein geeignetes Verfahren."
+ ],
+ [
+  "verdrehung",
+  "Wie sollte ein Flachband-Zurrgurt grundsätzlich geführt werden?",
+  "Der Gurt liegt zwischen den vorgesehenen Zurrpunkten.",
+  "Nach Herstellerangaben flach und ohne unnötige Verdrehungen.",
+  "Mit mehreren Verdrehungen an belasteten Kanten.",
+  "Mit einem Knoten in der belasteten Mitte.",
+  "Die vorgesehene Bandführung und der Schutz vor Schäden sind für die sichere Anwendung wichtig."
+ ],
+ [
+  "anzahl",
+  "Wovon hängt die erforderliche Zahl der Zurrmittel ab?",
+  "Du planst die Sicherung einer neuen schweren Ladung.",
+  "Von Sicherungsverfahren, Ladung, Reibung, Geometrie und Zurrmitteln.",
+  "Nur von der Anzahl der Paletten auf dem Lieferschein.",
+  "Nur von der Länge der Ladefläche.",
+  "Die Sicherung muss anhand relevanter Kräfte und tatsächlicher Einsatzbedingungen bestimmt werden."
+ ],
+ [
+  "winkel",
+  "Warum ist der Zurrwinkel für die Sicherung wichtig?",
+  "Gurte können in verschiedenen Richtungen verlaufen.",
+  "Der Winkel beeinflusst die wirksamen Kraftanteile.",
+  "Der Winkel beeinflusst nur das Aussehen der Ladung.",
+  "Der Winkel ersetzt die Prüfung zulässiger Zurrkräfte.",
+  "Die geometrische Ausrichtung beeinflusst die wirksamen Kraftanteile und die Sicherungswirkung."
+ ],
+ [
+  "kippen",
+  "Was muss bei hohen Gütern neben dem Rutschen geprüft werden?",
+  "Eine hohe schmale Maschine steht auf einer Palette.",
+  "Ob die Ladung auch gegen Kippen gesichert ist.",
+  "Ob die Ladung oben zusätzliches Gewicht erhält.",
+  "Ob die Ladung auf möglichst glatter Unterlage steht.",
+  "Hohe oder schmale Güter können trotz Schutz vor Rutschen kippen."
+ ],
+ [
+  "rollen",
+  "Welche Maßnahme ist für rollfähiges Ladegut geeignet?",
+  "Ein zylindrisches Bauteil wird liegend transportiert.",
+  "Geeignete belastbare Rollhemmung mit weiterer nötiger Sicherung.",
+  "Die Rolle ohne Sicherung auf einen ebenen Boden legen.",
+  "Die Rolle nur mit einer lockeren Abdeckplane umgeben.",
+  "Rollfähige Güter müssen gegen Verrollen und weitere Bewegungen gesichert sein."
+ ],
+ [
+  "palette",
+  "Was muss bei Ware auf einer Palette zusätzlich geprüft werden?",
+  "Mehrere Kartons stehen übereinander auf dem Ladungsträger.",
+  "Ob die Ware auf der Palette ausreichend stabil und gesichert ist.",
+  "Ob die Kartons der unteren Reihe gleichmäßig beschriftet sind.",
+  "Ob die Palette unabhängig von den Kartons schwer ist.",
+  "Eine gesicherte Palette verhindert nicht automatisch das Verschieben der Ware auf ihr."
+ ],
+ [
+  "verpackung",
+  "Was tust du bei sichtbar instabiler Verpackung?",
+  "Kartons sind eingedrückt und drohen nachzugeben.",
+  "Die Ladungseinheit erst in einen stabilen und sicherbaren Zustand bringen.",
+  "Beschädigte Kartons möglichst weit oben stapeln.",
+  "Die Gurte so stark spannen, bis die Kartons nachgeben.",
+  "Ungeeignete Verpackung kann Ladung und Sicherungswirkung beeinträchtigen."
+ ],
+ [
+  "empfindlich",
+  "Was gilt bei druckempfindlichen Gütern beim Niederzurren?",
+  "Hoher Anpressdruck könnte die Ware beschädigen.",
+  "Ein geeignetes Verfahren wählen, das Ware und Sicherungswirkung schützt.",
+  "Die maximal mögliche Spannung unabhängig von der Verpackung aufbringen.",
+  "Empfindliche Güter vollständig ungesichert lassen.",
+  "Die Sicherung muss wirksam sein, ohne die Ladung durch ungeeignete Kräfte instabil zu machen."
+ ],
+ [
+  "kontrolle",
+  "Was machst du nach einer starken Bremsung bei Verdacht auf verschobene Ladung?",
+  "Du hörst ungewöhnliche Geräusche aus dem Laderaum.",
+  "An einer geeigneten sicheren Stelle anhalten und die Sicherung kontrollieren.",
+  "Bis zum Ziel weiterfahren und die Geräusche ignorieren.",
+  "Die Ladung während der Fahrt aus dem Fahrerhaus beobachten.",
+  "Mögliche Verschiebungen müssen vor der Weiterfahrt sicher kontrolliert werden."
+ ],
+ [
+  "nachspannen",
+  "Was tust du bei gelockerten Zurrgurten?",
+  "Bei einer sicheren Zwischenkontrolle ist die Vorspannung geringer.",
+  "Die Sicherung fachgerecht wiederherstellen und die Ursache berücksichtigen.",
+  "Die Gurte unverändert lassen, solange die Ladung gerade steht.",
+  "Einen weiteren losen Gurt über die Ladung legen.",
+  "Nachlassende Vorspannung kann die Sicherungswirkung vermindern und muss behoben werden."
+ ],
+ [
+  "tueren",
+  "Was prüfst du vor dem Öffnen von Türen bei Verdacht auf verschobene Ladung?",
+  "Die Ladung könnte von innen gegen die Türen drücken.",
+  "Ob die Ladung anliegt und wie die Türen sicher geöffnet werden können.",
+  "Ob die Türen besonders schnell aufgeschwenkt werden können.",
+  "Ob eine Person fallende Güter mit den Händen auffangen kann.",
+  "Verschobene Güter können beim Öffnen herausfallen und Beschäftigte gefährden."
+ ],
+ [
+  "loesen",
+  "Was ist vor dem Lösen von Zurrmitteln bei kippgefährdeter Ladung nötig?",
+  "Ein hohes Bauteil steht nach der Fahrt schief.",
+  "Die Ladung anderweitig geeignet gegen Umfallen und Verrutschen sichern.",
+  "Alle Gurte zuerst gleichzeitig lösen.",
+  "Eine Person das Bauteil von Hand abstützen lassen.",
+  "Beim Lösen entfällt die Sicherungswirkung; instabile Ladung muss vorher gesichert sein."
+ ],
+ [
+  "entladen",
+  "Welche Abstellfläche ist für das Entladen vorzuziehen?",
+  "Mehrere betriebliche Stellen stehen zur Auswahl.",
+  "Eine geeignete tragfähige und möglichst waagerechte Fläche.",
+  "Eine steile Fläche ohne zusätzliche Sicherung.",
+  "Eine weiche unebene Fläche unabhängig von den Arbeitsmitteln.",
+  "Geeignete ebene Flächen unterstützen die Stabilität von Fahrzeug, Ladung und Arbeitsmitteln."
+ ],
+ [
+  "wegrollen",
+  "Was muss am abgestellten Fahrzeug vor dem Beladen verhindert werden?",
+  "Ein Hubwagen soll auf der Ladefläche eingesetzt werden.",
+  "Unbeabsichtigtes Wegrollen durch geeignete Fahrzeugsicherung.",
+  "Nur unbeabsichtigtes Einschalten der Beleuchtung.",
+  "Nur Öffnen der Fahrertür durch andere Beschäftigte.",
+  "Unbeabsichtigte Fahrzeugbewegungen können Ladegeräte und Beschäftigte gefährden."
+ ],
+ [
+  "personen",
+  "Wo sollten Personen beim Bewegen schwerer Ladegüter stehen?",
+  "Ein Mitarbeiter begleitet den Ladevorgang.",
+  "Außerhalb der Gefahrenbereiche bewegter oder fallender Ladung.",
+  "Zwischen der bewegten Ladung und einer festen Wand.",
+  "In der möglichen Fallrichtung, um die Ware aufzufangen.",
+  "Abstand zu Quetsch- und Fallbereichen ist beim Be- und Entladen wesentlich."
+ ],
+ [
+  "lose",
+  "Wie transportierst du unbenutzte Zurrgurte und lose Werkzeuge?",
+  "Nach der Beladung liegen Hilfsmittel auf der Ladefläche.",
+  "In geeigneten gesicherten Ablagen oder Behältern.",
+  "Lose auf der obersten Palette.",
+  "Lose unmittelbar hinter den Laderaumtüren.",
+  "Auch Hilfsmittel können bei Fahrbewegungen zu gefährlichen losen Gegenständen werden."
+ ],
+ [
+  "sicht",
+  "Was gilt, wenn Ladung die erforderliche Sicht des Fahrers einschränkt?",
+  "Ein Gegenstand ragt in seinen notwendigen Sichtbereich.",
+  "Die Ladung so ändern, dass die erforderliche Sicht gewährleistet ist.",
+  "Mit eingeschränkter Sicht starten und häufiger hupen.",
+  "Die Einschränkung hinnehmen, wenn die Ladung sicher steht.",
+  "Ladung darf die erforderliche Sicht und die Verkehrssicherheit nicht beeinträchtigen."
+ ],
+ [
+  "beleuchtung",
+  "Was gilt für Fahrzeugleuchten und Kennzeichen bei der Beladung?",
+  "Ein Teil der Ladung befindet sich am Heck des Fahrzeugs.",
+  "Vorgeschriebene Beleuchtung und Lesbarkeit der Kennzeichen gewährleisten.",
+  "Kennzeichen dürfen bei Tageslicht durch Ladung verdeckt sein.",
+  "Rückleuchten dürfen bei kurzer Fahrt verdeckt sein.",
+  "Die Anforderungen an vorgeschriebene Beleuchtung und lesbare Kennzeichen gelten auch bei Beladung."
+ ],
+ [
+  "bremsen",
+  "In welche Richtung kann sich ungesicherte Ladung beim starken Bremsen relativ zur Ladefläche bewegen?",
+  "Der Lkw fährt geradeaus und bremst stark.",
+  "Nach vorne in Richtung Fahrzeugfront.",
+  "Nach hinten in Richtung Fahrzeugheck.",
+  "Ausschließlich senkrecht nach oben.",
+  "Wegen ihrer Trägheit kann Ladung beim Abbremsen relativ zum Fahrzeug nach vorne gelangen."
+ ],
+ [
+  "kurve",
+  "In welche Richtung kann sich ungesicherte Ladung in einer Kurve relativ zur Ladefläche verschieben?",
+  "Das Fahrzeug durchfährt eine Kurve.",
+  "Zur Außenseite der gefahrenen Kurve.",
+  "Zur Innenseite der gefahrenen Kurve.",
+  "Ausschließlich in Richtung Fahrzeugfront.",
+  "Bei Kurvenfahrt kann die Trägheit eine seitliche Ladungsbewegung nach außen verursachen."
+ ],
+ [
+  "dokument",
+  "Was tust du, wenn du die Eignung der vorgesehenen Sicherung nicht beurteilen kannst?",
+  "Belastungsdaten und Sicherungsvorgaben sind unklar.",
+  "Angaben vor Fahrtbeginn klären und fachlich geeignete Sicherung herstellen.",
+  "Die Sicherung nach Gefühl wählen und losfahren.",
+  "Fehlende Angaben durch langsameres Fahren ersetzen.",
+  "Bei unklaren Voraussetzungen muss die Eignung der Sicherung vor der Fahrt geklärt werden."
+ ]
+];
+ const ids=new Set(current.questions.map(q=>q.id));
+ const added=rows.map(([slug,title,context,right,wrong1,wrong2,why],index)=>{
+ const id='ls-'+slug;if(ids.has(id))throw Error('Duplicate practice question: '+id);ids.add(id);
+ const correct=index%3;const answers=[wrong1,wrong2];answers.splice(correct,0,right);
+ return Object.freeze({id,course,topic:'lasten',title,context,answers:Object.freeze(answers),correct,why,source:ref.source});
+ });
+ globalThis.ABBATE_PRACTICE_BANK=Object.freeze({courses:Object.freeze({...current.courses,[course]:ref}),questions:Object.freeze([...current.questions,...added])});
+})();
