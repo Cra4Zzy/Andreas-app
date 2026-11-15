@@ -6,6 +6,7 @@
   let state,selected=null,search='',filter='all',registrationSuccessEmail=null;
   async function load(){state=await B.state();}
   function session(){return state?.me?.id;}
+  function canManageRoles(){return state?.me?.role==='admin'&&state.me.id==='353aceca-8524-4a28-bbd2-3b1026ab323e';}
   function syncShell(){const link=document.querySelector('[data-nav="admin"]');if(link)link.hidden=!state?.me||!B.isStaff(state.me);}
   function notice(text){document.querySelector('#portal-status').textContent=text;}
   const uuid=()=>globalThis.crypto?.randomUUID?.()||'local-'+Date.now().toString(36)+'-'+Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,'0')).join('');
@@ -51,7 +52,7 @@
   function peopleList(){return people().map(p=>`<button class="portal-person ${selected===p.id?'selected':''}" data-person="${safe(p.id)}" aria-pressed="${selected===p.id}"><span class="portal-person-name">${safe(p.name)}<small>${safe(p.email)}</small></span><span><small>${p.role==='admin'?'Administrator':p.role==='trainer'?'Ausbilder':'Teilnehmer'}</small>${badge(p)}</span></button>`).join('')||'<p class="portal-hint">Keine passenden Konten.</p>';}
   function detail(){
     const p=state.students.find(p=>p.id===selected);if(!p)return '<section class="portal-panel"><h2>Konto auswählen</h2><p>Wähle links einen Teilnehmer aus. Neue Registrierungen erscheinen hier nach dem Aktualisieren.</p></section>';
-    const rolePanel=state.me.role==='admin'&&p.id!==state.me.id?`<section class="portal-panel portal-role-panel">
+    const rolePanel=canManageRoles()&&p.id!==state.me.id?`<section class="portal-panel portal-role-panel">
        <h3>Administratorrechte</h3>
        <p><strong>Aktuelle Rolle:</strong> ${p.role==='admin'?'Administrator':p.role==='trainer'?'Ausbilder':'Teilnehmer'}</p>
        <p>Administratorrechte ermöglichen die Verwaltung aller Teilnehmerzugänge und Schulungsnachweise. Rollenänderungen werden protokolliert.</p>
@@ -183,7 +184,7 @@
       if(form.id==='access-form')await mutate(()=>B.setAccess(selected,submit?.value||'activate'),'Zugangsstatus auf dem Server gespeichert.');
       else if(form.id==='role-form'){
         if(values.roleConfirmed!=='yes')throw Error('Rollenänderung muss bestätigt werden.');
-        if(state.me?.role!=='admin'||!selected||selected===state.me.id)throw Error('Administrator access required');
+        if(!canManageRoles()||!selected||selected===state.me.id)throw Error('Administrator access required');
         const newRole=submit?.value;
         if(!['admin','learner'].includes(newRole))throw Error('Ungültige Rollenänderung.');
         await mutate(()=>B.setRole(selected,newRole),newRole==='admin'?'Administratorrechte vergeben.':'Administratorrechte entzogen.');
