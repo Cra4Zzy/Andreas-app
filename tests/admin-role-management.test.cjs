@@ -10,11 +10,11 @@ test('only an active, live-session admin can grant or revoke admin role in own s
   const db=new PGlite();
   const school='10000000-0000-0000-0000-000000000001';
   const otherSchool='10000000-0000-0000-0000-000000000002';
-  const owner='20000000-0000-0000-0000-000000000001';
+  const owner='353aceca-8524-4a28-bbd2-3b1026ab323e';
   const learner='20000000-0000-0000-0000-000000000002';
   const learner2='20000000-0000-0000-0000-000000000003';
   const outsider='20000000-0000-0000-0000-000000000004';
-  const sid=id=>id.replace('20000000','30000000');
+  const sid=id=>id==='353aceca-8524-4a28-bbd2-3b1026ab323e'?'30000000-0000-0000-0000-000000000001':id.replace('20000000','30000000');
   const as=async id=>db.exec(`reset role;set role authenticated;set request.jwt.claim.sub='${id}';set request.jwt.claims='{"session_id":"${sid(id)}"}';`);
   const setRole=(id,newRole)=>db.query('select * from public.abbate_manage_member_role($1,$2,$3)',[school,id,newRole]);
   try {
@@ -31,7 +31,8 @@ test('only an active, live-session admin can grant or revoke admin role in own s
        grant execute on function auth.uid(),auth.jwt() to authenticated;`);
     for(const file of ['backend/schema.sql','backend/accounts.sql','backend/live.sql',
       'supabase/migrations/20261102223000_fixed_30_day_access.sql',
-      'supabase/migrations/20261106150500_secure_admin_role_management.sql'])
+      'supabase/migrations/20261106150500_secure_admin_role_management.sql',
+      'supabase/migrations/20261115110000_restrict_role_management_to_owner.sql'])
        await db.exec(sql(file));
     await db.exec(`insert into abbate_schools values('${school}','School'),('${otherSchool}','Second');
        insert into abbate_private.registration_settings values(true,'${school}');`);
@@ -59,8 +60,9 @@ test('only an active, live-session admin can grant or revoke admin role in own s
     assert.equal(audit.rows[0].target_id,learner);
     await assert.rejects(setRole(learner,'admin'),/already has this role/);
     await as(learner);
-    const newAdminAction=(await setRole(learner2,'admin')).rows[0];
-    assert.equal(newAdminAction.role,'admin','New admin can manage other members');
+    await assert.rejects(setRole(learner2,'admin'),/Administrator access required/);
+    await as(owner);
+    assert.equal((await setRole(learner2,'admin')).rows[0].role,'admin');
     await as(owner);
     const revoked=(await setRole(learner,'learner')).rows[0];
     assert.deepEqual(revoked,{role:'learner',access_status:'pending',access_until:null});
@@ -75,7 +77,8 @@ test('only an active, live-session admin can grant or revoke admin role in own s
 
 test('admin role controls require explicit confirmation and prevent self-changes',()=>{
  const portal=sql('dist/portal.js'),backend=sql('dist/backend.js');
- assert.match(portal,/p\.id!==state\.me\.id/);
+ assert.match(portal,/canManageRoles\(\)&&p\.id!==state\.me\.id/);
+ assert.match(portal,/!canManageRoles\(\)/);
  assert.match(portal,/roleConfirmed/);
  assert.match(portal,/id="role-form"/);
  assert.match(portal,/Zum Administrator ernennen/);
@@ -88,6 +91,6 @@ test('admin role controls require explicit confirmation and prevent self-changes
   assert.match(sql(page),page==='dist/konto.html'?/backend\.js\?v=8/:/backend\.js\?v=8/);
  }
  for(const page of ['dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
-  assert.match(sql(page),page==='dist/konto.html'?/portal\.js\?v=16/:/portal\.js\?v=16/);
+  assert.match(sql(page),page==='dist/konto.html'?/portal\.js\?v=17/:/portal\.js\?v=17/);
  }
 });
