@@ -95,7 +95,7 @@ test('cached PWA shell uses current app JavaScript and CSS',()=>{
   assert.match(read('dist/sw.js'),/experience\.css\?v=5/);
   assert.match(read('dist/index.html'),/practice-bank\.js\?v=1/);
   assert.match(worker,/const CACHE='abbate-learning-v\d+'/);
-  for(const file of ['i18n-ru.js?v=1','i18n-uk.js?v=1','i18n-modern.js?v=4','i18n.js?v=12']){
+  for(const file of ['i18n-ru.js?v=1','i18n-uk.js?v=1','i18n-modern.js?v=5','i18n.js?v=12']){
     assert.ok(html.includes(file),'HTML missing '+file);
     assert.ok(worker.includes(file),'Service worker missing '+file);
   }
@@ -124,4 +124,15 @@ test('server-side desktop web updates verify release revisions and protect in-pr
   assert.doesNotMatch(pipeline,/--only-newer/);
   assert.match(pipeline,/Verify real HTTPS publication/);
   assert.doesNotThrow(()=>new (require('node:vm').Script)(manager));
+});
+
+test('exam disclaimer retains the non-certification notice without the editorial review sentence',()=>{
+  const app=read('dist/app.js');
+  const disclaimer=app.match(/<p class="exam-disclaimer">([^<]+)<\/p>/);
+  assert.equal(disclaimer?.[1],'Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt.');
+  const context={};
+  require('node:vm').runInNewContext(read('dist/i18n-modern.js'),context);
+  const translated=context.ABBATE_I18N_MODERN[disclaimer[1]];
+  assert.equal(Object.keys(translated).length,25);
+  assert.ok(Object.values(translated).every(value=>typeof value==='string'&&value.length>0));
 });
