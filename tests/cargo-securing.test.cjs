@@ -26,6 +26,6 @@ test('all 25 translated packs must match the complete question IDs before deploy
   const pack=locale.ABBATE_QUESTION_TRANSLATIONS[code];
   assert.equal(Object.keys(pack).length,350,code+' count');
   for(const id of ids){const fields=pack[id];assert.ok(Array.isArray(fields)&&fields.length===6&&fields.every(s=>typeof s==='string'&&s.trim().length>=3),code+'/'+id);}
-  for(const q of cargo){const fields=pack[q.id];assert.equal(new Set(fields.slice(2,5).map(s=>s.trim().toLocaleLowerCase())).size,3,code+'/'+q.id+' duplicate choices');}
+  for(const q of bank.questions){const fields=pack[q.id];assert.equal(new Set(fields.slice(2,5).map(s=>s.trim().toLocaleLowerCase())).size,3,code+'/'+q.id+' duplicate choices');}
  }
 });

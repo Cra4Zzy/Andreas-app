@@ -154,7 +154,7 @@ function home() {
 function learning() {
  const cards=COURSES.map((course,i)=>
  '<article class="qualification-card '+(course.active?'qualification-available':'qualification-upcoming')+'">'+
- '<div class="qualification-top"><span class="qualification-index">0'+(i+1)+' / 05</span><span class="qualification-badge '+(course.active?'live':'upcoming')+'">'+(courseQuestions(course.id).length+' Fragen im Pool')+'</span></div>'+
+ '<div class="qualification-top"><span class="qualification-index">0'+(i+1)+' / '+String(COURSES.length).padStart(2,'0')+'</span><span class="qualification-badge '+(course.active?'live':'upcoming')+'">'+(courseQuestions(course.id).length+' Fragen im Pool')+'</span></div>'+
  '<div class="qualification-symbol '+course.color+'">'+icon(course.icon)+'</div>'+
  '<h2>'+esc(course.name)+'</h2>'+
  '<p>'+esc(course.desc)+'</p>'+
