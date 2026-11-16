@@ -1,7 +1,19 @@
 'use strict';
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const icon = name => `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
+// Custom training pictograms, drawn on a common 24 × 24 grid.
+const COURSE_ICONS = Object.freeze({
+  "forklift": "<path d=\"M3 16v-4a2 2 0 0 1 2-2h2V4h5l4 8v4h-2M7 10h5l3 3M18 3v15h4M16 18h2M8 18h2\"/><circle cx=\"5.5\" cy=\"18\" r=\"2.5\"/><circle cx=\"12.5\" cy=\"18\" r=\"2.5\"/>",
+  "scissor-lift": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"5\" rx=\"1\"/><path d=\"M9 3v5m6-5v5M5 8l14 8M19 8 5 16M5 16h14a2 2 0 0 1 2 2v1H3v-1a2 2 0 0 1 2-2Z\"/><circle cx=\"6\" cy=\"20\" r=\"1.5\"/><circle cx=\"18\" cy=\"20\" r=\"1.5\"/>",
+  "tower-crane": "<path d=\"M7 7v14m4-14v14M4 21h10M7 7l4 5-4 4 4 5M2 7h20L9 2 2 7Zm7-5v5m10 0v7m0 0v2a2 2 0 1 1-2 2\"/>",
+  "rigging": "<path d=\"M12 2v2a2.5 2.5 0 1 1-2.5 2.5M12 9 5 17m7-8 7 8\"/><circle cx=\"5\" cy=\"17\" r=\"1.2\"/><circle cx=\"19\" cy=\"17\" r=\"1.2\"/><rect x=\"2\" y=\"18.5\" width=\"20\" height=\"3.5\" rx=\"1\"/>",
+  "excavator": "<rect x=\"2\" y=\"17.5\" width=\"13\" height=\"4\" rx=\"2\"/><path d=\"M5 19.5h.1m3.4 0h.1m3.4 0h.1M3 15v-4h4V6h5l3 5v4H3Zm4-4h8m-2-3 5-4 4 9-2 3m-2-1 2 1 2-3v5h-5l-1-2\"/>",
+  "cargo-strap": "<path d=\"M3 20V7l3-4h12l3 4v13M3 7h18M2 20h20M8 20v2m8-2v2M10 3v8m4-8v8m-4 5v4m4-4v4\"/><rect x=\"9\" y=\"11\" width=\"6\" height=\"5\" rx=\"1\"/>",
+  "rope-access": "<path d=\"M12 2v4m0 13v3M18.4 10.2l-2.5 6.6a5 5 0 0 1-9.4-3.4l2.3-6.1a5 5 0 0 1 8.9-.9\"/><path d=\"M14.6 9.2 17.3 4.9l3.1 2-2.7 4.3zM10 2v3m4 15v2\"/>"
+});
+const icon = name => Object.prototype.hasOwnProperty.call(COURSE_ICONS,name)
+  ? `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${COURSE_ICONS[name]}</svg>`
+  : `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const B = globalThis.ABBATE_BACKEND;
 const LANGUAGE_STORE = 'abbate-language-v1';
 const I18N = globalThis.ABBATE_I18N;
@@ -78,7 +90,7 @@ const TOPICS = [
   {id:'lasten',name:'Lasten & Grenzen',description:'Lasten richtig einschätzen und die Grenzen des Fahrzeugs beachten.',short:'Mit Überblick bewegen',icon:'file',color:'sand'},
   {id:'betrieb',name:'Sicher im Arbeitsalltag',description:'Sicht, Zusammenarbeit und ein sicher abgestelltes Fahrzeug.',short:'Auf dich und andere achten',icon:'users',color:'blue'}
 ];
-const COURSES=[{"id":"gabelstapler","name":"Gabelstapler","desc":"Fahrbetrieb, Fahrzeugcheck und Lastaufnahme. 50 bewertbare Übungsfragen.","sub":"50 Lernfragen","icon":"shield","color":"","active":true},{"id":"hebebuehnen","name":"Hebebühnen","desc":"Sicheres Arbeiten mit Hubarbeitsbühnen: Vorbereitung, Standsicherheit und Bedienung.","sub":"Lernmaterial folgt","icon":"users","color":"blue","active":false},{"id":"krane","name":"Krane","desc":"Kranbetrieb, Signale, Arbeitsbereich und sichere Lastbewegungen.","sub":"Lernmaterial folgt","icon":"file","color":"sand","active":false},{"id":"lasten","name":"Anschlagen von Lasten","desc":"Lasten richtig anschlagen, Anschlagmittel beurteilen und sicher kommunizieren.","sub":"Lernmaterial folgt","icon":"book","color":"","active":false},{"id":"bagger","name":"Erdbaumaschinen & Bagger","desc":"Bedienung von Erdbaumaschinen, Sicherheitsabstände und Gefahrenbereiche.","sub":"Lernmaterial folgt","icon":"shield","color":"blue","active":false},{"id":"ladungssicherung","name":"Ladungssicherung","desc":"Ladung sicher verteilen, verstauen und sichern.","sub":"50 Übungsfragen","icon":"shield","color":"sand","active":true},{"id":"abseilen","name":"Abseilen aus Höhen – Theorie","desc":"Ausrüstung, Vorbereitung und Rettungsplanung sicher verstehen.","sub":"50 Übungsfragen","icon":"shield","color":"blue","active":true}].map(course=>({...course,active:true,sub:PRACTICE_BANK.questions.filter(q=>q.course===course.id).length+' Übungsfragen'}));
+const COURSES=[{"id":"gabelstapler","name":"Gabelstapler","desc":"Fahrbetrieb, Fahrzeugcheck und Lastaufnahme. 50 bewertbare Übungsfragen.","sub":"50 Lernfragen","icon":"forklift","color":"","active":true},{"id":"hebebuehnen","name":"Hebebühnen","desc":"Sicheres Arbeiten mit Hubarbeitsbühnen: Vorbereitung, Standsicherheit und Bedienung.","sub":"Lernmaterial folgt","icon":"scissor-lift","color":"blue","active":false},{"id":"krane","name":"Krane","desc":"Kranbetrieb, Signale, Arbeitsbereich und sichere Lastbewegungen.","sub":"Lernmaterial folgt","icon":"tower-crane","color":"sand","active":false},{"id":"lasten","name":"Anschlagen von Lasten","desc":"Lasten richtig anschlagen, Anschlagmittel beurteilen und sicher kommunizieren.","sub":"Lernmaterial folgt","icon":"rigging","color":"","active":false},{"id":"bagger","name":"Erdbaumaschinen & Bagger","desc":"Bedienung von Erdbaumaschinen, Sicherheitsabstände und Gefahrenbereiche.","sub":"Lernmaterial folgt","icon":"excavator","color":"blue","active":false},{"id":"ladungssicherung","name":"Ladungssicherung","desc":"Ladung sicher verteilen, verstauen und sichern.","sub":"50 Übungsfragen","icon":"cargo-strap","color":"sand","active":true},{"id":"abseilen","name":"Abseilen aus Höhen – Theorie","desc":"Ausrüstung, Vorbereitung und Rettungsplanung sicher verstehen.","sub":"50 Übungsfragen","icon":"rope-access","color":"blue","active":true}].map(course=>({...course,active:true,sub:PRACTICE_BANK.questions.filter(q=>q.course===course.id).length+' Übungsfragen'}));
 // Every qualification has its own materials. Never reuse forklift content for cranes or earthmovers.
 let activeCourseId='gabelstapler';
 const courseQuestions=id=>QUESTIONS.filter(q=>(q.course||'gabelstapler')===id);
