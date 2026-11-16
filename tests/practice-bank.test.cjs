@@ -4,7 +4,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const read=file=>fs.readFileSync(file,'utf8');
-const names=['gabelstapler','hebebuehnen','krane','lasten','bagger','ladungssicherung'];
+const names=['gabelstapler','hebebuehnen','krane','lasten','bagger','ladungssicherung','abseilen'];
 const ctx={};
 ctx.globalThis=ctx;
 vm.runInNewContext(read('dist/practice-bank.js'),ctx,{filename:'dist/practice-bank.js'});
@@ -12,9 +12,9 @@ vm.runInNewContext(read('dist/practice-expansion.js'),ctx,{filename:'dist/practi
 vm.runInNewContext(read('dist/practice-expansion-final.js'),ctx,{filename:'dist/practice-expansion-final.js'});
 const bank=ctx.ABBATE_PRACTICE_BANK;
 
-test('new questions populate the six qualification areas',()=>{
+test('new questions populate the seven qualification areas',()=>{
  assert.deepEqual(Object.keys(bank.courses).sort(),names.slice().sort());
- assert.equal(bank.questions.length,300);
+ assert.equal(bank.questions.length,350);
  const seen=new Set();
  for(const name of names){
    const questions=bank.questions.filter(q=>q.course===name);
@@ -55,16 +55,16 @@ test('existing course list is preserved and new exercises use its course-specifi
 
 test('PWA loads offline question bank before the app and caches both',()=>{
  const html=read('dist/index.html'),sw=read('dist/sw.js');
- assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('app.js?v=36'));
+ assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('app.js?v=37'));
  assert.ok(sw.includes('practice-bank.js?v=1'));
  assert.ok(html.includes('practice-expansion.js?v=1'));
  assert.ok(sw.includes('practice-expansion.js?v=1'));
- assert.ok(html.includes('practice-expansion-final.js?v=2'));
- assert.ok(sw.includes('practice-expansion-final.js?v=2'));
- assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('practice-expansion-final.js?v=2'));
- assert.ok(html.indexOf('practice-expansion-final.js?v=2')<html.indexOf('app.js?v=36'));
+ assert.ok(html.includes('practice-expansion-final.js?v=3'));
+ assert.ok(sw.includes('practice-expansion-final.js?v=3'));
+ assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('practice-expansion-final.js?v=3'));
+ assert.ok(html.indexOf('practice-expansion-final.js?v=3')<html.indexOf('app.js?v=37'));
  assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('practice-expansion.js?v=1'));
- assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('app.js?v=36'));
- assert.ok(sw.includes('app.js?v=36'));
- assert.ok(sw.includes('abbate-learning-v43'));
+ assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('app.js?v=37'));
+ assert.ok(sw.includes('app.js?v=37'));
+ assert.ok(sw.includes('abbate-learning-v44'));
 });

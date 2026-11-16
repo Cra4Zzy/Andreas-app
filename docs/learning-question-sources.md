@@ -38,3 +38,13 @@ Stand 6. November 2026. Diese Datei dokumentiert die Quellenbasis des eigenstän
 - Adaptiver Auswahltest: zwei aufeinanderfolgende Runden mit je 20 unterschiedlichen Fragen aus Ladungssicherung, ohne Vermischung mit Gabelstapler.
 - Übersetzungslauf [43633691593](https://github.com/Cra4Zzy/Andreas-app/actions/runs/43633691593) erfolgreich; ursprünglich italienisches Anfrage-Limit im zweiten Versuch behoben.
 - Fachliche Quellen: [DGUV Regel 114-615 (04/2021)](https://publikationen.dguv.de/regelwerk/dguv-regeln/3696/branche-gueterkraftverkehr-guetertransport-im-strassenverkehr), §§ 22/23 StVO (geltende Fassung). Technische Validierung ist keine fachsprachliche Freigabe. Die Fahrschule muss die Fragen und Übersetzungen vor verbindlicher Verwendung prüfen; die App bleibt ein unverbindliches Lerntraining.
+
+## Abseilen aus Höhen – Theorie (50 Fragen)
+
+Eigenständig formulierte Theorieübungen mit stabilen IDs `as-*`, ergänzend zu den bestehenden 300 Fragen. Themen: Einsatzvorbereitung, Ausrüstung, Grenzen der eigenen Befähigung, Gefahren erkennen, Rettungsorganisation und Nachbereitung. Keine gerätespezifische Bedienungsanleitung und kein praktischer Befähigungsnachweis.
+
+Fachliche Referenzen:
+- DGUV Regel 112-198: https://publikationen.dguv.de/widgets/pdf/download/article/1013
+- DGUV Regel 112-199: https://publikationen.dguv.de/widgets/pdf/download/article/1014
+
+Die konkrete Gerätebedienung richtet sich nach Herstelleranleitung, betrieblicher Planung und praktischer Einweisung. Redaktioneller Stand 16.11.2026; Fachprüfung durch Andreas sowie fachliche Prüfung der maschinellen Übersetzungen ausstehend (`reviewed: false`). Wie die bisherigen Kategorien ist der Bereich als Theorietraining nutzbar, ohne bestätigte Schulungsnachweise zu erzeugen.

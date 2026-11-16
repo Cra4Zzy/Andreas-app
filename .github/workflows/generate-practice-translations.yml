@@ -1,7 +1,7 @@
 name: Generate Abbate question translations
 on:
   push:
-    branches: [main, 'feature/ladungssicherung']
+    branches: [main, 'feature/ladungssicherung', 'feature/abseilen-theorie']
     paths:
       - "scripts/generate-practice-translations.cjs"
       - ".github/workflows/generate-practice-translations.yml"
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Translate all 300 questions to one language
+      - name: Translate all 350 questions to one language
         env:
           TRANSLATE_WORKERS: "4"
         run: node scripts/generate-practice-translations.cjs ${{ matrix.locale }}
@@ -49,7 +49,7 @@ jobs:
           pattern: abbate-language-*
           path: dist/practice-translations/
           merge-multiple: true
-      - name: Validate the exact 300 x 25 translated question entries
+      - name: Validate the exact 350 x 25 translated question entries
         run: |
           node - <<'NODE'
           const fs=require('node:fs'),vm=require('node:vm');
@@ -58,10 +58,10 @@ jobs:
             const ctx={};ctx.globalThis=ctx;
             vm.runInNewContext(fs.readFileSync('dist/practice-translations/'+code+'.js','utf8'),ctx);
             const pack=ctx.ABBATE_QUESTION_TRANSLATIONS?.[code];
-            if(!pack||Object.keys(pack).length!==300)throw Error('Incomplete locale: '+code);
+            if(!pack||Object.keys(pack).length!==350)throw Error('Incomplete locale: '+code);
             for(const fields of Object.values(pack))if(!Array.isArray(fields)||fields.length!==6||fields.some(s=>typeof s!=='string'||s.length<3))throw Error('Corrupt locale: '+code);
           }
-          console.log('Validated 300 questions, five visible fields and explanation, across 25 locales');
+          console.log('Validated 350 questions, five visible fields and explanation, across 25 locales');
           NODE
       - name: Publish fully generated packs
         run: |

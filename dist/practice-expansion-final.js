@@ -1741,3 +1741,469 @@
  });
  globalThis.ABBATE_PRACTICE_BANK=Object.freeze({courses:Object.freeze({...current.courses,[course]:ref}),questions:Object.freeze([...current.questions,...added])});
 })();
+
+// Abseilen aus Höhen: original theoretical study scenarios; no practical qualification.
+;(function(){
+ const current=globalThis.ABBATE_PRACTICE_BANK;
+ const course='abseilen';
+ const ref=Object.freeze({source:'DGUV Regeln 112-198 und 112-199',url:'https://publikationen.dguv.de/widgets/pdf/download/article/1014',reviewed:false});
+ const rows=[
+ [
+  "qualifikation",
+  "Reicht eine bestandene Online-Lernrunde zum selbstständigen Abseilen aus?",
+  "Du hast die Theoriefragen erfolgreich beantwortet.",
+  "Nein, praktische Ausbildung und betriebliche Einweisung bleiben erforderlich.",
+  "Ja, wenn alle Antworten richtig waren.",
+  "Ja, wenn jemand vom Boden aus zusieht.",
+  "Theoriewissen ersetzt weder praktische Befähigung noch Einweisung in das konkrete System."
+ ],
+ [
+  "planung",
+  "Wann muss das Vorgehen für einen Notfall geklärt sein?",
+  "Ein Einsatz in der Höhe wird vorbereitet.",
+  "Vor Beginn des Einsatzes.",
+  "Erst wenn ein Unfall passiert.",
+  "Sobald die erste Person bereits am Seil hängt.",
+  "Ein vorbereitetes Vorgehen verhindert, dass im Notfall wertvolle Zeit mit ungeklärten Zuständigkeiten verloren geht."
+ ],
+ [
+  "stop",
+  "Was tust du bei einer ungeklärten Sicherheitsfrage vor dem Einsatz?",
+  "Du bist unsicher, ob die vorgesehene Ausrüstung geeignet ist.",
+  "Den Beginn stoppen und die Frage fachkundig klären lassen.",
+  "Mit besonders langsamen Bewegungen anfangen.",
+  "Die Entscheidung einem ungeschulten Kollegen überlassen.",
+  "Ungeklärte sicherheitsrelevante Voraussetzungen müssen vor der Benutzung geklärt werden."
+ ],
+ [
+  "anleitung",
+  "Welche Anleitung ist für die Bedienung des konkreten Geräts maßgeblich?",
+  "Zwei Abseilgeräte sehen ähnlich aus.",
+  "Die Herstelleranleitung des tatsächlich verwendeten Modells.",
+  "Die Erinnerung an irgendein ähnliches Gerät.",
+  "Eine allgemeine Beschreibung ohne Modellbezug.",
+  "Ähnliches Aussehen bedeutet nicht gleiche Bedienung; Modell und vorgesehener Einsatz müssen zusammenpassen."
+ ],
+ [
+  "kontrolle",
+  "Was gehört vor jeder Benutzung zur Vorbereitung?",
+  "Die Ausrüstung liegt bereit.",
+  "Die vorgesehenen Sicht- und Funktionskontrollen durchführen.",
+  "Nur kontrollieren, ob die Tasche vollständig geschlossen war.",
+  "Nur nachsehen, ob das Material sauber aussieht.",
+  "Eine saubere Oberfläche allein belegt keinen sicheren Zustand der Ausrüstung."
+ ],
+ [
+  "mangel",
+  "Wie gehst du mit einem beschädigten Gurt um?",
+  "Am Gurtband sind deutliche Schäden sichtbar.",
+  "Nicht benutzen, sichern und der zuständigen Person melden.",
+  "Die Stelle mit Klebeband verdecken.",
+  "Den Gurt nur für einen kurzen Abstieg benutzen.",
+  "Beschädigungen können die Schutzwirkung beeinträchtigen; eine improvisierte Reparatur schafft keinen verlässlichen Schutz."
+ ],
+ [
+  "kennzeichnung",
+  "Was ist bei nicht mehr lesbarer Produktkennzeichnung zu tun?",
+  "Die Zuordnung und Nutzungsgrenzen sind nicht sicher feststellbar.",
+  "Benutzung aussetzen und die Eignung fachkundig klären lassen.",
+  "Die Grenzen von einem ähnlich aussehenden Produkt übernehmen.",
+  "Die zulässige Belastung nach dem Gewicht des Geräts schätzen.",
+  "Ohne verlässliche Zuordnung lassen sich die für das Produkt geltenden Grenzen nicht sicher prüfen."
+ ],
+ [
+  "kompatibel",
+  "Dürfen beliebige Seile und Geräte kombiniert werden?",
+  "Ein Ersatzseil passt scheinbar durch das Gerät.",
+  "Nein, nur die für das System zugelassenen Kombinationen verwenden.",
+  "Ja, wenn das Seil die gleiche Farbe hat.",
+  "Ja, wenn sich das Seil von Hand durchziehen lässt.",
+  "Mechanisches Passen allein beweist keine sichere Funktion der Kombination."
+ ],
+ [
+  "seillaenge",
+  "Was muss bezüglich der Seillänge vor dem Einsatz feststehen?",
+  "Der geplante Abstieg endet auf einem sicheren Bereich.",
+  "Die verfügbare Länge reicht für das geplante Verfahren nach Herstellerangaben.",
+  "Die Länge wird erst während des Abstiegs geschätzt.",
+  "Eine ungefähre Angabe eines Kollegen genügt immer.",
+  "Eine zu kurze Verbindung zum vorgesehenen Ziel kann eine gefährliche Situation erzeugen."
+ ],
+ [
+  "gewicht",
+  "Welche Belastung ist mit der zulässigen Gerätegrenze abzugleichen?",
+  "Die Person trägt zusätzliche Ausrüstung.",
+  "Die für das System maßgebliche Gesamtbelastung einschließlich mitgeführter Ausrüstung.",
+  "Nur das Körpergewicht ohne weitere Gegenstände.",
+  "Nur das Gewicht des verwendeten Seils.",
+  "Zusätzliche Ausrüstung kann zur Belastung beitragen und darf bei der Prüfung der Grenzen nicht fehlen."
+ ],
+ [
+  "anschlag",
+  "Wie wird ein geeigneter Befestigungspunkt ausgewählt?",
+  "In der Nähe befinden sich mehrere Bauteile.",
+  "Nach nachgewiesener Eignung und dem vorgesehenen System.",
+  "Nach dem kürzesten Weg zur Kante.",
+  "Nach dem größten sichtbaren Durchmesser allein.",
+  "Das Aussehen eines Bauteils belegt weder dessen Tragfähigkeit noch die Eignung für die vorgesehene Belastung."
+ ],
+ [
+  "gelander",
+  "Ist ein vorhandenes Geländer automatisch ein geeigneter Anschlagpunkt?",
+  "Ein Geländer erscheint stabil.",
+  "Nein, die Eignung muss für diesen Zweck nachgewiesen sein.",
+  "Ja, jedes fest montierte Geländer genügt.",
+  "Ja, sobald man daran kräftig gerüttelt hat.",
+  "Ein Geländer ist ohne Eignungsnachweis nicht als Befestigung für das Rettungssystem anzusehen."
+ ],
+ [
+  "kante",
+  "Welche Gefahr besteht bei einem Seil an einer scharfen Kante?",
+  "Der geplante Seilverlauf berührt eine Metallkante.",
+  "Das Seil kann beschädigt oder durchtrennt werden.",
+  "Das Seil wird dadurch automatisch besser geführt.",
+  "Nur die Farbe des Seils kann sich verändern.",
+  "Kantenkontakt kann tragende Fasern schädigen; der Seilverlauf muss dafür sicher geplant sein."
+ ],
+ [
+  "schutz",
+  "Wie wird mit einer gefährlichen Kante im Seilverlauf umgegangen?",
+  "Die Kante lässt sich im geplanten Verlauf nicht einfach vermeiden.",
+  "Den Verlauf oder geeignete Schutzmaßnahmen fachgerecht planen lassen.",
+  "Irgendeinen dünnen Stoff darüberlegen und beginnen.",
+  "Die Gefahr durch schnelleres Abseilen verkürzen.",
+  "Ein zufälliger Gegenstand ist kein nachgewiesen geeigneter Kantenschutz für die konkrete Situation."
+ ],
+ [
+  "pendeln",
+  "Warum ist eine seitliche Versetzung zum Anschlagpunkt zu beachten?",
+  "Die Person befindet sich nicht unterhalb der Befestigung.",
+  "Es kann eine Pendelbewegung mit Anprall an Hindernisse entstehen.",
+  "Die seitliche Versetzung beseitigt jede Anprallgefahr.",
+  "Sie ist nur für die Seilfarbe wichtig.",
+  "Seitliche Bewegungen können Personen gegen Bauwerksteile führen; diese Gefahr gehört in die Planung."
+ ],
+ [
+  "ziel",
+  "Was muss für den vorgesehenen Ankunftsbereich gelten?",
+  "Ein Abstieg wird vorbereitet.",
+  "Er muss sicher erreichbar und frei von relevanten Gefahren sein.",
+  "Er muss lediglich von oben sichtbar sein.",
+  "Seine Sicherheit kann erst nach der Ankunft geprüft werden.",
+  "Eine sichere Bewegung endet nicht über einer ungeschützten Öffnung oder in einem anderen Gefahrenbereich."
+ ],
+ [
+  "absperren",
+  "Warum wird der Bereich unter dem Einsatz abgesichert?",
+  "Unterhalb bewegen sich weitere Personen.",
+  "Zum Schutz vor herabfallenden Gegenständen und anderen Einsatzgefahren.",
+  "Damit niemand die Arbeitszeit beobachten kann.",
+  "Damit keine Kommunikation zum Boden möglich ist.",
+  "Auch unbeteiligte Personen müssen vor den Gefahren des Einsatzes geschützt werden."
+ ],
+ [
+  "werkzeug",
+  "Wie gehst du mit Werkzeugen in der Höhe um?",
+  "Für die Arbeit werden kleine Werkzeuge benötigt.",
+  "Gegen Herabfallen sichern, entsprechend dem vorgesehenen Verfahren.",
+  "Lose in eine offene Jackentasche stecken.",
+  "Ungesichert an den Rand der Arbeitsfläche legen.",
+  "Auch kleine Gegenstände können beim Herabfallen Menschen verletzen."
+ ],
+ [
+  "wetter",
+  "Was tust du bei plötzlich gefährlich werdenden Wetterbedingungen?",
+  "Wind oder Gewitter gefährden den Einsatz.",
+  "Den Einsatz nach dem festgelegten sicheren Vorgehen unterbrechen.",
+  "Nur schneller weiterarbeiten, um Zeit zu sparen.",
+  "Die Wetteränderung bis zum geplanten Ende ignorieren.",
+  "Ändern sich die Bedingungen, muss die Sicherheit erneut beurteilt werden."
+ ],
+ [
+  "kommunikation",
+  "Was gehört zur Kommunikation vor dem Start?",
+  "Mehrere Personen sind am Einsatz beteiligt.",
+  "Verständliche Signale und Zuständigkeiten vereinbaren.",
+  "Darauf vertrauen, dass jeder spontane Zurufe versteht.",
+  "Nur die Person am Seil über den Ablauf informieren.",
+  "Vorab abgestimmte Kommunikation verringert Missverständnisse in kritischen Situationen."
+ ],
+ [
+  "verstaendnis",
+  "Was tust du, wenn du eine Anweisung nicht verstanden hast?",
+  "Ein wichtiger Schritt wird dir erklärt.",
+  "Nachfragen und vor dem Beginn Klarheit herstellen.",
+  "So tun, als sei die Anweisung verstanden.",
+  "Den Schritt durch Ausprobieren selbst herausfinden.",
+  "Sicherheitsrelevante Anweisungen müssen verstanden sein; Raten ist keine geeignete Arbeitsweise."
+ ],
+ [
+  "partner",
+  "Welchen Zweck hat eine vereinbarte gegenseitige Kontrolle?",
+  "Das Team führt vor dem Einsatz eine zusätzliche Kontrolle durch.",
+  "Fehler vor Beginn erkennen, ohne die eigene Verantwortung zu ersetzen.",
+  "Die Herstelleranleitung vollständig ersetzen.",
+  "Jede weitere Kontrolle der Ausrüstung dauerhaft überflüssig machen.",
+  "Eine zusätzliche Kontrolle kann Fehler sichtbar machen; die übrigen Sicherheitsanforderungen bleiben bestehen."
+ ],
+ [
+  "verschluss",
+  "Was ist bei einem Verbindungselement vor Belastung zu prüfen?",
+  "Ein Karabiner gehört zum vorgesehenen System.",
+  "Dass er nach Anleitung geschlossen, verriegelt und richtig ausgerichtet ist.",
+  "Nur dass er aus glänzendem Metall besteht.",
+  "Nur dass er größer als die anderen Teile ist.",
+  "Ein falsch belastetes oder unverschlossenes Verbindungselement kann seine Schutzfunktion verlieren."
+ ],
+ [
+  "gurtoese",
+  "Kann jede Öse am Gurt zur Sicherung einer Person dienen?",
+  "Am Gurt befinden sich verschiedene Schlaufen und Ösen.",
+  "Nein, nur die für die jeweilige Funktion vorgesehenen Befestigungspunkte.",
+  "Ja, alle sichtbaren Schlaufen sind gleich belastbar.",
+  "Ja, wenn sich ein Karabiner einhängen lässt.",
+  "Materialschlaufen und sicherheitsrelevante Befestigungspunkte haben unterschiedliche Aufgaben."
+ ],
+ [
+  "sitz",
+  "Was ist beim Anlegen des Gurts wichtig?",
+  "Ein anderer Teilnehmer hat den Gurt zuvor benutzt.",
+  "Passform und Einstellung nach Anleitung für die eigene Person prüfen.",
+  "Die Einstellung des vorherigen Benutzers unverändert übernehmen.",
+  "Den Gurt möglichst locker tragen, damit er nicht drückt.",
+  "Eine ungeprüfte Einstellung kann die vorgesehene Körperhaltung und Schutzwirkung beeinträchtigen."
+ ],
+ [
+  "umbau",
+  "Darf ein Gerät eigenständig verändert werden?",
+  "Ein Bauteil erscheint bei der Bedienung störend.",
+  "Nein, keine eigenmächtigen Veränderungen vornehmen.",
+  "Ja, sofern sich das Gerät danach leichter bedienen lässt.",
+  "Ja, wenn die Änderung später wieder rückgängig gemacht wird.",
+  "Veränderungen können die geprüfte Funktion und Sicherheit des Systems aufheben."
+ ],
+ [
+  "sport",
+  "Ist private Sportausrüstung automatisch für den betrieblichen Einsatz geeignet?",
+  "Ein Mitarbeiter bringt eigene Kletterausrüstung mit.",
+  "Nein, ihre Eignung für den konkreten betrieblichen Zweck muss geprüft sein.",
+  "Ja, wenn sie bei Freizeittouren funktioniert hat.",
+  "Ja, wenn sie besonders leicht ist.",
+  "Erfahrung mit Freizeitmaterial ersetzt keine Prüfung der Eignung für das vorgesehene Arbeits- oder Rettungssystem."
+ ],
+ [
+  "zweck",
+  "Darf ein Rettungsgerät ohne Weiteres für regelmäßige Arbeiten eingesetzt werden?",
+  "Ein Gerät ist für Rettungszwecke vorgesehen.",
+  "Nein, nur innerhalb seines vorgesehenen Verwendungszwecks.",
+  "Ja, solange die Arbeit keine ganze Schicht dauert.",
+  "Ja, wenn Rettungseinsätze damit ebenfalls möglich sind.",
+  "Der zugelassene Einsatzzweck und die konkreten Herstellergrenzen bestimmen die Verwendung."
+ ],
+ [
+  "zweipersonen",
+  "Wann darf ein System gleichzeitig zwei Personen tragen?",
+  "Bei einer Rettung wird eine Begleitung erwogen.",
+  "Nur wenn das gesamte System und Verfahren dafür geeignet und freigegeben sind.",
+  "Immer, wenn beide Personen zusammenarbeiten.",
+  "Immer, wenn ein zweiter Karabiner vorhanden ist.",
+  "Eine zusätzliche Person verändert die Belastung; einzelne passende Teile genügen nicht als Eignungsnachweis."
+ ],
+ [
+  "heiss",
+  "Warum sind heiße Oberflächen und Funken problematisch?",
+  "Die Ausrüstung liegt nahe einer Schweißarbeit.",
+  "Sie können tragende Bestandteile beschädigen.",
+  "Sie verbessern die Belastbarkeit textiler Teile.",
+  "Sie sind nur für die Verpackung relevant.",
+  "Hitzeeinwirkung kann Material schwächen, auch wenn der Schaden nicht sofort deutlich sichtbar ist."
+ ],
+ [
+  "chemie",
+  "Was tust du nach möglichem Kontakt mit unbekannten Chemikalien?",
+  "Ein Seil wurde durch eine unbekannte Flüssigkeit verunreinigt.",
+  "Nicht weiterverwenden und die weitere Behandlung fachkundig klären.",
+  "Abwischen und ohne weitere Prüfung benutzen.",
+  "Die betroffene Stelle durch einen beliebigen Knoten verstecken.",
+  "Chemische Einwirkungen können die Materialfestigkeit beeinträchtigen und sind nicht durch Aussehen allein zu bewerten."
+ ],
+ [
+  "lager",
+  "Wie wird die Ausrüstung zwischen Einsätzen aufbewahrt?",
+  "Der Einsatz ist beendet.",
+  "Geschützt und entsprechend den Herstellerangaben lagern.",
+  "Dauerhaft ungeschützt in direkter Sonne liegen lassen.",
+  "Zusammen mit offenen Chemikalienbehältern lagern.",
+  "Geeignete Lagerung schützt das Material vor vermeidbarer Alterung und Beschädigung."
+ ],
+ [
+  "reinigen",
+  "Welche Reinigung ist für die Ausrüstung richtig?",
+  "Das Material ist verschmutzt.",
+  "Die vom Hersteller vorgegebene Reinigungsmethode verwenden.",
+  "Beliebige starke Lösungsmittel einsetzen.",
+  "Textile Teile mit offener Flamme trocknen.",
+  "Ungeeignete Reinigungs- und Trocknungsverfahren können sicherheitsrelevante Materialien schädigen."
+ ],
+ [
+  "lebensdauer",
+  "Darf Ausrüstung nach Ablauf ihrer zulässigen Gebrauchsdauer weiterbenutzt werden?",
+  "Das Material sieht äußerlich noch gut aus.",
+  "Nein, die festgelegten Herstellergrenzen sind einzuhalten.",
+  "Ja, solange keine sichtbaren Risse vorhanden sind.",
+  "Ja, wenn sie nur selten benutzt wurde, unabhängig von den Vorgaben.",
+  "Das äußere Erscheinungsbild ersetzt nicht die Beachtung der festgelegten Lebensdauer."
+ ],
+ [
+  "pruefung",
+  "Ersetzt die Prüfung durch eine sachkundige Person die Kontrolle vor Benutzung?",
+  "Die letzte dokumentierte Prüfung liegt erst kurz zurück.",
+  "Nein, die vorgeschriebene Kontrolle vor jeder Benutzung bleibt nötig.",
+  "Ja, bis zum nächsten vorgesehenen Prüftermin.",
+  "Ja, wenn seitdem nur ein Kollege die Ausrüstung benutzt hat.",
+  "Neue Schäden können auch nach einer dokumentierten Prüfung entstehen."
+ ],
+ [
+  "dokumentation",
+  "Warum müssen Prüfungen nachvollziehbar dokumentiert sein?",
+  "Mehrere Ausrüstungsteile werden im Betrieb verwendet.",
+  "Damit Zustand, Zuordnung und Prüftermine nachvollziehbar bleiben.",
+  "Damit tägliche Kontrollen grundsätzlich entfallen.",
+  "Damit die Ausrüstung unbegrenzt weiterbenutzt werden darf.",
+  "Eine nachvollziehbare Dokumentation unterstützt die sichere Verwaltung der einzelnen Ausrüstungsteile."
+ ],
+ [
+  "sturz",
+  "Wie gehst du mit durch einen Sturz beanspruchter Ausrüstung um?",
+  "Das System hat eine Person aufgefangen.",
+  "Der Benutzung entziehen und fachkundig über die weitere Verwendung entscheiden lassen.",
+  "Sofort wiederverwenden, wenn sie sauber aussieht.",
+  "Nur den Karabiner wechseln und weiterarbeiten.",
+  "Nach außergewöhnlicher Belastung kann eine nicht sichtbare Schädigung vorliegen."
+ ],
+ [
+  "notruf",
+  "Welche Information hilft bei der Alarmierung von Rettungskräften besonders?",
+  "Bei einem Einsatz ist ein Notfall eingetreten.",
+  "Genaue Einsatzstelle, Situation und Zugangsmöglichkeiten angeben.",
+  "Nur den Namen des Geräteherstellers nennen.",
+  "Nur die bisherige Dauer der Arbeit nennen.",
+  "Präzise Angaben zum Ort und zur Lage erleichtern das gezielte Erreichen der betroffenen Person."
+ ],
+ [
+  "eigenschutz",
+  "Was gilt für helfende Personen bei einer Rettung?",
+  "Ein Kollege braucht dringend Unterstützung.",
+  "Eigenschutz beachten und nach dem vorbereiteten Verfahren handeln.",
+  "Ohne Sicherung zur betroffenen Person klettern.",
+  "Jede Sicherheitsmaßnahme zugunsten der Geschwindigkeit weglassen.",
+  "Eine ungesicherte Rettungsaktion kann zusätzliche Betroffene erzeugen und die Hilfe erschweren."
+ ],
+ [
+  "haengen",
+  "Wie ist regungsloses Hängen im Gurt zu bewerten?",
+  "Eine Person hängt nach einem Ereignis bewegungslos im System.",
+  "Als dringlicher Notfall, der unverzügliche organisierte Hilfe erfordert.",
+  "Als sichere Ruheposition ohne zeitlichen Handlungsbedarf.",
+  "Als Anlass, die Person zunächst lange unbeobachtet zu lassen.",
+  "Bewegungsloses Hängen kann gefährlich werden; die Person benötigt schnell geeignete Hilfe."
+ ],
+ [
+  "rettungsdienst",
+  "Reicht der allgemeine Hinweis auf die Feuerwehr als Rettungsplanung aus?",
+  "Für den konkreten Arbeitsplatz wurde noch kein Ablauf festgelegt.",
+  "Nein, die tatsächlich mögliche und rechtzeitige Rettung muss konkret geplant sein.",
+  "Ja, ein vorhandenes Telefon ersetzt jede weitere Planung.",
+  "Ja, solange sich eine Straße in der Nähe befindet.",
+  "Örtliche Zugänglichkeit, verfügbare Mittel und benötigte Zeit müssen für den Einsatz berücksichtigt werden."
+ ],
+ [
+  "zugang",
+  "Warum müssen Rettungswege und Zugänge bekannt sein?",
+  "Das Team arbeitet an einem schwer zugänglichen Ort.",
+  "Damit Hilfe die Einsatzstelle ohne vermeidbare Verzögerung erreichen kann.",
+  "Damit die Ausrüstung weniger Platz benötigt.",
+  "Damit die Kommunikation während des Einsatzes entfallen kann.",
+  "Unbekannte oder versperrte Zugänge können Hilfe verzögern und gehören daher zur Vorbereitung."
+ ],
+ [
+  "uebung",
+  "Welchen Zweck haben praktische Übungen im vorgesehenen System?",
+  "Das Team kennt die theoretischen Grundlagen.",
+  "Die sichere Anwendung und abgestimmten Abläufe unter geeigneter Anleitung üben.",
+  "Das System ohne fachkundige Begleitung erstmals ausprobieren.",
+  "Die Herstellergrenzen durch eigene Versuche erweitern.",
+  "Handlungssicherheit entsteht nicht allein durch Lesen; praktische Übungen benötigen geeignete Anleitung und Schutzmaßnahmen."
+ ],
+ [
+  "wechsel",
+  "Was ist beim Wechsel auf ein unbekanntes Gerätemodell erforderlich?",
+  "Ein bisher nicht verwendetes Gerät wird bereitgestellt.",
+  "Einweisung und Eignung für den vorgesehenen Einsatz sicherstellen.",
+  "Die Bedienung vom bisherigen Modell unverändert übertragen.",
+  "Nur prüfen, ob die Bedienhebel ähnlich aussehen.",
+  "Unterschiedliche Modelle können abweichende Bedienung und Einsatzgrenzen haben."
+ ],
+ [
+  "abbruch",
+  "Wie reagierst du auf einen sicherheitsrelevanten Gerätefehler im Einsatz?",
+  "Eine Funktion verhält sich unerwartet.",
+  "Nach dem eingeübten Notfallverfahren handeln und Unterstützung anfordern.",
+  "Das Gerät im belasteten Zustand eigenständig zerlegen.",
+  "Unbekannte Bedienhandlungen versuchsweise ausprobieren.",
+  "Ungeplante Experimente am belasteten System können die Situation verschärfen."
+ ],
+ [
+  "uebergabe",
+  "Was ist bei der Übergabe von Ausrüstung an andere Personen wichtig?",
+  "Ein Teamwechsel findet statt.",
+  "Besonderheiten, Schäden und Prüfstatus nachvollziehbar weitergeben.",
+  "Bekannte Auffälligkeiten verschweigen, um den Ablauf nicht zu stören.",
+  "Nur die Anzahl der Taschen mitteilen.",
+  "Sicherheitsrelevante Informationen müssen die nächste verwendende Person erreichen."
+ ],
+ [
+  "muede",
+  "Was tust du, wenn deine Aufmerksamkeit deutlich beeinträchtigt ist?",
+  "Du fühlst dich vor dem Einsatz stark erschöpft.",
+  "Die Beeinträchtigung melden und den Einsatz nicht unkritisch beginnen.",
+  "Die Erschöpfung durch möglichst schnelles Arbeiten ausgleichen.",
+  "Sie verbergen, damit das Team nicht warten muss.",
+  "Aufmerksamkeit und Handlungsfähigkeit sind bei Arbeiten mit Absturzgefahr wesentlich."
+ ],
+ [
+  "aenderung",
+  "Was gilt nach einer wesentlichen Änderung der Einsatzbedingungen?",
+  "Der geplante Weg oder das System soll geändert werden.",
+  "Die Änderung vor Fortsetzung sicherheitlich beurteilen lassen.",
+  "Die ursprüngliche Planung gilt automatisch unverändert weiter.",
+  "Nur die voraussichtliche Arbeitszeit neu schätzen.",
+  "Eine geänderte Situation kann neue Gefahren schaffen und erfordert eine passende Beurteilung."
+ ],
+ [
+  "ende",
+  "Was gehört zur Nachbereitung des Einsatzes?",
+  "Ausrüstung und Material werden zurückgebracht.",
+  "Auffälligkeiten melden und Material nach Vorgaben kontrollieren und versorgen.",
+  "Alles ungeprüft in die nächste Einsatztasche packen.",
+  "Beschädigungen erst bei der nächsten Benutzung erwähnen.",
+  "Eine sorgfältige Nachbereitung verhindert, dass ungeklärte Mängel in den nächsten Einsatz gelangen."
+ ],
+ [
+  "grenzen",
+  "Wie gehst du mit einer Aufgabenstellung außerhalb deiner Ausbildung um?",
+  "Du sollst ein nicht erlerntes Rettungsverfahren ausführen.",
+  "Die Grenze benennen und geeignete fachkundige Unterstützung hinzuziehen.",
+  "Das Verfahren anhand weniger Online-Bilder improvisieren.",
+  "Es allein versuchen, wenn gerade niemand Zeit hat.",
+  "Die eigene Befähigung muss zum Verfahren passen; Improvisation ersetzt keine Ausbildung."
+ ]
+];
+ const ids=new Set(current.questions.map(q=>q.id));
+ const added=rows.map(([slug,title,context,right,wrong1,wrong2,why],index)=>{
+  const id='as-'+slug;if(ids.has(id))throw Error('Duplicate practice question: '+id);ids.add(id);
+  const correct=index%3,answers=[wrong1,wrong2];answers.splice(correct,0,right);
+  return Object.freeze({id,course,topic:index<17?'grundlagen':index<34?'lasten':'betrieb',title,context,answers:Object.freeze(answers),correct,why,source:ref.source});
+ });
+ globalThis.ABBATE_PRACTICE_BANK=Object.freeze({courses:Object.freeze({...current.courses,[course]:ref}),questions:Object.freeze([...current.questions,...added])});
+})();
