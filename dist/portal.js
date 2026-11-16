@@ -50,8 +50,20 @@
   }
   function people(){return state.students.filter(p=>p.id!==state.me?.id&&(p.name+' '+p.email).toLowerCase().includes(search.toLowerCase())&&(filter==='all'||(filter==='expired'?p.access==='active'&&!M.access(p):p.access===filter)));}
   function peopleList(){return people().map(p=>`<button class="portal-person ${selected===p.id?'selected':''}" data-person="${safe(p.id)}" aria-pressed="${selected===p.id}"><span class="portal-person-name">${safe(p.name)}<small>${safe(p.email)}</small></span><span><small>${p.role==='admin'?'Administrator':p.role==='trainer'?'Ausbilder':'Teilnehmer'}</small>${badge(p)}</span></button>`).join('')||'<p class="portal-hint">Keine passenden Konten.</p>';}
+  function pickerLabel(){
+    const person=state.students.find(p=>p.id===selected);
+    return `<span><small>Teilnehmer auswählen</small><strong>${safe(person?.name||'Konto suchen')}</strong><span class="portal-picker-email">${safe(person?.email||'Name oder E-Mail')}</span></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>`;
+  }
+  function setPickerOpen(open,focus=false){
+    const picker=document.querySelector('#account-picker');
+    const toggle=document.querySelector('#account-picker-toggle');
+    if(!picker||!toggle)return;
+    picker.classList.toggle('is-open',open);
+    toggle.setAttribute('aria-expanded',String(open));
+    if(focus)(open?document.querySelector('#account-search'):toggle).focus({preventScroll:true});
+  }
   function detail(){
-    const p=state.students.find(p=>p.id===selected);if(!p)return '<section class="portal-panel"><h2>Konto auswählen</h2><p>Wähle links einen Teilnehmer aus. Neue Registrierungen erscheinen hier nach dem Aktualisieren.</p></section>';
+    const p=state.students.find(p=>p.id===selected);if(!p)return '<section class="portal-panel"><h2>Konto auswählen</h2><p>Wähle einen Teilnehmer über die Kontenauswahl aus. Neue Registrierungen erscheinen hier nach dem Aktualisieren.</p></section>';
     const rolePanel=canManageRoles()&&p.id!==state.me.id?`<section class="portal-panel portal-role-panel">
        <h3>Administratorrechte</h3>
        <p><strong>Aktuelle Rolle:</strong> ${p.role==='admin'?'Administrator':p.role==='trainer'?'Ausbilder':'Teilnehmer'}</p>
@@ -70,7 +82,7 @@
   }
   function renderDetail(){document.querySelector('#account-detail').innerHTML=detail();}
   function admin(){
-    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Geschützter Verwaltungsbereich</span><h1>Teilnehmerverwaltung</h1><p>Zugänge verwalten, Schulungen dokumentieren und Prüfungsergebnisse erfassen.</p></div><details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Der QR-Code führt zur Anmeldeseite und kann auf allen Schülerkarten verwendet werden.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code" style="image-rendering:pixelated"></canvas><p class="portal-hint">Der QR-Code enthält keine personenbezogenen Daten.</p><a class="portal-text" href="${AbbateCardQR.target}" target="_blank" rel="noopener noreferrer">Anmeldeseite öffnen ↗</a><button class="secondary" id="download-qr" type="button" disabled>PNG (Druckqualität) herunterladen</button><button class="secondary" id="download-qr-svg" type="button" disabled>SVG (Vektorformat) herunterladen</button></details></section><div class="portal-actions portal-refresh"><button class="secondary" data-refresh>Konten aktualisieren</button><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div><section class="portal-stats" aria-label="Kontenübersicht"><div><span>Registrierte Konten</span><strong>${state.students.filter(p=>p.id!==state.me.id).length}</strong></div><div><span>Warten auf Freischaltung</span><strong>${state.students.filter(p=>p.role==='learner'&&p.access==='pending').length}</strong></div><div><span>Aktive Zugänge</span><strong>${state.students.filter(p=>p.role==='learner'&&M.access(p)).length}</strong></div><div><span>Pausiert / abgelaufen</span><strong>${state.students.filter(p=>p.role==='learner'&&(p.access==='paused'||(p.access==='active'&&!M.access(p)))).length}</strong></div></section><div class="portal-admin-layout"><aside class="portal-sidebar"><label for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name oder E-Mail" value="${safe(search)}"><label class="portal-filter-label" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></aside><div id="account-detail" class="portal-detail">${detail()}</div></div>`;
+    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Geschützter Verwaltungsbereich</span><h1>Teilnehmerverwaltung</h1><p>Zugänge verwalten, Schulungen dokumentieren und Prüfungsergebnisse erfassen.</p></div><details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Der QR-Code führt zur Anmeldeseite und kann auf allen Schülerkarten verwendet werden.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code" style="image-rendering:pixelated"></canvas><p class="portal-hint">Der QR-Code enthält keine personenbezogenen Daten.</p><a class="portal-text" href="${AbbateCardQR.target}" target="_blank" rel="noopener noreferrer">Anmeldeseite öffnen ↗</a><button class="secondary" id="download-qr" type="button" disabled>PNG (Druckqualität) herunterladen</button><button class="secondary" id="download-qr-svg" type="button" disabled>SVG (Vektorformat) herunterladen</button></details></section><div class="portal-actions portal-refresh"><button class="secondary" data-refresh>Konten aktualisieren</button><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div><section class="portal-stats" aria-label="Kontenübersicht"><div><span>Registrierte Konten</span><strong>${state.students.filter(p=>p.id!==state.me.id).length}</strong></div><div><span>Warten auf Freischaltung</span><strong>${state.students.filter(p=>p.role==='learner'&&p.access==='pending').length}</strong></div><div><span>Aktive Zugänge</span><strong>${state.students.filter(p=>p.role==='learner'&&M.access(p)).length}</strong></div><div><span>Pausiert / abgelaufen</span><strong>${state.students.filter(p=>p.role==='learner'&&(p.access==='paused'||(p.access==='active'&&!M.access(p)))).length}</strong></div></section><div class="portal-admin-layout"><aside class="portal-sidebar" id="account-picker"><button type="button" id="account-picker-toggle" class="portal-picker-toggle" aria-expanded="false" aria-controls="account-picker-panel">${pickerLabel()}</button><div id="account-picker-panel" class="portal-picker-panel"><label for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name oder E-Mail" value="${safe(search)}"><label class="portal-filter-label" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></div></aside><div id="account-detail" class="portal-detail">${detail()}</div></div>`;
     document.querySelector('#account-filter').value=filter;
     const canvas=document.querySelector('#portal-qr');
     AbbateCardQR.render(canvas).then(()=>{
@@ -201,6 +213,11 @@
     }catch(error){const msg=B.message(error);const el=form.querySelector('[role="alert"]');if(el)el.textContent=msg;notice(msg);}
     finally{delete form.dataset.busy;form.removeAttribute('aria-busy');if(submit)submit.disabled=false;}
   });
+  root.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&event.target.closest('#account-picker')&&window.matchMedia('(max-width:700px)').matches){
+      event.preventDefault();setPickerOpen(false,true);
+    }
+  });
   root.addEventListener('input',event=>{if(view==='admin'&&event.target.id==='account-search'){search=event.target.value;document.querySelector('#account-list').innerHTML=peopleList();}});
   root.addEventListener('change',async event=>{
     if(view!=='admin'||!B.isStaff(state.me))return;
@@ -217,7 +234,17 @@
     if(event.target.closest('[data-recovery]')){location.hash='passwort';recovery();return;}
     if(event.target.closest('[data-logout]')){await B.client.auth.signOut({scope:'local'});location.replace('./konto.html');return;}
     if(view!=='admin'||!B.isStaff(state?.me))return;
-    const person=event.target.closest('[data-person]');if(person){selected=person.dataset.person;document.querySelector('#account-list').innerHTML=peopleList();renderDetail();return;}
+    const pickerToggle=event.target.closest('#account-picker-toggle');
+    if(pickerToggle){setPickerOpen(pickerToggle.getAttribute('aria-expanded')!=='true',true);return;}
+    const person=event.target.closest('[data-person]');if(person){
+      selected=person.dataset.person;
+      document.querySelector('#account-list').innerHTML=peopleList();
+      document.querySelector('#account-picker-toggle').innerHTML=pickerLabel();
+      renderDetail();
+      if(window.matchMedia('(max-width:700px)').matches)setPickerOpen(false,true);
+      else document.querySelector('#account-list [data-person][aria-pressed="true"]')?.focus({preventScroll:true});
+      return;
+    }
     const qrButton=event.target.closest('#download-qr, #download-qr-svg');
     if(qrButton){
       if(qrButton.disabled)return;
