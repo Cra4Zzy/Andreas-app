@@ -96,3 +96,38 @@
  .portal-picker-panel .portal-filter-label{margin-top:12px}
  .portal-picker-toggle:focus-visible{outline-offset:-4px}
 }
+
+/* Mobile administration: actions first, explanations and secondary tasks on demand. */
+.portal-mobile-copy,.portal-mobile-help,.portal-admin-disclosure{display:none}
+@media(max-width:700px){
+ .portal-detail{display:flex;flex-direction:column;gap:16px;min-width:0}
+ .portal-detail .portal-desktop-copy{display:none}
+ .portal-detail .portal-mobile-copy{display:block}
+ .portal-detail .portal-account-heading{margin:0;gap:12px}
+ .portal-detail .portal-account-heading h2{font-size:26px;line-height:1.15}
+ .portal-detail .portal-account-heading>div{min-width:0}
+ .portal-detail .portal-access-panel{padding:20px}
+ .portal-detail .portal-access-panel h3{font-size:25px;margin:0 0 8px;line-height:1.2}
+ .portal-detail .portal-section-intro{font-size:15px;line-height:1.5;color:#607468;margin:0 0 14px}
+ .portal-detail .portal-access-panel form{margin:16px 0 0}
+ .portal-detail .portal-access-panel [name="intent"]{min-height:48px;font-size:15px}
+ .portal-mobile-help{display:block;margin:14px 0;padding:12px 14px;background:#ffffff80;border:1px solid #dfd4b0;border-radius:11px}
+ .portal-mobile-help summary{cursor:pointer;font-size:14px;font-weight:700;line-height:1.4;color:#526248;min-height:24px}
+ .portal-mobile-help ol{padding-left:19px;margin:14px 0 0}
+ .portal-mobile-help li{font-size:14px;line-height:1.5;margin:0 0 10px;color:#53664f}
+ .portal-mobile-help p{font-size:14px!important;margin-top:12px}
+ .portal-detail .portal-entry,.portal-detail .portal-admin-history,.portal-detail .portal-role-panel{margin:0;padding:0;border:1px solid #dfe7dd;background:#fffefa;border-radius:16px;box-shadow:none;overflow:hidden}
+ .portal-admin-disclosure{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;padding:18px;text-align:left;background:transparent;color:#23453f;border:0;min-height:80px}
+ .portal-admin-disclosure>span:first-child{display:grid;gap:5px;min-width:0}
+ .portal-admin-disclosure strong{font-size:18px;line-height:1.25;font-weight:700}
+ .portal-admin-disclosure small{font-size:13px;line-height:1.4;font-weight:400;color:#687d71}
+ .portal-disclosure-mark{font-size:25px;font-weight:400;flex-shrink:0;color:#64856e}
+ .portal-admin-disclosure:focus-visible{outline-offset:-4px}
+ .portal-disclosure-content{display:none;padding:0 18px 18px}
+ .portal-disclosure-content.is-open{display:block}
+ .portal-detail .portal-entry form{margin:16px 0 0}
+ .portal-detail .portal-record-form label{font-size:14px}
+ .portal-detail .portal-admin-history .portal-section-title{display:none}
+ .portal-detail .portal-role-panel{order:5}
+ .portal-detail .portal-delete{order:6;margin:2px 0 0}
+}
