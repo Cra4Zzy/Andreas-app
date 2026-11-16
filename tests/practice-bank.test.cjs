@@ -55,16 +55,39 @@ test('existing course list is preserved and new exercises use its course-specifi
 
 test('PWA loads offline question bank before the app and caches both',()=>{
  const html=read('dist/index.html'),sw=read('dist/sw.js');
- assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('app.js?v=37'));
+ const appAsset=html.match(/src="\.\/(app\.js\?v=\d+)"/)?.[1];
+ assert.ok(appAsset,'HTML must load versioned app JavaScript');
+ assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf(appAsset));
  assert.ok(sw.includes('practice-bank.js?v=1'));
  assert.ok(html.includes('practice-expansion.js?v=1'));
  assert.ok(sw.includes('practice-expansion.js?v=1'));
  assert.ok(html.includes('practice-expansion-final.js?v=3'));
  assert.ok(sw.includes('practice-expansion-final.js?v=3'));
  assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('practice-expansion-final.js?v=3'));
- assert.ok(html.indexOf('practice-expansion-final.js?v=3')<html.indexOf('app.js?v=37'));
+ assert.ok(html.indexOf('practice-expansion-final.js?v=3')<html.indexOf(appAsset));
  assert.ok(html.indexOf('practice-bank.js?v=1')<html.indexOf('practice-expansion.js?v=1'));
- assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf('app.js?v=37'));
- assert.ok(sw.includes('app.js?v=37'));
- assert.ok(sw.includes('abbate-learning-v44'));
+ assert.ok(html.indexOf('practice-expansion.js?v=1')<html.indexOf(appAsset));
+ assert.ok(sw.includes('"./'+appAsset+'"'));
+ assert.match(sw,/const CACHE='abbate-learning-v\d+'/);
+});
+
+test('each qualification has a distinct custom SVG icon in both learner views',()=>{
+ const app=read('dist/app.js');
+ const prefix=app.slice(0,app.indexOf('const B ='));
+ const courses=app.match(/const COURSES=(\[.*\])\.map\(course=>/);
+ assert.ok(courses,'course configuration must exist');
+ const config=JSON.parse(courses[1]);
+ const context={};
+ vm.runInNewContext(prefix+'\nthis.renderIcon=icon;this.courseIcons=COURSE_ICONS;',context);
+ assert.equal(config.length,7);
+ assert.equal(new Set(config.map(c=>c.icon)).size,7);
+ for(const course of config){
+   assert.ok(Object.hasOwn(context.courseIcons,course.icon),course.id+' must use a custom icon');
+   const svg=context.renderIcon(course.icon);
+   assert.match(svg,/<svg viewBox="0 0 24 24"/);
+   assert.match(svg,/<(?:path|rect|circle)\b/);
+   assert.doesNotMatch(svg,/<use\b/);
+ }
+ assert.match(context.renderIcon('home'),/<use href="#i-home"/);
+ assert.equal((app.match(/icon\(course\.icon\)/g)||[]).length,2);
 });

@@ -83,8 +83,10 @@ test('download cards retain live download logic without redundant update callout
 });
 
 test('cached PWA shell uses current app JavaScript and CSS',()=>{
-  assert.match(read('dist/index.html'),/app\.js\?v=37/);
-  assert.match(read('dist/sw.js'),/app\.js\?v=37/);
+  const html=read('dist/index.html'),worker=read('dist/sw.js');
+  const appAsset=html.match(/src="\.\/(app\.js\?v=\d+)"/)?.[1];
+  assert.ok(appAsset,'HTML must load versioned app JavaScript');
+  assert.ok(worker.includes('"./'+appAsset+'"'),'Service worker must cache the exact app version from HTML');
   assert.match(read('dist/sw.js'),/styles\.css\?v=18/);
   assert.match(read('dist/sw.js'),/practice-bank\.js\?v=1/);
   assert.match(read('dist/index.html'),/practice-expansion\.js\?v=1/);
@@ -92,8 +94,7 @@ test('cached PWA shell uses current app JavaScript and CSS',()=>{
   assert.match(read('dist/index.html'),/experience\.css\?v=5/);
   assert.match(read('dist/sw.js'),/experience\.css\?v=5/);
   assert.match(read('dist/index.html'),/practice-bank\.js\?v=1/);
-  assert.match(read('dist/sw.js'),/abbate-learning-v44/);
-  const html=read('dist/index.html'),worker=read('dist/sw.js');
+  assert.match(worker,/const CACHE='abbate-learning-v\d+'/);
   for(const file of ['i18n-ru.js?v=1','i18n-uk.js?v=1','i18n-modern.js?v=4','i18n.js?v=12']){
     assert.ok(html.includes(file),'HTML missing '+file);
     assert.ok(worker.includes(file),'Service worker missing '+file);
