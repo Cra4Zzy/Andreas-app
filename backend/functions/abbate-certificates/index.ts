@@ -29,7 +29,7 @@ async function sendCertificate(admin:any,r:any,pdf:string,expectedEmail:string){
 }
 const signaturePath=(school:string)=>school+"/signature.png";
 const textDate=(s:string)=>new Intl.DateTimeFormat("de-DE",{dateStyle:"long",timeZone:"Europe/Berlin"}).format(new Date(s+"T12:00:00Z"));
-async function createPDF(name:string,label:string,record:any,signature:ArrayBuffer){
+async function createPDF(name:string,label:string,record:any,signature:ArrayBuffer,draft=false){
  const pdf=await PDFDocument.create(), p=pdf.addPage([842,595]);
  const serif=await pdf.embedFont(StandardFonts.TimesRoman), bold=await pdf.embedFont(StandardFonts.HelveticaBold), regular=await pdf.embedFont(StandardFonts.Helvetica), italic=await pdf.embedFont(StandardFonts.TimesRomanItalic);
  const ink=rgb(.13,.17,.14), gold=rgb(.63,.53,.30), muted=rgb(.37,.40,.36);
@@ -58,7 +58,8 @@ async function createPDF(name:string,label:string,record:any,signature:ArrayBuff
  p.drawImage(sig,{x:600-sig.width*s/2,y:102,width:sig.width*s,height:sig.height*s});
  for(const x of [242,600])p.drawLine({start:{x:x-94,y:99},end:{x:x+94,y:99},color:gold,thickness:.8});
  at(textDate(record.completed_at),242,111);at("Prüfungsdatum",242,81,bold);at("Andreas Abbate",600,81,bold);at("Prüfungsverantwortlicher",600,66,regular,10,muted);
- center("Nur Theorieprüfung · Kein eigenständiger Fahrausweis · "+record.reference,42,10,regular,muted);
+ center(draft?"ENTWURF · KEIN PRÜFUNGSNACHWEIS · NICHT AUSGESTELLT":"Nur Theorieprüfung · Kein eigenständiger Fahrausweis · "+record.reference,42,10,bold,muted);
+ if(draft){center("VORSCHAU / ENTWURF",564,12,bold,rgb(.57,.18,.14));center("ENTWURF",382,16,bold,rgb(.57,.18,.14));}
  pdf.setTitle("Abbate – Nachweis der Theorieprüfung");pdf.setAuthor("Fahrschule Andreas Abbate");
  return await pdf.saveAsBase64();
 }
@@ -76,7 +77,7 @@ Deno.serve(async req=>{
   const body=await req.json();
   if(!body||typeof body!=="object")throw new Fault("Ungültige Anfrage.");
   const action=body.action;
-  if(!["status","signature","issue","download","list","mail"].includes(action))throw new Fault("Unbekannte Aktion.");
+  if(!["status","signature","issue","download","list","mail","preview"].includes(action))throw new Fault("Unbekannte Aktion.");
   // A live membership read is enforced by the existing RLS policy (including live_session).
   const {data:members,error:membershipError}=await caller.from("abbate_memberships").select("school_id,role,access_status,access_until").eq("user_id",auth.user.id);
   if(membershipError||!members?.length)throw new Fault("Kein gültiger Zugang.",403);
@@ -97,6 +98,20 @@ Deno.serve(async req=>{
    }
    const {data:sig}=await admin.storage.from(bucket).download(signaturePath(m.school_id));
    return json({signatureReady:!!sig,mailReady:mailReady()});
+  }
+  if(action==="preview"){
+   const m=members.find((m:any)=>m.school_id===body.school&&active(m));
+   if(!m)throw new Fault("Administratorrechte erforderlich.",403);
+   const label=body.label,date=body.completedAt,today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Berlin"}).format(new Date());
+   if(typeof label!=="string"||!Object.hasOwn(courses,label)||!uuid.test(String(body.participantId||""))||typeof date!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+"T12:00:00Z"))||new Date(date+"T12:00:00Z").toISOString().slice(0,10)!==date||date>today)throw new Fault("Ungültige Vorschauangaben.");
+   const {data:learner,error:learnerError}=await caller.from("abbate_memberships").select("user_id").eq("school_id",m.school_id).eq("user_id",body.participantId).eq("role","learner").maybeSingle();
+   if(learnerError||!learner)throw new Fault("Teilnehmer nicht verfügbar.",404);
+   const {data:profile,error:profileError}=await caller.from("abbate_profiles").select("display_name").eq("school_id",m.school_id).eq("user_id",learner.user_id).maybeSingle();
+   if(profileError||!profile?.display_name)throw new Fault("Teilnehmername fehlt.");
+   const {data:sig,error:sigError}=await admin.storage.from(bucket).download(signaturePath(m.school_id));
+   if(sigError||!sig)throw new Fault("Die freigegebene Unterschrift fehlt.",409);
+   const pdf=await createPDF(profile.display_name,label,{completed_at:date,reference:"ENTWURF"},await sig.arrayBuffer(),true);
+   return json({pdf,draft:true});
   }
   if(action==="list"){
    const ids=body.ids;
