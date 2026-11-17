@@ -91,14 +91,20 @@ test('cached PWA shell uses current app JavaScript and CSS',()=>{
   assert.match(read('dist/sw.js'),/practice-bank\.js\?v=1/);
   assert.match(read('dist/index.html'),/practice-expansion\.js\?v=1/);
   assert.match(read('dist/sw.js'),/practice-expansion\.js\?v=1/);
-  assert.match(read('dist/index.html'),/experience\.css\?v=5/);
-  assert.match(read('dist/sw.js'),/experience\.css\?v=5/);
+  const experienceAsset=html.match(/href="\.\/(experience\.css\?v=\d+)"/)?.[1];
+  assert.ok(experienceAsset,'HTML must load versioned experience CSS');
+  assert.ok(worker.includes('"./'+experienceAsset+'"'),'Service worker must cache the exact experience CSS version from HTML');
   assert.match(read('dist/index.html'),/practice-bank\.js\?v=1/);
   assert.match(worker,/const CACHE='abbate-learning-v\d+'/);
   for(const file of ['i18n-ru.js?v=1','i18n-uk.js?v=1','i18n-modern.js?v=5','i18n.js?v=12']){
     assert.ok(html.includes(file),'HTML missing '+file);
     assert.ok(worker.includes(file),'Service worker missing '+file);
   }
+});
+
+test('homepage hero identifies the certified examination provider',()=>{
+  assert.match(read('dist/app.js'),/class="hero-certification"[^>]*>[^<]*.*IHK-zertifizierter Prüfungsbetrieb/);
+  assert.match(read('dist/experience.css'),/\.hero-certification\s*\{/);
 });
 
 test('learning UI stays focused and identifies simulation honestly',()=>{
