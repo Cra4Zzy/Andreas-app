@@ -1,13 +1,13 @@
 /* Abbate administration only — operational workspace, original brand colors. */
-body[data-view=admin]{--ad-ink:#183438;--ad-mid:#3e5555;--ad-green:#173f41;--ad-gold:#f2c84b;--ad-line:#aebdb7;--ad-surface:#fffefa;--ad-bg:#eef1ed;background:var(--ad-bg);color:var(--ad-ink);font-size:16px}
-body[data-view=admin] .portal-header{background:var(--ad-green);color:white;border:0;max-width:none;margin:0;padding:14px 22px;min-height:62px}
-body[data-view=admin] .portal-brand>span{color:white;font-size:27px}
-body[data-view=admin] .portal-brand small{color:#d4e2dc}
-body[data-view=admin] .portal-primary-nav{background:#244e50}
-body[data-view=admin] .portal-primary-nav a{color:#fff}
-body[data-view=admin] .portal-primary-nav a[aria-current=page],body[data-view=admin] .portal-primary-nav a.active{background:var(--ad-gold);color:#173438}
+body[data-view=admin]{--ad-ink:#183438;--ad-mid:#3e5555;--ad-green:#173f41;--ad-gold:#f2c84b;--ad-line:#b9c8bc;--ad-surface:#fffefa;--ad-bg:#f5f5f0;background:var(--ad-bg);color:var(--ad-ink);font-size:16px}
+body[data-view=admin] .portal-header{position:relative;background:var(--ad-surface);color:var(--ad-ink);border-bottom:1px solid #d7e0d5;max-width:1500px;margin:0 auto;padding:14px clamp(16px,3vw,40px);min-height:76px}
+body[data-view=admin] .portal-brand>span{color:var(--ad-green);font-size:30px}
+body[data-view=admin] .portal-brand small{color:var(--ad-mid)}
+body[data-view=admin] .portal-primary-nav{background:#e8eee6;flex:0 1 auto;justify-content:center}
+body[data-view=admin] .portal-primary-nav a{color:#304c43}
+body[data-view=admin] .portal-primary-nav a[aria-current=page],body[data-view=admin] .portal-primary-nav a.active,body[data-view=admin] .portal-primary-nav a.is-current{background:var(--ad-surface);color:#173438;box-shadow:0 1px 4px #18343817}
 body[data-view=admin] .portal-language-trigger{color:var(--ad-ink)}
-body[data-view=admin] .portal-main{max-width:1600px;margin:0 auto;padding:24px clamp(16px,3vw,40px) 38px}
+body[data-view=admin] .portal-main{max-width:1500px;margin:0 auto;padding:28px clamp(16px,3vw,40px) 38px}
 body[data-view=admin] .portal-admin-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 18px}
 body[data-view=admin] .portal-admin-heading h1{font-size:clamp(26px,3vw,40px);margin:4px 0 0;letter-spacing:-.04em;color:var(--ad-ink)}
 body[data-view=admin] .portal-eyebrow{color:#47645b}
@@ -86,21 +86,24 @@ body[data-view=admin] .portal-record{padding:14px;border:1px solid var(--ad-line
 body[data-view=admin] .portal-record h3{font-size:18px;margin:10px 0}
 body[data-view=admin] .portal-hint,body[data-view=admin] .portal-record dt{color:var(--ad-mid)}
 body[data-view=admin] #portal-status:not(:empty){background:#e0ede4;color:#1d503a;border:1px solid #9bb7a4;padding:10px 14px;border-radius:9px;margin:0 0 12px}
-@media(min-width:1200px){
- body[data-view=admin] .portal-header{position:fixed;inset:0 auto 0 0;width:208px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:24px;padding:24px 14px;z-index:5}
- body[data-view=admin] .portal-primary-nav{display:grid;grid-template-columns:1fr;background:none;padding:0;gap:6px}
- body[data-view=admin] .portal-primary-nav a{padding:12px 14px;text-align:left;min-height:44px}
- body[data-view=admin] .portal-header-actions{margin-top:auto}
- body[data-view=admin] .portal-main{margin-left:208px;max-width:none}
- body[data-view=admin] .portal-legal-footer{margin-left:208px}
+@media(min-width:981px){
+ body[data-view=admin] .portal-header{display:flex;align-items:center;justify-content:space-between;gap:20px}
+ body[data-view=admin] .portal-primary-nav a{padding:10px 14px;text-align:center;min-height:44px}
  body[data-view=admin] .portal-sidebar{top:18px}
+ body[data-view=admin] .portal-admin-layout{grid-template-columns:minmax(250px,310px) minmax(0,1fr);gap:24px}
+ body[data-view=admin] .portal-stats>div{padding:16px 20px;border-radius:14px}
+ body[data-view=admin] .portal-account-heading,body[data-view=admin] .admin-section,body[data-view=admin] .portal-role-panel,body[data-view=admin] .portal-sidebar{border-radius:16px;box-shadow:0 8px 24px #173f4108}
+ body[data-view=admin] .admin-section-body{padding:18px 20px}
+}
+@media(min-width:701px) and (max-width:980px){
+ body[data-view=admin] .portal-primary-nav{flex:0 0 100%;justify-content:flex-start}
 }
 @media(max-width:700px){
- body[data-view=admin] .portal-header{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;min-height:0}
+ body[data-view=admin] .portal-header{display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;min-height:0;background:var(--ad-surface)}
  body[data-view=admin] .portal-brand img{width:29px;height:38px}
  body[data-view=admin] .portal-brand>span{font-size:24px}
  body[data-view=admin] .portal-brand small{display:none}
- body[data-view=admin] .portal-primary-nav{width:100%;order:3;display:flex;justify-content:space-between;gap:2px;padding:3px}
+ body[data-view=admin] .portal-primary-nav{width:100%;flex:0 0 100%;order:3;display:flex;justify-content:space-between;gap:2px;padding:3px}
  body[data-view=admin] .portal-primary-nav a{font-size:12px;padding:8px 5px;flex:1;text-align:center}
  body[data-view=admin] .portal-main{padding:13px 12px 28px}
  body[data-view=admin] .portal-admin-heading{flex-wrap:wrap;gap:9px;margin:0 0 12px}
@@ -136,3 +139,10 @@ body[data-view=admin] #portal-status:not(:empty){background:#e0ede4;color:#1d503
  body[data-view=admin] .portal-legal-footer{padding:16px 12px}
 }
 @media(max-width:360px){body[data-view=admin] .portal-stats>div{padding:6px}body[data-view=admin] .portal-stats span{font-size:11px}body[data-view=admin] .portal-account-heading .portal-badge{padding:4px 6px}}
+
+/* Consistent light workspace at all screen sizes; retain compact signed PDF rendering. */
+body[data-view=admin] .portal-primary-nav a:hover{background:#dce7db;color:var(--ad-ink)}
+body[data-view=admin] .portal-header-actions{width:auto;flex:none;margin-left:0}
+body[data-view=admin] .portal-person.selected{background:#e8f0e7;border-color:#52765a}
+body[data-view=admin] .admin-pdf-canvas{max-width:760px;margin-inline:auto}
+@media(max-width:700px){body[data-view=admin] .portal-header-actions{margin-left:auto}body[data-view=admin] .admin-pdf-canvas{width:100%;max-width:100%}}
