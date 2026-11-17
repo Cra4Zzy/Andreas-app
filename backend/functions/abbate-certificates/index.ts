@@ -4,7 +4,8 @@ import nodemailer from "npm:nodemailer@10.6.0";
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Cache-Control":"no-store"};
 const json=(v:unknown,status=200)=>new Response(JSON.stringify(v),{status,headers:{...cors,"Content-Type":"application/json"}});
 class Fault extends Error { constructor(message:string,public status=400){super(message)} }
-const courses:Record<string,string>={"Fahr- und Steuerpersonal / Gabelstaplerfahrer":"Theoretische Ausbildungsinhalte nach DGUV Grundsatz 308-001","Hebebühnen":"","Krane":"","Anschlagen von Lasten":"","Erdbaumaschinen & Bagger":"","Ladungssicherung":"","Abseilen aus Höhen":""};
+// Subject references only; a theory certificate does not attest practical competence.
+const courses:Record<string,string>={"Fahr- und Steuerpersonal / Gabelstaplerfahrer":"Theoretische Ausbildungsinhalte nach DGUV Grundsatz 308-001","Hebebühnen":"Fachlicher Bezug: DGUV Grundsatz 308-008 (Hubarbeitsbühnen)","Krane":"Fachlicher Bezug: DGUV Grundsatz 309-003","Anschlagen von Lasten":"Fachlicher Bezug: DGUV Regel 109-017 (Anhang B)","Erdbaumaschinen & Bagger":"Fachlicher Bezug: DGUV Grundsatz 301-005 (Hydraulikbagger und Radlader)","Ladungssicherung":"Fachlicher Bezug: DGUV Regel 114-615 und VDI 2700","Abseilen aus Höhen":"Fachlicher Bezug: DGUV Regeln 112-198 und 112-199"};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const bucket="abbate-certificate-assets";
 const smtp=()=>({host:Deno.env.get("CERT_SMTP_HOST"),user:Deno.env.get("CERT_SMTP_USER"),pass:Deno.env.get("CERT_SMTP_PASSWORD"),from:Deno.env.get("CERT_SMTP_FROM")});
