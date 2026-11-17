@@ -146,3 +146,14 @@ body[data-view=admin] .portal-header-actions{width:auto;flex:none;margin-left:0}
 body[data-view=admin] .portal-person.selected{background:#e8f0e7;border-color:#52765a}
 body[data-view=admin] .admin-pdf-canvas{max-width:760px;margin-inline:auto}
 @media(max-width:700px){body[data-view=admin] .portal-header-actions{margin-left:auto}body[data-view=admin] .admin-pdf-canvas{width:100%;max-width:100%}}
+
+/* Keep the certificate workspace mounted during mobile rendering. */
+.admin-section-heading{display:flex;align-items:center;gap:12px;padding:14px 16px;min-height:60px;color:var(--ad-ink);border-bottom:1px solid #d6ded7}
+.admin-section-heading>span:nth-child(2){display:grid;gap:2px;min-width:0}
+.admin-section-heading strong{font-size:19px;line-height:1.2;font-weight:750}
+.admin-section-heading small{font-size:13px;color:var(--ad-mid)}
+.admin-preview-stage{position:relative;display:grid;place-items:center;min-height:160px;width:100%;max-width:760px;margin-inline:auto;aspect-ratio:1.414;box-sizing:border-box;background:#fdfbf5;border:1px solid #bba66f;border-radius:8px;overflow:hidden;overflow-anchor:none}
+.admin-preview-stage .admin-pdf-canvas{border:0;border-radius:0;width:100%;max-width:none}
+.admin-preview-message{margin:0;padding:18px;text-align:center;font-size:15px;font-weight:600;overflow-wrap:anywhere;color:var(--ad-ink)}
+.admin-preview-stage[data-preview-state=error],.admin-preview-stage[data-preview-state=stale]{background:#fff8e9}
+@media(max-width:700px){.admin-section-heading{padding:12px;gap:10px}.admin-section-heading strong{font-size:17px}}
