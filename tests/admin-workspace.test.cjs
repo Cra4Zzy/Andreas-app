@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
 const p=fs.readFileSync('dist/portal.js','utf8'),css=fs.readFileSync('dist/admin-workspace.css','utf8'),page=fs.readFileSync('dist/verwaltung.html','utf8');
 test('responsive admin workspace separates certificate, access, routine records and history',()=>{
- assert.match(page,/admin-workspace\.css\?v=4/);
+ assert.match(page,/admin-workspace\.css\?v=5/);
  assert.match(p,/<section class="cert-panel admin-section"/);
  assert.match(p,/class="portal-access-panel admin-section"/);
  assert.match(p,/class="portal-panel portal-entry admin-section"/);
@@ -17,4 +17,13 @@ test('responsive admin workspace separates certificate, access, routine records 
  assert.match(p,/await renderCertificateCanvas\(canvas,bytes\)/);
  assert.doesNotMatch(p,/frame\.className='admin-pdf-frame'/);
  assert.match(p,/certificateConfirmed!=='yes'/);
+});
+
+test('certificate section uses manual accessible disclosure with no form recreation',()=>{
+ assert.match(p,/type="button" class="admin-section-heading cert-section-toggle" data-admin-disclosure="certificate-section-content" aria-expanded="false" aria-controls="certificate-section-content"/);
+ assert.match(p,/id="certificate-section-content" class="admin-section-body portal-disclosure-content"/);
+ assert.match(css,/#certificate-section-content\.is-open\{display:block\}/);
+ const toggle=p.slice(p.indexOf("const disclosure=event.target.closest('[data-admin-disclosure]')"),p.indexOf('const pickerToggle='));
+ assert.match(toggle,/classList\.toggle\('is-open',open\)/);
+ assert.doesNotMatch(toggle,/innerHTML|replaceChildren|renderDetail|certificateDraft|previewSequence/);
 });
