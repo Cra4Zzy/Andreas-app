@@ -71,7 +71,8 @@ body[data-view=admin] .cert-review-summary{background:#edf3ee;border:1px solid #
 .admin-certificate-actions{display:flex;gap:8px;flex-wrap:wrap}
 .admin-certificate-actions .primary{flex:1}
 .cert-signed-preview{display:grid;gap:8px}
-.admin-pdf-frame{display:block;width:100%;aspect-ratio:1.414;border:1px solid #a99055;border-radius:6px;background:#fdfbf5}
+.admin-pdf-canvas{display:block;width:100%;height:auto;max-width:100%;border:1px solid #a99055;border-radius:6px;background:#fdfbf5;box-sizing:border-box}
+.admin-preview-loading{margin:0;padding:20px;text-align:center;background:#edf3ee;color:#183438;border-radius:8px;font-weight:600}
 .admin-alert{font-size:14px;background:#fcf0d0;color:#62490e;padding:8px 12px;border-radius:8px;margin:0 0 12px}
 body[data-view=admin] .portal-admin-disclosure{display:flex;width:100%;padding:14px 16px;align-items:center;justify-content:space-between;gap:12px;background:none;color:var(--ad-ink);border:0;text-align:left}
 body[data-view=admin] .portal-admin-disclosure strong{display:block;font-size:18px}
@@ -131,8 +132,6 @@ body[data-view=admin] #portal-status:not(:empty){background:#e0ede4;color:#1d503
  body[data-view=admin] .portal-record-form .portal-wide{grid-column:1/-1}
  body[data-view=admin] .portal-actions{display:flex;flex-wrap:wrap}
  .admin-certificate-actions{display:grid}
- .admin-pdf-frame{display:none}
- .cert-signed-preview>.secondary{background:#e7efe9;border:1px solid #81988d}
  body[data-view=admin] .cert-paper{padding:20px 10px}
  body[data-view=admin] .portal-legal-footer{padding:16px 12px}
 }

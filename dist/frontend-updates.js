@@ -12,7 +12,7 @@
   document.addEventListener('input',e=>{if(e.target.closest?.('form'))dirty=true;},{passive:true});
   const unsafe=()=>{
     const q=new URLSearchParams(location.search),h=location.hash.toLowerCase();
-    return dirty||!!document.querySelector('dialog[open]')||
+    return dirty||!!document.querySelector('dialog[open], [data-abbate-update-block]')||
       ['#uebung','#lernfragen','#ergebnis'].includes(h)||
       ['code','token_hash','access_token','error','error_code'].some(k=>q.has(k))||
       /access_token|refresh_token|type=recovery|error=/i.test(h);
