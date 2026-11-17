@@ -4,7 +4,39 @@
   const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const day=value=>new Intl.DateTimeFormat(localStorage.getItem('abbate-language-v1')||'de',{dateStyle:'long'}).format(new Date(value+'T12:00:00'));
   let state,selected=null,search='',filter='all',registrationSuccessEmail=null;
-  async function load(){state=await B.state();}
+  let certStatus={signatureReady:false,mailReady:false}, certRecords=new Map();
+  async function certCall(body){
+    const {data,error}=await B.client.functions.invoke('abbate-certificates',{body});
+    if(error){let detail;try{detail=await error.context?.json();}catch{}throw Error(detail?.error||'Zertifikatsdienst momentan nicht erreichbar.');}
+    if(data?.error)throw Error(data.error);
+    return data;
+  }
+  async function load(){
+    state=await B.state();certRecords=new Map();certStatus={signatureReady:false,mailReady:false};
+    if(!state.me||view==='login')return;
+    try{
+      if(view==='admin'&&state.me.role==='admin')certStatus=await certCall({action:'status',school:state.me.school});
+      const ids=state.completions.filter(r=>r.kind==='exam'&&r.outcome==='passed'&&!r.revokedAt).map(r=>r.id);
+      for(let i=0;i<ids.length;i+=100){const result=await certCall({action:'list',ids:ids.slice(i,i+100)});for(const row of result.certificates||[])certRecords.set(row.completion_id,row);}
+    }catch{certStatus.unavailable=true;}
+  }
+  function downloadCertificate(data){
+    if(!data.pdf||!data.reference)throw Error('Keine PDF erhalten.');
+    const bytes=Uint8Array.from(atob(data.pdf),x=>x.charCodeAt(0));
+    const url=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));
+    const a=document.createElement('a');a.href=url;a.download='Abbate-'+data.reference.replace(/[^A-Za-z0-9-]/g,'')+'.pdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
+  }
+  function mailLabel(status){return ({accepted:'Vom Mailserver angenommen',sending:'Versand läuft – nicht erneut senden',uncertain:'Versand unklar – Postfach prüfen',not_sent:'Keine E-Mail versendet.'})[status]||'Keine E-Mail versendet.';}
+  function certActions(r,editable){
+    if(r.kind!=='exam'||r.outcome!=='passed')return '';
+    const stored=certRecords.get(r.id), admin=editable&&state.me?.role==='admin';
+    if(!stored)return admin&&r.title.endsWith(' · Theorieprüfung')?'<button class="secondary" type="button" data-cert-issue="'+safe(r.id)+'" '+(!certStatus.signatureReady?'disabled':'')+'>Zertifikat ausstellen</button>':'';
+    return '<div class="portal-actions"><button type="button" class="secondary" data-cert-download="'+safe(r.id)+'">Zertifikat als PDF</button>'+ (admin&&certStatus.mailReady&&stored.mail_status==='not_sent'?'<button type="button" class="secondary" data-cert-mail="'+safe(r.id)+'">Per E-Mail versenden</button>':'')+'</div>'+(admin?'<p class="portal-hint">'+safe(mailLabel(stored.mail_status))+'</p>':'');
+  }
+  function signaturePanel(){
+    if(state.me?.role!=='admin')return '';
+    return '<details class="portal-panel"><summary>Zertifikatseinstellungen</summary><p>Unterschrift: '+(certStatus.signatureReady?'Geschützt hinterlegt':certStatus.unavailable?'Status nicht verfügbar':'Noch nicht hinterlegt')+' · E-Mail: '+(certStatus.mailReady?'Konfiguriert':'Nicht konfiguriert')+'</p><form id="signature-form"><label>Freigegebene Originalunterschrift (PNG, max. 1 MB)<input type="file" name="signature" accept="image/png" required></label><label class="portal-consent"><input type="checkbox" name="authorized" value="yes" required> Ich bin zur Verwendung dieser Unterschrift für Zertifikate berechtigt.</label><button type="submit" class="secondary">Unterschrift geschützt speichern</button><p role="alert" class="portal-error"></p></form></details>';
+  }
   function session(){return state?.me?.id;}
   function canManageRoles(){return state?.me?.role==='admin'&&state.me.id==='353aceca-8524-4a28-bbd2-3b1026ab323e';}
   function syncShell(){const link=document.querySelector('[data-nav="admin"]');if(link)link.hidden=!state?.me||!B.isStaff(state.me);}
@@ -13,7 +45,7 @@
   
   function personStatus(person){return person.access==='active'&&!M.access(person)?'Abgelaufen':M.statuses[person.access];}
   function badge(person){return `<span class="portal-badge ${M.access(person)?'active':person.access}">${safe(personStatus(person))}</span>`;}
-  function recordCard(r,editable=false){return `<article class="portal-record"><div class="portal-record-top"><span>${safe(M.kinds[r.kind])}</span><span class="portal-result ${r.outcome}">${r.outcome==='failed'?'×':'✓'} ${safe(M.outcomes[r.outcome])}</span></div><h3>${safe(r.title)}</h3><dl><div><dt>Durchgeführt am</dt><dd>${day(r.completedAt)}</dd></div><div><dt>Erfasst durch</dt><dd>Fahrschule Abbate</dd></div><div><dt>Referenz</dt><dd>${safe(r.reference)}</dd></div></dl>${editable?`<label class="portal-result-edit">Ergebnis ändern<select data-result="${safe(r.id)}">${Object.entries(M.outcomes).filter(([value])=>r.kind!=='exam'||value!=='attended').map(([value,label])=>`<option value="${value}" ${r.outcome===value?'selected':''}>${safe(label)}</option>`).join('')}</select></label><button class="portal-text" data-revoke="${safe(r.id)}">Fehleintrag zurückziehen</button>`:''}</article>`;}
+  function recordCard(r,editable=false){return `<article class="portal-record"><div class="portal-record-top"><span>${safe(M.kinds[r.kind])}</span><span class="portal-result ${r.outcome}">${r.outcome==='failed'?'×':'✓'} ${safe(M.outcomes[r.outcome])}</span></div><h3>${safe(r.title)}</h3><dl><div><dt>Durchgeführt am</dt><dd>${day(r.completedAt)}</dd></div><div><dt>Erfasst durch</dt><dd>Fahrschule Abbate</dd></div><div><dt>Referenz</dt><dd>${safe(r.reference)}</dd></div></dl>${certActions(r,editable)}${editable?`<label class="portal-result-edit">Ergebnis ändern<select data-result="${safe(r.id)}">${Object.entries(M.outcomes).filter(([value])=>r.kind!=='exam'||value!=='attended').map(([value,label])=>`<option value="${value}" ${r.outcome===value?'selected':''}>${safe(label)}</option>`).join('')}</select></label><button class="portal-text" data-revoke="${safe(r.id)}">Fehleintrag zurückziehen</button>`:''}</article>`;}
   function login(){
     root.innerHTML=`<section class="portal-login-heading"><span class="portal-eyebrow">Persönlicher Zugang</span><h1>Schulungen und Prüfungsergebnisse</h1><p>Melde dich an, um die von deiner Fahrschule dokumentierten Schulungen und Prüfungsergebnisse einzusehen.</p></section><div class="portal-login-grid"><section class="portal-panel"><span class="portal-step">01 / Bereits registriert</span><h2>Deinen Bereich öffnen</h2><form id="login-form"><label>E-Mail-Adresse<input type="email" name="email" required autocomplete="username" maxlength="254"></label><label>Passwort<input type="password" name="password" required autocomplete="current-password"></label><button class="primary" type="submit">Anmelden ↗</button><p role="alert" class="portal-error"></p></form><button class="portal-text" data-recovery>Passwort vergessen?</button></section><section class="portal-panel"><span class="portal-step">02 / Registrierung</span><h2>Konto erstellen</h2><p class="portal-hint">Die Registrierung ist kostenfrei. <strong>Wichtig:</strong> Nach dem Absenden musst du deine E-Mail-Adresse über einen Link in deinem Postfach bestätigen. Erst danach kannst du dich anmelden. Die Fahrschule schaltet deinen Lernzugang anschließend frei. Es entsteht kein Abonnement.</p><form id="register-form"><label>Vor- und Nachname<input name="name" maxlength="120" required autocomplete="name"></label><label>E-Mail-Adresse<input name="email" type="email" maxlength="254" required autocomplete="email"></label><label>Passwort<input name="password" type="password" minlength="12" required autocomplete="new-password" aria-describedby="password-hint"></label><p id="password-hint" class="portal-hint">Mindestens 12 Zeichen. Verwende ein eigenes, sicheres Passwort.</p><label class="portal-consent"><input type="checkbox" name="termsAccepted" value="yes" required> <span>Ich akzeptiere die <a href="./agb.html" target="_blank" rel="noopener">AGB und Nutzungsbedingungen</a> (Fassung 02.11.2026).</span></label><p class="portal-hint">Unsere <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a> und Informationen zu <a href="./widerruf.html" target="_blank" rel="noopener">Widerruf und Verbraucherrechten</a> kannst du jederzeit einsehen. Die Registrierung ist kostenlos und keine Bestellung.</p><button class="secondary" type="submit">Konto registrieren</button><p role="alert" class="portal-error"></p></form></section></div>`;
   }
@@ -88,18 +120,18 @@
   let certificateDraft=null;
   function certificatePanel(p){
     const C=globalThis.ABBATE_CERTIFICATES;if(!C)return '';
-    return `<section class="cert-panel" aria-labelledby="cert-heading"><span class="portal-eyebrow">Zertifikatsvorbereitung</span><h3 id="cert-heading">Bestandene Theorieprüfung</h3><p>Bereite den Nachweis für ${safe(p.name)} vor. Name und E-Mail stammen aus dem Teilnehmerkonto. Der Versand ist bis zur Freigabe der Unterschrift deaktiviert.</p><form id="certificate-form" class="portal-record-form"><label class="portal-wide">Ausbildungsbereich<select name="course" required><option value="">Bitte auswählen …</option>${C.courses.map(c=>`<option value="${safe(c.id)}">${safe(c.label)}</option>`).join('')}</select></label><label>Prüfungsdatum<input name="completedAt" type="date" value="${C.today()}" max="${C.today()}" required></label><label>Bestätigung (für späteren Versand)<select name="notification"><option value="none">Keine E-Mail</option><option value="email">Zertifikat per E-Mail</option></select></label><div class="portal-wide cert-recipient"><small>Teilnehmer</small><strong>${safe(p.name)}</strong><span>${safe(p.email)}</span></div><div class="portal-wide"><button class="secondary" name="intent" value="preview" type="submit">Zertifikatsvorschau prüfen</button></div><div id="certificate-preview" class="portal-wide" aria-live="polite"></div><p role="alert" class="portal-error portal-wide"></p></form></section>`;
+    return `<section class="cert-panel" aria-labelledby="cert-heading"><span class="portal-eyebrow">Zertifikatsvorbereitung</span><h3 id="cert-heading">Bestandene Theorieprüfung</h3><p>Bereite den Nachweis für ${safe(p.name)} vor. Name und E-Mail stammen aus dem Teilnehmerkonto. Die Ausstellung benötigt eine freigegebene Unterschrift; der E-Mail-Versand eine konfigurierte Mailverbindung.</p><form id="certificate-form" class="portal-record-form"><label class="portal-wide">Ausbildungsbereich<select name="course" required><option value="">Bitte auswählen …</option>${C.courses.map(c=>`<option value="${safe(c.id)}">${safe(c.label)}</option>`).join('')}</select></label><label>Prüfungsdatum<input name="completedAt" type="date" value="${C.today()}" max="${C.today()}" required></label><label>Bestätigung (für späteren Versand)<select name="notification"><option value="none">Keine E-Mail</option><option value="email" ${certStatus.mailReady?'':'disabled'}>Zertifikat per E-Mail</option></select></label><div class="portal-wide cert-recipient"><small>Teilnehmer</small><strong>${safe(p.name)}</strong><span>${safe(p.email)}</span></div><div class="portal-wide"><button class="secondary" name="intent" value="preview" type="submit">Zertifikatsvorschau prüfen</button></div><div id="certificate-preview" class="portal-wide" aria-live="polite"></div><p role="alert" class="portal-error portal-wide"></p></form></section>`;
   }
   function showCertificate(form,draft){
     const formatted=new Intl.DateTimeFormat('de-DE',{dateStyle:'long',timeZone:'Europe/Berlin'}).format(new Date(draft.completedAt+'T12:00:00Z'));
     const target=form.querySelector('#certificate-preview');
-    target.innerHTML=`<div class="cert-review"><span class="cert-draft-label">ENTWURF · KEIN PRÜFUNGSNACHWEIS</span><article class="cert-paper" lang="de" translate="no"><img src="./assets/logo-abbate.png" alt="Abbate"><div class="cert-brand">FAHRSCHULE ANDREAS ABBATE</div><h4>ZERTIFIKAT</h4><p class="cert-kicker">ERFOLGREICH BESTANDENE THEORIEPRÜFUNG</p><p>Hiermit bestätigen wir, dass</p><div class="cert-name">${safe(draft.name)}</div><p>die Theorieprüfung im Ausbildungsbereich</p><strong class="cert-course">${safe(draft.label)}</strong>${draft.standard?`<p class="cert-standard">${safe(draft.standard)}</p>`:''}<p>am ${safe(formatted)} erfolgreich bestanden hat.</p><p class="cert-congratulations">Herzlichen Glückwunsch zu dieser Leistung.</p><div class="cert-signatures"><div><span>${safe(formatted)}</span><strong>Prüfungsdatum</strong></div><div><span>Unterschrift ausstehend</span><strong>Andreas Abbate</strong><small>Prüfungsverantwortlicher</small></div></div><footer>ENTWURF · NUR THEORIEPRÜFUNG · NICHT ALS NACHWEIS VERWENDEN</footer></article><div class="cert-review-summary"><strong>Versandoption: ${draft.notification==='email'?'E-Mail an '+safe(draft.email):'Keine E-Mail'}</strong><p>Diese Auswahl ist derzeit nur eine Vorschau. Es wird keine E-Mail gesendet und kein Zertifikat ausgestellt. Du kannst den tatsächlichen Prüfungseintrag bereits im Schulungspass speichern.</p></div><label class="portal-consent"><input type="checkbox" name="certificateConfirmed" value="yes"> <span>Ich bestätige, dass diese Person die ausgewählte Theorieprüfung am angegebenen Datum tatsächlich bestanden hat.</span></label><button class="primary" name="intent" value="save" type="submit">Prüfung speichern · ohne Versand</button></div>`;
+    target.innerHTML=`<div class="cert-review"><span class="cert-draft-label">ENTWURF · KEIN PRÜFUNGSNACHWEIS</span><article class="cert-paper" lang="de" translate="no"><img src="./assets/logo-abbate.png" alt="Abbate"><div class="cert-brand">FAHRSCHULE ANDREAS ABBATE</div><h4>ZERTIFIKAT</h4><p class="cert-kicker">ERFOLGREICH BESTANDENE THEORIEPRÜFUNG</p><p>Hiermit bestätigen wir, dass</p><div class="cert-name">${safe(draft.name)}</div><p>die Theorieprüfung im Ausbildungsbereich</p><strong class="cert-course">${safe(draft.label)}</strong>${draft.standard?`<p class="cert-standard">${safe(draft.standard)}</p>`:''}<p>am ${safe(formatted)} erfolgreich bestanden hat.</p><p class="cert-congratulations">Herzlichen Glückwunsch zu dieser Leistung.</p><div class="cert-signatures"><div><span>${safe(formatted)}</span><strong>Prüfungsdatum</strong></div><div><span>Unterschrift ausstehend</span><strong>Andreas Abbate</strong><small>Prüfungsverantwortlicher</small></div></div><footer>ENTWURF · NUR THEORIEPRÜFUNG · NICHT ALS NACHWEIS VERWENDEN</footer></article><div class="cert-review-summary"><strong>Versandoption: ${draft.notification==='email'?'E-Mail an '+safe(draft.email):'Keine E-Mail'}</strong><p>Nach ausdrücklicher Bestätigung wird die Prüfung gespeichert. Falls die Ausstellung fehlschlägt, kann das Zertifikat später über den gespeicherten Prüfungseintrag ausgestellt werden.</p></div><label class="portal-consent"><input type="checkbox" name="certificateConfirmed" value="yes"> <span>Ich bestätige, dass diese Person die ausgewählte Theorieprüfung am angegebenen Datum tatsächlich bestanden hat.</span></label><button class="primary" name="intent" value="save" type="submit">Prüfung speichern · ohne Versand</button>${state.me.role==='admin'?`<button class="primary" name="intent" value="issue" type="submit" ${certStatus.signatureReady?'':'disabled'}>Zertifikat ausstellen${draft.notification==='email'?' und versenden':''}</button>`:''} </div>`;
     certificateDraft=JSON.stringify(draft);
   }
 
   function renderDetail(){certificateDraft=null;document.querySelector('#account-detail').innerHTML=detail();}
   function admin(){
-    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Geschützter Verwaltungsbereich</span><h1>Teilnehmerverwaltung</h1><p>Zugänge verwalten, Schulungen dokumentieren und Prüfungsergebnisse erfassen.</p></div><details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Der QR-Code führt zur Anmeldeseite und kann auf allen Schülerkarten verwendet werden.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code" style="image-rendering:pixelated"></canvas><p class="portal-hint">Der QR-Code enthält keine personenbezogenen Daten.</p><a class="portal-text" href="${AbbateCardQR.target}" target="_blank" rel="noopener noreferrer">Anmeldeseite öffnen ↗</a><button class="secondary" id="download-qr" type="button" disabled>PNG (Druckqualität) herunterladen</button><button class="secondary" id="download-qr-svg" type="button" disabled>SVG (Vektorformat) herunterladen</button></details></section><div class="portal-actions portal-refresh"><button class="secondary" data-refresh>Konten aktualisieren</button><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div><section class="portal-stats" aria-label="Kontenübersicht"><div><span>Registrierte Konten</span><strong>${state.students.filter(p=>p.id!==state.me.id).length}</strong></div><div><span>Warten auf Freischaltung</span><strong>${state.students.filter(p=>p.role==='learner'&&p.access==='pending').length}</strong></div><div><span>Aktive Zugänge</span><strong>${state.students.filter(p=>p.role==='learner'&&M.access(p)).length}</strong></div><div><span>Pausiert / abgelaufen</span><strong>${state.students.filter(p=>p.role==='learner'&&(p.access==='paused'||(p.access==='active'&&!M.access(p)))).length}</strong></div></section><div class="portal-admin-layout"><aside class="portal-sidebar" id="account-picker"><button type="button" id="account-picker-toggle" class="portal-picker-toggle" aria-expanded="false" aria-controls="account-picker-panel">${pickerLabel()}</button><div id="account-picker-panel" class="portal-picker-panel"><label for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name oder E-Mail" value="${safe(search)}"><label class="portal-filter-label" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></div></aside><div id="account-detail" class="portal-detail">${detail()}</div></div>`;
+    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Geschützter Verwaltungsbereich</span><h1>Teilnehmerverwaltung</h1><p>Zugänge verwalten, Schulungen dokumentieren und Prüfungsergebnisse erfassen.</p></div><details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Der QR-Code führt zur Anmeldeseite und kann auf allen Schülerkarten verwendet werden.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code" style="image-rendering:pixelated"></canvas><p class="portal-hint">Der QR-Code enthält keine personenbezogenen Daten.</p><a class="portal-text" href="${AbbateCardQR.target}" target="_blank" rel="noopener noreferrer">Anmeldeseite öffnen ↗</a><button class="secondary" id="download-qr" type="button" disabled>PNG (Druckqualität) herunterladen</button><button class="secondary" id="download-qr-svg" type="button" disabled>SVG (Vektorformat) herunterladen</button></details></section>${signaturePanel()}<div class="portal-actions portal-refresh"><button class="secondary" data-refresh>Konten aktualisieren</button><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div><section class="portal-stats" aria-label="Kontenübersicht"><div><span>Registrierte Konten</span><strong>${state.students.filter(p=>p.id!==state.me.id).length}</strong></div><div><span>Warten auf Freischaltung</span><strong>${state.students.filter(p=>p.role==='learner'&&p.access==='pending').length}</strong></div><div><span>Aktive Zugänge</span><strong>${state.students.filter(p=>p.role==='learner'&&M.access(p)).length}</strong></div><div><span>Pausiert / abgelaufen</span><strong>${state.students.filter(p=>p.role==='learner'&&(p.access==='paused'||(p.access==='active'&&!M.access(p)))).length}</strong></div></section><div class="portal-admin-layout"><aside class="portal-sidebar" id="account-picker"><button type="button" id="account-picker-toggle" class="portal-picker-toggle" aria-expanded="false" aria-controls="account-picker-panel">${pickerLabel()}</button><div id="account-picker-panel" class="portal-picker-panel"><label for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name oder E-Mail" value="${safe(search)}"><label class="portal-filter-label" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></div></aside><div id="account-detail" class="portal-detail">${detail()}</div></div>`;
     document.querySelector('#account-filter').value=filter;
     const canvas=document.querySelector('#portal-qr');
     AbbateCardQR.render(canvas).then(()=>{
@@ -218,16 +250,37 @@
         if(!['admin','learner'].includes(newRole))throw Error('Ungültige Rollenänderung.');
         await mutate(()=>B.setRole(selected,newRole),newRole==='admin'?'Administratorrechte vergeben.':'Administratorrechte entzogen.');
       }
+      else if(form.id==='signature-form'){
+        if(state.me.role!=='admin'||values.authorized!=='yes')throw Error('Administratorfreigabe erforderlich.');
+        const file=form.elements.signature.files[0];
+        if(!file||file.type!=='image/png'||file.size>1048576)throw Error('Bitte PNG bis 1 MB auswählen.');
+        const bytes=new Uint8Array(await file.arrayBuffer());let binary='';
+        for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));
+        await certCall({action:'signature',school:state.me.school,confirmed:true,png:btoa(binary)});
+        await load();admin();notice('Unterschrift geschützt gespeichert.');
+      }
       else if(form.id==='certificate-form'){
         const C=globalThis.ABBATE_CERTIFICATES;
         const person=state.students.find(p=>p.id===selected);
         const draft=C.prepare(person,values);
-        if(submit?.value!=='save'){showCertificate(form,draft);return;}
+        if(!['save','issue'].includes(submit?.value)){showCertificate(form,draft);return;}
         if(certificateDraft!==JSON.stringify(draft)||values.certificateConfirmed!=='yes')throw Error('Bitte die aktuelle Vorschau und die bestandene Prüfung ausdrücklich bestätigen.');
-        if(M.recordsFor(state,selected).some(r=>r.kind==='exam'&&r.outcome==='passed'&&r.title===draft.title&&r.completedAt===draft.completedAt))throw Error('Diese Theorieprüfung ist bereits im Schulungspass gespeichert.');
+        const issuing=submit.value==='issue';
+        if(issuing&&(state.me.role!=='admin'||!certStatus.signatureReady))throw Error('Ausstellung noch nicht freigegeben.');
+        if(issuing&&draft.notification==='email'&&!certStatus.mailReady)throw Error('E-Mail-Versand nicht eingerichtet.');
+        if(issuing&&!confirm('Zertifikat für '+draft.name+' ausstellen'+(draft.notification==='email'?' und an '+draft.email+' senden':'')+'?'))return;
+        const existing=M.recordsFor(state,selected).find(r=>r.kind==='exam'&&r.outcome==='passed'&&r.title===draft.title&&r.completedAt===draft.completedAt);
+        if(existing&&!issuing)throw Error('Diese Theorieprüfung ist bereits im Schulungspass gespeichert.');
         M.addCompletion({students:state.students,completions:[],audit:[]},draft,uuid());
-        await mutate(()=>B.addCompletion(draft),'Bestandene Theorieprüfung gespeichert. Kein Zertifikat ausgestellt und keine E-Mail versendet.');
-        certificateDraft=null;
+        const id=existing?.id||await B.addCompletion(draft);
+        if(!issuing){await load();admin();notice('Bestandene Theorieprüfung gespeichert. Keine E-Mail versendet.');return;}
+        let msg;
+        try{
+          const result=await certCall({action:'issue',completionId:id,confirmed:true});
+          msg='Zertifikat ausgestellt. '+mailLabel(result.mailStatus);
+          if(draft.notification==='email'){const sent=await certCall({action:'mail',completionId:id,confirmed:true,email:draft.email});msg='Zertifikat ausgestellt. '+mailLabel(sent.mailStatus);}
+        }catch(e){msg='Prüfung gespeichert. Zertifikatsaktion: '+e.message;}
+        await load();admin();notice(msg);certificateDraft=null;
       }
       else if(form.id==='record-form'){
         if(values.kind==='annual_instruction'){
@@ -266,6 +319,19 @@
     if(event.target.closest('[data-refresh]')){await render();return;}
     if(event.target.closest('[data-recovery]')){location.hash='passwort';recovery();return;}
     if(event.target.closest('[data-logout]')){await B.client.auth.signOut({scope:'local'});location.replace('./konto.html');return;}
+    const certButton=event.target.closest('[data-cert-download],[data-cert-issue],[data-cert-mail]');
+    if(certButton){
+      const id=certButton.dataset.certDownload||certButton.dataset.certIssue||certButton.dataset.certMail;
+      const record=state.completions.find(r=>r.id===id);if(!record)return;
+      const action=certButton.dataset.certDownload?'download':certButton.dataset.certIssue?'issue':'mail';
+      if(action!=='download'&&(view!=='admin'||state.me.role!=='admin'))return;
+      const person=state.students.find(p=>p.id===record.student);
+      if(action!=='download'&&(!person||!confirm(action==='mail'?'Zertifikat an '+person.email+' versenden?':'Bestandene Theorieprüfung für '+person.name+' bestätigen und Zertifikat ausstellen?')))return;
+      certButton.disabled=true;
+      try{const data=await certCall({action,completionId:id,confirmed:true,email:person?.email});if(action==='download')downloadCertificate(data);else{await load();admin();notice(action==='mail'?mailLabel(data.mailStatus):'Zertifikat ausgestellt.');}}
+      catch(e){notice(e.message);}finally{certButton.disabled=false;}
+      return;
+    }
     if(view!=='admin'||!B.isStaff(state?.me))return;
     const disclosure=event.target.closest('[data-admin-disclosure]');
     if(disclosure){
