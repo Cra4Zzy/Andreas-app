@@ -58,8 +58,7 @@ async function createPDF(name:string,label:string,record:any,signature:ArrayBuff
  p.drawImage(sig,{x:600-sig.width*s/2,y:102,width:sig.width*s,height:sig.height*s});
  for(const x of [242,600])p.drawLine({start:{x:x-94,y:99},end:{x:x+94,y:99},color:gold,thickness:.8});
  at(textDate(record.completed_at),242,111);at("Prüfungsdatum",242,81,bold);at("Andreas Abbate",600,81,bold);at("Prüfungsverantwortlicher",600,66,regular,10,muted);
- center(draft?"ENTWURF · KEIN PRÜFUNGSNACHWEIS · NICHT AUSGESTELLT":"Nur Theorieprüfung · Kein eigenständiger Fahrausweis · "+record.reference,42,10,bold,muted);
- if(draft){center("VORSCHAU / ENTWURF",564,12,bold,rgb(.57,.18,.14));center("ENTWURF",382,16,bold,rgb(.57,.18,.14));}
+ center(draft?"PDF-Vorschau · Noch nicht ausgestellt":"Nur Theorieprüfung · Kein eigenständiger Fahrausweis · "+record.reference,42,10,bold,muted);
  pdf.setTitle("Abbate – Nachweis der Theorieprüfung");pdf.setAuthor("Fahrschule Andreas Abbate");
  return await pdf.saveAsBase64();
 }
