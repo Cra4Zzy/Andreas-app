@@ -1,0 +1,7 @@
+# Zertifikate – Ausstellungsprozess (Vorbereitung)
+
+Die Teilnehmerverwaltung bietet eine Vorschau für tatsächlich bestandene Theorieprüfungen. Der Teilnehmername und die E-Mail-Adresse kommen aus dem ausgewählten Konto. Das Prüfungsdatum wird auf den aktuellen Berliner Kalendertag vorbelegt und darf korrigiert, aber nicht in die Zukunft gelegt werden. Der Ausbildungsbereich muss explizit gewählt werden. Nur beim Gabelstapler ist der zuvor abgestimmte Hinweis auf DGUV Grundsatz 308-001 hinterlegt. Andere Normen bleiben bis zur fachlichen Freigabe leer.
+
+Der Entwurf ist sichtbar als **kein Prüfungsnachweis** markiert. Ein ausdrücklich bestätigter Prüfungseintrag kann über die bestehende serverseitig autorisierte RPC gespeichert werden. Die E-Mail-Auswahl ist nur ein Vorschauwert; sie wird nicht gespeichert und löst keinen Versand aus.
+
+Vor Live-Ausstellung: genehmigte Unterschrift und finale Fachtexte übernehmen; zugriffsgeschützte serverseitige PDF-Erstellung (kein öffentlich erreichbares Unterschriftsbild), authentifizierte Ausstellungs- und Versandfunktion mit Prüfung von Rollen, Teilnehmer, Abschlussstatus und Widerruf, eindeutige Zertifikatsreferenz, idempotente Versandaufträge und protokollierte Zustellstatus, privater Download im Schulungspass. Bestehenden SMTP-Transport erst nach tatsächlichem Test für Zertifikat-Anhänge freigeben. Keine Zertifikate aus Lernrunden automatisch ausstellen.

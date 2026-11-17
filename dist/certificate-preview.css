@@ -1,0 +1,27 @@
+/* Unsigned preview follows the approved ivory / muted gold certificate design. */
+.cert-panel{margin-top:28px;padding-top:24px;border-top:1px solid #d7ded7}
+.cert-panel>p{color:#536460;max-width:65ch}
+.cert-panel .portal-record-form{margin-top:18px}
+.cert-recipient{display:grid;gap:3px;background:#f1f5f1;border-radius:12px;padding:14px 16px;overflow-wrap:anywhere}
+.cert-recipient small,.cert-recipient span{color:#536460}
+.cert-review{display:grid;gap:16px;min-width:0}
+.cert-draft-label{font-size:12px;font-weight:700;letter-spacing:.08em;color:#76551c}
+.cert-paper{box-sizing:border-box;position:relative;background:#fdfbf5;color:#222820;border:1px solid #ad9559;outline:1px solid #e4d8b7;outline-offset:-7px;text-align:center;padding:clamp(18px,4vw,42px) clamp(12px,4vw,40px);overflow-wrap:anywhere;font-family:Georgia,'Times New Roman',serif}
+.cert-paper img{height:54px;width:auto;max-width:100%;object-fit:contain;display:block;margin:0 auto 10px}
+.cert-brand,.cert-kicker,.cert-paper footer{font:700 10px/1.5 Arial,sans-serif;letter-spacing:.16em}
+.cert-paper h4{font:400 clamp(23px,5vw,45px)/1.15 Georgia,serif;letter-spacing:.11em;margin:16px 0 8px;color:#222820}
+.cert-paper p{font:400 13px/1.5 Arial,sans-serif;color:#52605a;margin:8px 0}
+.cert-paper .cert-kicker{color:#826c38;margin-bottom:22px}
+.cert-name{font:400 clamp(21px,4vw,34px)/1.2 Georgia,serif;margin:10px 0;color:#222820}
+.cert-course{font:700 17px/1.35 Arial,sans-serif;display:block}
+.cert-paper .cert-standard{font-size:12px}
+.cert-paper .cert-congratulations{font:italic 16px/1.5 Georgia,serif;color:#222820;margin:20px 0}
+.cert-signatures{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,4vw,40px);margin:20px auto 10px;font:12px/1.4 Arial,sans-serif}
+.cert-signatures div{display:grid;align-content:end;gap:4px;min-width:0}
+.cert-signatures span{padding:10px 0;border-bottom:1px solid #ad9559;color:#665b47}
+.cert-signatures small{font-size:10px}
+.cert-paper footer{color:#756747;font-size:9px;margin-top:20px}
+.cert-review-summary{padding:14px 16px;border-radius:12px;background:#f6f1e4;color:#463b25;overflow-wrap:anywhere}
+.cert-review-summary p{margin:6px 0 0}
+.cert-review .portal-consent{align-items:flex-start}
+@media(max-width:480px){.cert-paper{padding:22px 12px}.cert-paper h4{letter-spacing:.06em}.cert-brand,.cert-paper footer{letter-spacing:.08em}.cert-signatures{gap:10px}.cert-course{font-size:15px}}

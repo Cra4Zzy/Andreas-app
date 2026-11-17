@@ -1,0 +1,8 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
+const C=require('../dist/certificate-model.js');
+const p={id:'participant-1',role:'learner',name:'Max Mustermann',email:'max@example.test'};
+const v={course:'gabelstapler',completedAt:'2026-11-17',notification:'none'};
+test('certificate preview uses selected participant, date and confirmed forklift standard',()=>{const d=C.prepare(p,v,'2026-11-17');assert.equal(d.name,p.name);assert.equal(d.email,p.email);assert.equal(d.student,p.id);assert.equal(d.completedAt,v.completedAt);assert.equal(d.outcome,'passed');assert.equal(d.kind,'exam');assert.match(d.standard,/308-001/);assert.equal(C.courses.length,7);assert.equal(C.prepare(p,{...v,course:'krane'},'2026-11-17').standard,'');});
+test('certificate rejects invalid recipients, unknown courses and impossible dates',()=>{for(const x of [{...v,course:'unknown'},{...v,completedAt:'2026-02-30'},{...v,completedAt:'2026-11-18'},{...v,notification:'unknown'}])assert.throws(()=>C.prepare(p,x,'2026-11-17'));assert.throws(()=>C.prepare({...p,role:'admin'},v,'2026-11-17'));assert.throws(()=>C.prepare({...p,email:''},{...v,notification:'email'},'2026-11-17'));});
+test('unsigned certificate preview is not sent and saving needs explicit confirmation',()=>{const s=fs.readFileSync('dist/portal.js','utf8');assert.match(s,/ENTWURF · KEIN PRÜFUNGSNACHWEIS/);assert.match(s,/certificateConfirmed!=='yes'/);assert.match(s,/Keine E-Mail versendet\.|keine E-Mail versendet\./);assert.match(s,/certificateDraft!==JSON.stringify\(draft\)/);assert.match(s,/Prüfung speichern · ohne Versand/);});
