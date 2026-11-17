@@ -1,11 +1,32 @@
 import { createClient } from "npm:@supabase/supabase-js@2.89.0";
 import { PDFDocument, StandardFonts, rgb } from "npm:pdf-lib@1.17.1";
+import nodemailer from "npm:nodemailer@10.6.0";
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Cache-Control":"no-store"};
 const json=(v:unknown,status=200)=>new Response(JSON.stringify(v),{status,headers:{...cors,"Content-Type":"application/json"}});
 class Fault extends Error { constructor(message:string,public status=400){super(message)} }
 const courses:Record<string,string>={"Fahr- und Steuerpersonal / Gabelstaplerfahrer":"Theoretische Ausbildungsinhalte nach DGUV Grundsatz 308-001","Hebebühnen":"","Krane":"","Anschlagen von Lasten":"","Erdbaumaschinen & Bagger":"","Ladungssicherung":"","Abseilen aus Höhen":""};
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const bucket="abbate-certificate-assets";
+const smtp=()=>({host:Deno.env.get("CERT_SMTP_HOST"),user:Deno.env.get("CERT_SMTP_USER"),pass:Deno.env.get("CERT_SMTP_PASSWORD"),from:Deno.env.get("CERT_SMTP_FROM")});
+const mailReady=()=>{const s=smtp();return !!(s.host&&s.user&&s.pass&&s.from);};
+const mailText="Guten Tag,\n\nherzlichen Glückwunsch zur bestandenen Theorieprüfung! Im Anhang findest du dein Zertifikat der Fahrschule Andreas Abbate. Du kannst den Nachweis auch in deinem persönlichen Schulungspass abrufen.\n\nViele Grüße\nFahrschule Andreas Abbate";
+async function sendCertificate(admin:any,r:any,pdf:string,expectedEmail:string){
+ if(!mailReady())throw new Fault("Der Zertifikatsversand ist noch nicht eingerichtet.",409);
+ const {data:recipient,error:userError}=await admin.auth.admin.getUserById(r.participant_id);
+ const email=recipient?.user?.email;
+ if(userError||!recipient?.user?.email_confirmed_at||!email||!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)||email.toLowerCase()!==String(expectedEmail||"").trim().toLowerCase())throw new Fault("Die bestätigte E-Mail-Adresse stimmt nicht mit der Versandvorschau überein.",409);
+ const {data:claim,error:claimError}=await admin.from("abbate_certificates").update({mail_status:"sending",mail_attempted_at:new Date().toISOString(),mail_recipient:email}).eq("completion_id",r.id).eq("mail_status","not_sent").is("invalidated_at",null).select("completion_id").maybeSingle();
+ if(claimError)throw new Fault("Versand konnte nicht reserviert werden.",500);
+ if(!claim){const {data:current}=await admin.from("abbate_certificates").select("mail_status,invalidated_at").eq("completion_id",r.id).maybeSingle();if(current?.invalidated_at)throw new Fault("Dieses Zertifikat wurde gesperrt.",409);return current?.mail_status||"uncertain";}
+ const s=smtp();let status="uncertain",id=null;
+ try{
+  const transport=nodemailer.createTransport({host:s.host,port:465,secure:true,auth:{user:s.user,pass:s.pass},connectionTimeout:12000,greetingTimeout:12000,socketTimeout:20000,tls:{rejectUnauthorized:true}});
+  const info=await transport.sendMail({from:{name:"Fahrschule Andreas Abbate",address:s.from!},to:{name:"",address:email},subject:"Dein Zertifikat – bestandene Theorieprüfung",text:mailText,attachments:[{filename:"Abbate-"+r.reference+".pdf",content:pdf,encoding:"base64",contentType:"application/pdf"}],disableFileAccess:true,disableUrlAccess:true});
+  if(info.accepted?.length){status="accepted";id=info.messageId||null;}
+ }catch(e){console.error("Certificate SMTP result uncertain",e instanceof Error?e.name:"unknown");}
+ const {error:finishError}=await admin.from("abbate_certificates").update({mail_status:status,mail_accepted_at:status==="accepted"?new Date().toISOString():null,mail_message_id:id}).eq("completion_id",r.id).eq("mail_status","sending");
+ return finishError?"uncertain":status;
+}
 const signaturePath=(school:string)=>school+"/signature.png";
 const textDate=(s:string)=>new Intl.DateTimeFormat("de-DE",{dateStyle:"long",timeZone:"Europe/Berlin"}).format(new Date(s+"T12:00:00Z"));
 async function createPDF(name:string,label:string,record:any,signature:ArrayBuffer){
@@ -55,7 +76,7 @@ Deno.serve(async req=>{
   const body=await req.json();
   if(!body||typeof body!=="object")throw new Fault("Ungültige Anfrage.");
   const action=body.action;
-  if(!["status","signature","issue","download"].includes(action))throw new Fault("Unbekannte Aktion.");
+  if(!["status","signature","issue","download","list","mail"].includes(action))throw new Fault("Unbekannte Aktion.");
   // A live membership read is enforced by the existing RLS policy (including live_session).
   const {data:members,error:membershipError}=await caller.from("abbate_memberships").select("school_id,role,access_status,access_until").eq("user_id",auth.user.id);
   if(membershipError||!members?.length)throw new Fault("Kein gültiger Zugang.",403);
@@ -72,26 +93,42 @@ Deno.serve(async req=>{
     try{const doc=await PDFDocument.create();await doc.embedPng(bytes);}catch{throw new Fault("PNG konnte nicht gelesen werden.");}
     const {error}=await admin.storage.from(bucket).upload(signaturePath(m.school_id),bytes,{contentType:"image/png",upsert:true});
     if(error)throw new Fault("Unterschrift konnte nicht gespeichert werden.",500);
-    return json({signatureReady:true,mailReady:false});
+    return json({signatureReady:true,mailReady:mailReady()});
    }
    const {data:sig}=await admin.storage.from(bucket).download(signaturePath(m.school_id));
-   return json({signatureReady:!!sig,mailReady:false});
+   return json({signatureReady:!!sig,mailReady:mailReady()});
+  }
+  if(action==="list"){
+   const ids=body.ids;
+   if(!Array.isArray(ids)||ids.length>100||ids.some(x=>typeof x!=="string"||!uuid.test(x)))throw new Fault("Ungültige Prüfungsreferenzen.");
+   if(!ids.length)return json({certificates:[]});
+   const {data:allowed,error:allowedError}=await caller.from("abbate_completions").select("id").in("id",ids).eq("kind","exam").eq("outcome","passed").is("revoked_at",null);
+   if(allowedError)throw new Fault("Zertifikate konnten nicht geprüft werden.",500);
+   if(!allowed?.length)return json({certificates:[]});
+   const {data:rows,error:rowsError}=await admin.from("abbate_certificates").select("completion_id,issued_at,mail_status,invalidated_at").in("completion_id",allowed.map(x=>x.id)).is("invalidated_at",null);
+   if(rowsError)throw new Fault("Zertifikate konnten nicht geprüft werden.",500);
+   return json({certificates:rows||[]});
   }
   if(!uuid.test(String(body.completionId||"")))throw new Fault("Ungültige Prüfungsreferenz.");
   // RLS checks school, active account and live session; a learner can only read their own unrevoked record.
   const {data:r,error:recordError}=await caller.from("abbate_completions").select("id,school_id,participant_id,kind,outcome,completed_at,reference,revoked_at,abbate_courses(title)").eq("id",body.completionId).maybeSingle();
   if(recordError||!r||r.revoked_at||r.kind!=="exam"||r.outcome!=="passed")throw new Fault("Kein berechtigter bestandener Prüfungseintrag.",404);
   const m=members.find((m:any)=>m.school_id===r.school_id);
-  if(!m||(action==="issue"?!active(m):!(active(m)||m.role==="trainer"||r.participant_id===auth.user.id)))throw new Fault("Keine Berechtigung.",403);
-  const {data:existing,error:existingError}=await admin.from("abbate_certificates").select("pdf_base64,invalidated_at,issued_at").eq("completion_id",r.id).maybeSingle();
+  if(!m||(["issue","mail"].includes(action)?!active(m):!(active(m)||m.role==="trainer"||r.participant_id===auth.user.id)))throw new Fault("Keine Berechtigung.",403);
+  const {data:existing,error:existingError}=await admin.from("abbate_certificates").select("pdf_base64,invalidated_at,issued_at,mail_status").eq("completion_id",r.id).maybeSingle();
   if(existingError)throw new Fault("Zertifikat konnte nicht geprüft werden.",500);
   if(existing?.invalidated_at)throw new Fault("Dieses Zertifikat wurde gesperrt.",409);
+  if(action==="mail"){
+   if(body.confirmed!==true||!existing)throw new Fault("Bitte den Versand eines ausgestellten Zertifikats ausdrücklich bestätigen.");
+   const mailStatus=await sendCertificate(admin,r,existing.pdf_base64,body.email);
+   return json({mailStatus,reference:r.reference});
+  }
   if(action==="download"){
    if(!existing)throw new Fault("Für diese Prüfung wurde noch kein Zertifikat ausgestellt.",404);
    return json({pdf:existing.pdf_base64,reference:r.reference,issuedAt:existing.issued_at});
   }
   if(body.confirmed!==true)throw new Fault("Bitte Ausstellung ausdrücklich bestätigen.");
-  if(existing)return json({pdf:existing.pdf_base64,reference:r.reference,issuedAt:existing.issued_at,mailStatus:"not_sent"});
+  if(existing)return json({pdf:existing.pdf_base64,reference:r.reference,issuedAt:existing.issued_at,mailStatus:existing.mail_status||"not_sent"});
   const title=(r.abbate_courses as any)?.title||"",suffix=" · Theorieprüfung";
   const label=title.endsWith(suffix)?title.slice(0,-suffix.length):"";
   if(!Object.hasOwn(courses,label))throw new Fault("Bitte einen Prüfungseintrag aus der Zertifikatsvorbereitung auswählen.");
@@ -101,7 +138,7 @@ Deno.serve(async req=>{
   if(sigError||!sig)throw new Fault("Die freigegebene Unterschrift muss zuerst hinterlegt werden.",409);
   const pdf=await createPDF(profile.display_name,label,r,await sig.arrayBuffer());
   const {error:saveError}=await admin.from("abbate_certificates").insert({completion_id:r.id,issued_by:auth.user.id,pdf_base64:pdf});
-  if(saveError){if(saveError.code==="23505"){const {data:stored}=await admin.from("abbate_certificates").select("pdf_base64,invalidated_at,issued_at").eq("completion_id",r.id).maybeSingle();if(stored&&!stored.invalidated_at)return json({pdf:stored.pdf_base64,reference:r.reference,issuedAt:stored.issued_at,mailStatus:"not_sent"});}throw new Fault("Zertifikat konnte nicht gespeichert werden.",409);}
+  if(saveError){if(saveError.code==="23505"){const {data:stored}=await admin.from("abbate_certificates").select("pdf_base64,invalidated_at,issued_at,mail_status").eq("completion_id",r.id).maybeSingle();if(stored&&!stored.invalidated_at)return json({pdf:stored.pdf_base64,reference:r.reference,issuedAt:stored.issued_at,mailStatus:stored.mail_status||"not_sent"});}throw new Fault("Zertifikat konnte nicht gespeichert werden.",409);}
   return json({pdf,reference:r.reference,mailStatus:"not_sent"});
  }catch(e){if(e instanceof Fault)return json({error:e.message},e.status);console.error("Certificate operation failed",e instanceof Error?e.name:"unknown");return json({error:"Zertifikatsdienst momentan nicht verfügbar."},500);}
 });

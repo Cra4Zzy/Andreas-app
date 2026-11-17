@@ -1,0 +1,1 @@
+alter table public.abbate_certificates add column if not exists mail_status text not null default 'not_sent' check(mail_status in ('not_sent','sending','accepted','uncertain')), add column if not exists mail_attempted_at timestamptz, add column if not exists mail_accepted_at timestamptz, add column if not exists mail_recipient text, add column if not exists mail_message_id text;
