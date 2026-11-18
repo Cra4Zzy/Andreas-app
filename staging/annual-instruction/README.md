@@ -1,0 +1,4 @@
+# Jährliche Unterweisung – staging only
+Additional certificate option for attended annual safety instruction. This is a participation certificate, not a practical qualification, exam or blanket proof of site-specific instruction. The employer must separately document applicable contents and fulfill its obligations. No automatic validity period or reminders are asserted.
+
+Before deployment: test database guard/invalidation and Edge Function preview, issue, list, download, mail and role checks on a staging database. Confirm PDF wording with operator; check real PDF layout. Then apply SQL, deploy the Edge Function (JWT verification remains enabled), and only then merge frontend to main. Do not execute any actual email or issue a real certificate in tests. Existing live edge version from which this draft derives: 9.
