@@ -36,3 +36,11 @@ test('mobile PDF preview starts enlarged without changing issuance or PDF aspect
  assert.match(c,/data-zoom="175"[^\n]+width:175%/);assert.match(c,/data-zoom="250"[^\n]+width:250%/);
  assert.match(c,/height:auto;max-width:none/);assert.match(c,/overflow:auto/);
 });
+
+test('mobile PDF opens a separate full-screen reader without issuing a certificate',()=>{
+ const p=fs.readFileSync('dist/portal.js','utf8'),c=fs.readFileSync('dist/admin-workspace.css','utf8');
+ assert.match(p,/dialog\.showModal\(\)/);assert.match(p,/ctx\.drawImage\(source,0,0\)/);
+ assert.match(p,/matches\?250:175,true/);assert.match(p,/viewer\?\.open\)viewer\.close\(\)/);
+ assert.match(p,/type="button" class="primary" data-cert-viewer-close/);
+ assert.match(c,/height:100dvh/);assert.match(c,/max-height:none;max-width:none/);
+});
