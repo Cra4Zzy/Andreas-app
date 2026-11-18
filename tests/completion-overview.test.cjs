@@ -37,3 +37,14 @@ test('completed records are read-only inside the existing administrator archive'
  assert.doesNotMatch(markup,/data-cert-issue|data-cert-mail|B\.addCompletion|B\.updateRecord/);
  assert.match(markup,/Durchgeführt am/);
 });
+
+test('archive close button uses native dialog submission, bypassing all mutation handlers',async()=>{
+ const markup=js.slice(js.indexOf('  function certificateOverview(){'),js.indexOf('  function renderCertificateOverview(){'));
+ assert.match(markup,/<form method="dialog" id="cert-overview-dismiss"[^>]*><button type="submit"[^>]*data-cert-overview-close/);
+ const eventSource=js.slice(js.indexOf("  root.addEventListener('submit'"),js.indexOf("  root.addEventListener('keydown'"));
+ let submit;new Function('root',eventSource)({addEventListener:(type,fn)=>{if(type==='submit')submit=fn;}});
+ let prevented=false;await submit({target:{id:'cert-overview-dismiss',method:'dialog'},preventDefault(){prevented=true;}});
+ assert.equal(prevented,false);
+ const css=fs.readFileSync('dist/admin-workspace.css','utf8');
+ assert.match(css,/\.admin-overview-dismiss button\{[^}]*pointer-events:auto/);
+});

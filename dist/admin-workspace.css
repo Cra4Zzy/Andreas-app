@@ -277,3 +277,10 @@ body[data-view=admin] .admin-overview-switch button:focus-visible{outline:3px so
  body[data-view=admin] .admin-completion-links button{font-size:13px;padding:8px 10px}
  body[data-view=admin] .admin-overview-switch button{font-size:13px;padding:7px 5px}
 }
+
+/* Keep the archive dismiss control in its own non-scrolling header above the list. */
+.admin-cert-overview-header{position:relative;z-index:2;min-width:0;isolation:isolate}
+.admin-cert-overview-header>div{min-width:0}
+body[data-view=admin] .admin-overview-dismiss{display:block;flex:0 0 44px;width:44px;margin:0;padding:0;position:relative;z-index:3}
+body[data-view=admin] .admin-overview-dismiss button{display:grid;place-items:center;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;touch-action:manipulation;pointer-events:auto}
+.admin-overview-dismiss svg{pointer-events:none}
