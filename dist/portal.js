@@ -11,12 +11,14 @@
     if(data?.error)throw Error(data.error);
     return data;
   }
+  const annualRecord=r=>r.kind==='instruction'&&r.outcome==='attended'&&r.title==='Jährliche Unterweisung · Unterweisungsnachweis';
+  const certificateEligible=r=>r.kind==='exam'&&r.outcome==='passed'||annualRecord(r);
   async function load(){
     state=await B.state();certRecords=new Map();certStatus={signatureReady:false,mailReady:false};
     if(!state.me||view==='login')return;
     try{
       if(view==='admin'&&state.me.role==='admin')certStatus=await certCall({action:'status',school:state.me.school});
-      const ids=state.completions.filter(r=>r.kind==='exam'&&r.outcome==='passed'&&!r.revokedAt).map(r=>r.id);
+      const ids=state.completions.filter(r=>certificateEligible(r)&&!r.revokedAt).map(r=>r.id);
       for(let i=0;i<ids.length;i+=100){const result=await certCall({action:'list',ids:ids.slice(i,i+100)});for(const row of result.certificates||[])certRecords.set(row.completion_id,row);}
     }catch{certStatus.unavailable=true;}
   }
@@ -28,9 +30,9 @@
   }
   function mailLabel(status){return ({accepted:'Vom Mailserver angenommen',sending:'Versand läuft – nicht erneut senden',uncertain:'Versand unklar – Postfach prüfen',not_sent:'Keine E-Mail versendet.'})[status]||'Keine E-Mail versendet.';}
   function certActions(r,editable){
-    if(r.kind!=='exam'||r.outcome!=='passed')return '';
+    if(!certificateEligible(r))return '';
     const stored=certRecords.get(r.id), admin=editable&&state.me?.role==='admin';
-    if(!stored)return admin&&r.title.endsWith(' · Theorieprüfung')?'<button class="secondary" type="button" data-cert-issue="'+safe(r.id)+'" '+(!certStatus.signatureReady?'disabled':'')+'>Zertifikat ausstellen</button>':'';
+    if(!stored)return admin&&(r.title.endsWith(' · Theorieprüfung')||annualRecord(r))?'<button class="secondary" type="button" data-cert-issue="'+safe(r.id)+'" '+(!certStatus.signatureReady?'disabled':'')+'>Zertifikat ausstellen</button>':'';
     return '<div class="portal-actions"><button type="button" class="secondary" data-cert-download="'+safe(r.id)+'">Zertifikat als PDF</button>'+ (admin&&certStatus.mailReady&&stored.mail_status==='not_sent'?'<button type="button" class="secondary" data-cert-mail="'+safe(r.id)+'">Per E-Mail versenden</button>':'')+'</div>'+(admin?'<p class="portal-hint">'+safe(mailLabel(stored.mail_status))+'</p>':'');
   }
   function signaturePanel(){
@@ -152,7 +154,7 @@
   }
   function certificatePanel(p){
     const C=globalThis.ABBATE_CERTIFICATES;if(!C)return '';
-    return `<section class="cert-panel admin-section" aria-labelledby="cert-heading"><button type="button" class="admin-section-heading cert-section-toggle" data-admin-disclosure="certificate-section-content" aria-expanded="false" aria-controls="certificate-section-content"><span class="admin-section-icon admin-gold" aria-hidden="true">✓</span><span><strong id="cert-heading">Prüfung &amp; Zertifikat</strong><small>Bestandene Theorieprüfung</small></span><span class="admin-chevron" aria-hidden="true"></span></button><div id="certificate-section-content" class="admin-section-body portal-disclosure-content">${state.me.role==='admin'&&!certStatus.signatureReady?'<p class="admin-alert">Unterschrift fehlt. Bitte in den Einstellungen hinterlegen.</p>':''}<form id="certificate-form" class="portal-record-form"><label class="portal-wide">Ausbildungsbereich<select name="course" required><option value="">Bitte auswählen …</option>${C.courses.map(c=>`<option value="${safe(c.id)}">${safe(c.label)}</option>`).join('')}</select></label><label>Prüfungsdatum<input name="completedAt" type="date" value="${C.today()}" max="${C.today()}" required></label><label>Versand<select name="notification"><option value="none">Keine E-Mail</option><option value="email" ${certStatus.mailReady?'':'disabled'}>Zertifikat per E-Mail</option></select></label><div class="portal-wide"><button class="primary admin-preview-button" name="intent" value="preview" type="submit">PDF-Vorschau prüfen</button></div><div id="certificate-preview" class="portal-wide" aria-live="polite"></div><p role="alert" class="portal-error portal-wide"></p></form></div></section>`;
+    return `<section class="cert-panel admin-section" aria-labelledby="cert-heading"><button type="button" class="admin-section-heading cert-section-toggle" data-admin-disclosure="certificate-section-content" aria-expanded="false" aria-controls="certificate-section-content"><span class="admin-section-icon admin-gold" aria-hidden="true">✓</span><span><strong id="cert-heading">Prüfung &amp; Zertifikat</strong><small>Theorieprüfung oder jährliche Unterweisung</small></span><span class="admin-chevron" aria-hidden="true"></span></button><div id="certificate-section-content" class="admin-section-body portal-disclosure-content">${state.me.role==='admin'&&!certStatus.signatureReady?'<p class="admin-alert">Unterschrift fehlt. Bitte in den Einstellungen hinterlegen.</p>':''}<form id="certificate-form" class="portal-record-form"><label class="portal-wide">Zertifikat / Ausbildungsbereich<select name="course" required><option value="">Bitte auswählen …</option>${C.courses.map(c=>`<option value="${safe(c.id)}">${safe(c.label)}</option>`).join('')}</select></label><label>Prüfungs- / Unterweisungsdatum<input name="completedAt" type="date" value="${C.today()}" max="${C.today()}" required></label><label>Versand<select name="notification"><option value="none">Keine E-Mail</option><option value="email" ${certStatus.mailReady?'':'disabled'}>Zertifikat per E-Mail</option></select></label><div class="portal-wide"><button class="primary admin-preview-button" name="intent" value="preview" type="submit">PDF-Vorschau prüfen</button></div><div id="certificate-preview" class="portal-wide" aria-live="polite"></div><p role="alert" class="portal-error portal-wide"></p></form></div></section>`;
   }
   function invalidateCertificatePreview(form){
     const target=form.querySelector('#certificate-preview');
@@ -172,7 +174,7 @@
     const sequence=++previewSequence;certificatePreviewReady=false;
     const marker=JSON.stringify(draft);certificateDraft=marker;
     target.setAttribute('data-abbate-update-block','');
-    target.innerHTML=`<div class="cert-review"><div class="admin-preview-status"><strong>PDF-Vorschau</strong><span>Noch nicht ausgestellt</span></div><div class="admin-preview-stage" data-preview-state="loading"><p class="admin-preview-message" role="status">PDF wird geladen …</p><canvas class="admin-pdf-canvas" role="img" aria-label="Zertifikatsvorschau mit Unterschrift" hidden></canvas></div><div class="cert-review-summary"><strong>${draft.notification==='email'?'Empfänger: '+safe(draft.email):'Ohne E-Mail-Versand'}</strong></div><label class="portal-consent"><input type="checkbox" name="certificateConfirmed" value="yes"> <span>Ich bestätige die bestandene Theorieprüfung.</span></label><div class="admin-certificate-actions">${state.me.role==='admin'?'<button class="primary" name="intent" value="issue" type="submit" disabled>Zertifikat ausstellen'+(draft.notification==='email'?' und versenden':'')+'</button>':''}<button class="secondary" name="intent" value="save" type="submit">Nur Prüfung speichern</button></div></div>`;
+    target.innerHTML=`<div class="cert-review"><div class="admin-preview-status"><strong>PDF-Vorschau</strong><span>Noch nicht ausgestellt</span></div><div class="admin-preview-stage" data-preview-state="loading"><p class="admin-preview-message" role="status">PDF wird geladen …</p><canvas class="admin-pdf-canvas" role="img" aria-label="Zertifikatsvorschau mit Unterschrift" hidden></canvas></div><div class="cert-review-summary"><strong>${draft.notification==='email'?'Empfänger: '+safe(draft.email):'Ohne E-Mail-Versand'}</strong></div><label class="portal-consent"><input type="checkbox" name="certificateConfirmed" value="yes"> <span>${draft.kind==='instruction'?'Ich bestätige die tatsächlich durchgeführte jährliche Unterweisung und die Teilnahme.':'Ich bestätige die bestandene Theorieprüfung.'}</span></label><div class="admin-certificate-actions">${state.me.role==='admin'?'<button class="primary" name="intent" value="issue" type="submit" disabled>Zertifikat ausstellen'+(draft.notification==='email'?' und versenden':'')+'</button>':''}<button class="secondary" name="intent" value="save" type="submit">Nur Nachweis speichern</button></div></div>`;
     const stage=target.querySelector('.admin-preview-stage'),message=stage.querySelector('.admin-preview-message'),canvas=stage.querySelector('canvas'),issue=target.querySelector('[value="issue"]');
     const current=()=>target.isConnected&&certificateDraft===marker&&sequence===previewSequence&&stage.isConnected;
     if(state.me.role!=='admin'||!certStatus.signatureReady){
@@ -336,22 +338,22 @@
         const person=state.students.find(p=>p.id===selected);
         const draft=C.prepare(person,values);
         if(!['save','issue'].includes(submit?.value)){await showCertificate(form,draft);return;}
-        if(certificateDraft!==JSON.stringify(draft)||values.certificateConfirmed!=='yes')throw Error('Bitte die aktuelle Vorschau und die bestandene Prüfung ausdrücklich bestätigen.');
+        if(certificateDraft!==JSON.stringify(draft)||values.certificateConfirmed!=='yes')throw Error('Bitte die aktuelle Vorschau und den tatsächlichen Abschluss ausdrücklich bestätigen.');
         const issuing=submit.value==='issue';
         if(issuing&&(state.me.role!=='admin'||!certStatus.signatureReady||!certificatePreviewReady))throw Error('Ausstellung noch nicht freigegeben.');
         if(issuing&&draft.notification==='email'&&!certStatus.mailReady)throw Error('E-Mail-Versand nicht eingerichtet.');
         if(issuing&&!confirm('Zertifikat für '+draft.name+' ausstellen'+(draft.notification==='email'?' und an '+draft.email+' senden':'')+'?'))return;
-        const existing=M.recordsFor(state,selected).find(r=>r.kind==='exam'&&r.outcome==='passed'&&r.title===draft.title&&r.completedAt===draft.completedAt);
-        if(existing&&!issuing)throw Error('Diese Theorieprüfung ist bereits im Schulungspass gespeichert.');
+        const existing=M.recordsFor(state,selected).find(r=>r.kind===draft.kind&&r.outcome===draft.outcome&&r.title===draft.title&&r.completedAt===draft.completedAt);
+        if(existing&&!issuing)throw Error('Dieser Nachweis ist bereits im Schulungspass gespeichert.');
         M.addCompletion({students:state.students,completions:[],audit:[]},draft,uuid());
         const id=existing?.id||await B.addCompletion(draft);
-        if(!issuing){await load();admin();notice('Bestandene Theorieprüfung gespeichert. Keine E-Mail versendet.');return;}
+        if(!issuing){await load();admin();notice('Nachweis gespeichert. Keine E-Mail versendet.');return;}
         let msg;
         try{
           const result=await certCall({action:'issue',completionId:id,confirmed:true});
           msg='Zertifikat ausgestellt. '+mailLabel(result.mailStatus);
           if(draft.notification==='email'){const sent=await certCall({action:'mail',completionId:id,confirmed:true,email:draft.email});msg='Zertifikat ausgestellt. '+mailLabel(sent.mailStatus);}
-        }catch(e){msg='Prüfung gespeichert. Zertifikatsaktion: '+e.message;}
+        }catch(e){msg='Nachweis gespeichert. Zertifikatsaktion: '+e.message;}
         await load();admin();notice(msg);certificateDraft=null;
       }
       else if(form.id==='record-form'){
@@ -401,7 +403,7 @@
       const action=certButton.dataset.certDownload?'download':certButton.dataset.certIssue?'issue':'mail';
       if(action!=='download'&&(view!=='admin'||state.me.role!=='admin'))return;
       const person=state.students.find(p=>p.id===record.student);
-      if(action!=='download'&&(!person||!confirm(action==='mail'?'Zertifikat an '+person.email+' versenden?':'Bestandene Theorieprüfung für '+person.name+' bestätigen und Zertifikat ausstellen?')))return;
+      if(action!=='download'&&(!person||!confirm(action==='mail'?'Zertifikat an '+person.email+' versenden?':(annualRecord(record)?'Teilnahme an der jährlichen Unterweisung für ':'Bestandene Theorieprüfung für ')+person.name+' bestätigen und Zertifikat ausstellen?')))return;
       certButton.disabled=true;
       try{const data=await certCall({action,completionId:id,confirmed:true,email:person?.email});if(action==='download')downloadCertificate(data);else{await load();admin();notice(action==='mail'?mailLabel(data.mailStatus):'Zertifikat ausgestellt.');}}
       catch(e){notice(e.message);}finally{certButton.disabled=false;}
