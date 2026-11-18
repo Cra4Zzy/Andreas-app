@@ -27,20 +27,23 @@ test('all seven certificate categories use verified subject references in fronte
  assert.match(edge,/Nur Theorieprüfung/);
 });
 
-test('mobile PDF preview starts enlarged without changing issuance or PDF aspect ratio',()=>{
+test('certificate preview is compact and opens only when explicitly tapped',()=>{
  const p=fs.readFileSync('dist/portal.js','utf8'),c=fs.readFileSync('dist/admin-workspace.css','utf8');
- assert.match(p,/matches\?175:100,true/);
- assert.match(p,/data-cert-zoom="100"/);assert.match(p,/data-cert-zoom="175"/);assert.match(p,/data-cert-zoom="250"/);
- assert.match(p,/stage\.scrollLeft=scale===100\?0/);
- assert.match(p,/zoom\.hidden=true/);
- assert.match(c,/data-zoom="175"[^\n]+width:175%/);assert.match(c,/data-zoom="250"[^\n]+width:250%/);
- assert.match(c,/height:auto;max-width:none/);assert.match(c,/overflow:auto/);
+ const show=p.slice(p.indexOf('async function showCertificate('),p.indexOf('function renderDetail('));
+ assert.match(show,/type="button" class="admin-preview-thumbnail" data-cert-viewer-open/);
+ assert.match(show,/querySelector\('\[data-cert-viewer-open\]'\)\.hidden=false/);
+ assert.doesNotMatch(show,/openCertificateViewer\(/);
+ assert.match(p,/const viewerOpen=event\.target\.closest\('\[data-cert-viewer-open\]'\)/);
+ assert.match(c,/max-width:290px/);
+ assert.doesNotMatch(p,/data-cert-zoom|setCertificateZoom/);
 });
-
-test('mobile PDF opens a separate full-screen reader without issuing a certificate',()=>{
+test('lightbox shows the complete PDF with single X and cannot open a stale draft',()=>{
  const p=fs.readFileSync('dist/portal.js','utf8'),c=fs.readFileSync('dist/admin-workspace.css','utf8');
- assert.match(p,/dialog\.showModal\(\)/);assert.match(p,/ctx\.drawImage\(source,0,0\)/);
- assert.match(p,/matches\?250:175,true/);assert.match(p,/viewer\?\.open\)viewer\.close\(\)/);
- assert.match(p,/type="button" class="primary" data-cert-viewer-close/);
- assert.match(c,/height:100dvh/);assert.match(c,/max-height:none;max-width:none/);
+ assert.match(p,/if\(!certificatePreviewReady\|\|!target\?\.isConnected\)return/);
+ assert.match(p,/ctx\.drawImage\(source,0,0\)/);assert.match(p,/dialog\.showModal\(\)/);
+ assert.match(p,/data-cert-viewer-close aria-label="Vorschau schließen"/);
+ assert.match(p,/dialog\?\.close\(\);trigger\?\.focus/);
+ assert.match(p,/viewer\?\.open\)viewer\.close\(\)/);
+ assert.match(c,/height:92dvh/);assert.match(c,/object-fit:contain/);
+ assert.doesNotMatch(p,/Zurück zur Ausstellung|250 %|175 %/);
 });
