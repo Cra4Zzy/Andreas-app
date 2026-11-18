@@ -215,3 +215,43 @@ body[data-view=admin] .admin-viewer-mode[hidden]{display:none}
  body[data-view=admin] .admin-certificate-viewer[open]{width:calc(100% - 12px);height:92vh;height:92dvh;border-radius:12px}
  .admin-viewer-page{padding:0}
 }
+
+/* Admin certificate archive: separate from draft preview, no new issuance actions. */
+body[data-view=admin] .admin-toolbar{flex-wrap:wrap;justify-content:flex-end}
+body[data-view=admin] .admin-cert-overview-trigger{background:#e5eee7;border-color:#779787;white-space:nowrap}
+body[data-view=admin] .admin-cert-overview:not([open]){display:none}
+body[data-view=admin] .admin-cert-overview[open]{position:fixed;inset:0;display:grid;grid-template-rows:auto minmax(0,1fr);width:min(900px,calc(100% - 24px));height:min(760px,92vh);height:min(760px,92dvh);max-width:100%;max-height:96vh;margin:auto;padding:0;border:1px solid #bdcbc0;border-radius:16px;background:var(--ad-surface);color:var(--ad-ink);overflow:hidden;box-sizing:border-box;box-shadow:0 24px 80px #10232540}
+.admin-cert-overview::backdrop{background:#102325b3}
+.admin-cert-overview-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 24px;background:white;border-bottom:1px solid #d7e0d5}
+.admin-cert-overview-header h2{font-size:clamp(22px,4vw,30px);line-height:1.15;margin:4px 0 5px}
+.admin-cert-overview-header p{font-size:14px;color:var(--ad-mid);margin:0}
+.admin-cert-overview-header .admin-viewer-close{font-size:25px}
+.admin-cert-overview-body{min-height:0;overflow:auto;overscroll-behavior:contain;padding:18px 24px}
+.admin-cert-overview-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.admin-cert-overview-stats>div{display:grid;gap:3px;padding:12px;border-radius:10px;background:#edf2ed;border:1px solid #d3dfd4}
+.admin-cert-overview-stats small{font-size:12px;color:var(--ad-mid)}
+.admin-cert-overview-stats strong{font-size:26px;line-height:1.1}
+.admin-cert-overview-filters{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px;margin:18px 0 10px}
+.admin-cert-overview-filters label{display:grid;gap:5px;min-width:0}
+body[data-view=admin] .admin-cert-overview-filters input,body[data-view=admin] .admin-cert-overview-filters select{width:100%;min-width:0;box-sizing:border-box}
+.admin-cert-overview-results{display:grid;gap:8px}
+.admin-cert-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:14px;border:1px solid #c6d3c8;border-radius:10px;background:white}
+.admin-cert-row-main{min-width:0;overflow-wrap:anywhere}
+.admin-cert-row-main>strong{display:block;font-size:17px}
+.admin-cert-row-main>small{display:block;font-size:12px;color:var(--ad-mid)}
+.admin-cert-row-main p{font-size:14px;font-weight:650;margin:8px 0 4px}
+.admin-cert-row-actions{display:grid;justify-items:end;gap:8px}
+.admin-cert-mail-status{font-size:12px;font-weight:700;padding:5px 8px;border-radius:7px;background:#f0eee5;color:#554d35;line-height:1.35}
+.admin-cert-mail-status.accepted{background:#e0eee4;color:#24513b}
+.admin-cert-mail-status.sending,.admin-cert-mail-status.uncertain,.admin-cert-mail-status.unknown{background:#faecd0;color:#67480e}
+.admin-cert-empty{padding:22px 12px;text-align:center;color:var(--ad-mid);background:#f2f5f0;border-radius:10px}
+@media(max-width:700px){
+ body[data-view=admin] .admin-toolbar .admin-cert-overview-trigger{flex:1 0 100%;order:3}
+ body[data-view=admin] .admin-cert-overview[open]{width:calc(100% - 12px);height:92dvh;border-radius:12px}
+ .admin-cert-overview-header{padding:14px}
+ .admin-cert-overview-body{padding:12px}
+ .admin-cert-overview-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-cert-overview-filters,.admin-cert-row{grid-template-columns:minmax(0,1fr);gap:8px}
+ .admin-cert-row-actions{justify-items:start;grid-template-columns:minmax(0,1fr) auto;align-items:center}
+ body[data-view=admin] .admin-cert-row-actions button{font-size:12px;padding:8px;white-space:normal}
+}

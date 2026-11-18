@@ -16,11 +16,13 @@
   async function load(){
     state=await B.state();certRecords=new Map();certStatus={signatureReady:false,mailReady:false};
     if(!state.me||view==='login')return;
+    if(view==='admin'&&state.me.role==='admin'){
+      try{certStatus=await certCall({action:'status',school:state.me.school});}catch{certStatus.unavailable=true;}
+    }
     try{
-      if(view==='admin'&&state.me.role==='admin')certStatus=await certCall({action:'status',school:state.me.school});
       const ids=state.completions.filter(r=>certificateEligible(r)&&!r.revokedAt).map(r=>r.id);
       for(let i=0;i<ids.length;i+=100){const result=await certCall({action:'list',ids:ids.slice(i,i+100)});for(const row of result.certificates||[])certRecords.set(row.completion_id,row);}
-    }catch{certStatus.unavailable=true;}
+    }catch{certStatus.listUnavailable=true;certRecords.clear();}
   }
   function downloadCertificate(data){
     if(!data.pdf||!data.reference)throw Error('Keine PDF erhalten.');
@@ -245,9 +247,42 @@
     const due=C.reminders(state.completions).filter(r=>people.has(r.student));
     return `<details class="portal-panel admin-section"><summary><span><strong>Jährliche Unterweisungen</strong> <small>${due.length} fällig oder in 30 Tagen</small></span></summary><div class="admin-section-body"><p class="portal-hint">Planungshilfe je Fachbereich, gerechnet ab der letzten dokumentierten Unterweisung. Frühere Unterweisungen können erforderlich sein. Kein automatischer Versand.</p>${due.map(r=>`<div class="portal-record"><strong>${safe(people.get(r.student).name)}</strong><p>${safe(r.field)} · ${safe(day(r.due))} · ${r.days<0?'Überfällig':r.days===0?'Heute fällig':'In '+r.days+' Tagen'}</p><button type="button" class="secondary" data-person="${safe(r.student)}">Teilnehmer öffnen</button></div>`).join('')||'<p>Keine anstehenden Wiederholungen aus den erfassten Fachbereichsnachweisen.</p>'}</div></details>`;
   }
+  // An attendance or exam record alone is not an issued certificate.
+  function issuedCertificateRows(snapshot,stored){
+    const people=new Map(snapshot.students.map(p=>[p.id,p]));
+    return snapshot.completions.filter(r=>certificateEligible(r)&&!r.revokedAt&&stored.has(r.id)&&!stored.get(r.id).invalidated_at).map(r=>{
+      const c=stored.get(r.id),p=people.get(r.student);
+      const status=['accepted','not_sent','sending','uncertain'].includes(c.mail_status)?c.mail_status:'unknown';
+      return {...r,name:p?.name||'Teilnehmer nicht verfügbar',email:p?.email||'',issuedAt:c.issued_at,status};
+    }).sort((a,b)=>String(b.issuedAt||'').localeCompare(String(a.issuedAt||''))||a.id.localeCompare(b.id));
+  }
+  function filterIssuedCertificates(rows,query,mode){
+    const q=String(query||'').trim().toLocaleLowerCase('de-DE');
+    return rows.filter(r=>(mode==='all'||(mode==='review'?['sending','uncertain','unknown'].includes(r.status):r.status===mode))&&(!q||[r.name,r.email,r.title,r.reference].some(v=>String(v||'').toLocaleLowerCase('de-DE').includes(q))));
+  }
+  function certificateOverview(){
+    if(state.me?.role!=='admin')return '';
+    return '<dialog id="certificate-overview" class="admin-cert-overview" aria-labelledby="certificate-overview-title"><header class="admin-cert-overview-header"><div><span class="portal-eyebrow">Zertifikatsarchiv</span><h2 id="certificate-overview-title">Ausgestellte Zertifikate</h2><p>Alle gültigen Nachweise mit ihrem aktuellen E-Mail-Versandstatus.</p></div><button type="button" class="admin-viewer-close" data-cert-overview-close aria-label="Übersicht schließen">×</button></header><div class="admin-cert-overview-body"><div id="cert-overview-stats" class="admin-cert-overview-stats"></div><div class="admin-cert-overview-filters"><label>Name, Fachbereich oder Referenz<input type="search" id="cert-overview-search" placeholder="Zertifikat suchen" autocomplete="off"></label><label>Versandstatus<select id="cert-overview-filter"><option value="all">Alle Zertifikate</option><option value="accepted">Vom Mailserver angenommen</option><option value="not_sent">Noch nicht versendet</option><option value="review">Versand prüfen</option></select></label></div><p class="portal-hint" id="cert-overview-count" role="status"></p><p class="portal-error" id="cert-overview-error" role="alert"></p><div id="cert-overview-results" class="admin-cert-overview-results"></div><p class="portal-hint">„Vom Mailserver angenommen“ bedeutet nicht, dass die E-Mail bereits gelesen oder im Posteingang zugestellt wurde. Zurückgezogene Nachweise werden nicht angezeigt.</p></div></dialog>';
+  }
+  function renderCertificateOverview(){
+    const dialog=root.querySelector('#certificate-overview');
+    if(!dialog||state.me?.role!=='admin')return;
+    const stats=dialog.querySelector('#cert-overview-stats'),list=dialog.querySelector('#cert-overview-results'),count=dialog.querySelector('#cert-overview-count');
+    if(certStatus.listUnavailable){
+      stats.innerHTML='';list.innerHTML='<p class="admin-alert">Zertifikate konnten nicht vollständig geladen werden. Bitte die Verwaltung aktualisieren.</p>';count.textContent='';return;
+    }
+    const rows=issuedCertificateRows(state,certRecords);
+    const accepted=rows.filter(r=>r.status==='accepted').length,open=rows.filter(r=>r.status==='not_sent').length;
+    stats.innerHTML=[['Ausgestellt',rows.length],['Mail angenommen',accepted],['Nicht versendet',open],['Versand prüfen',rows.length-accepted-open]].map(([label,n])=>'<div><small>'+label+'</small><strong>'+n+'</strong></div>').join('');
+    const filtered=filterIssuedCertificates(rows,dialog.querySelector('#cert-overview-search').value,dialog.querySelector('#cert-overview-filter').value);
+    count.textContent=filtered.length+' von '+rows.length+' Zertifikaten';
+    const issuedDate=value=>value&&Number.isFinite(Date.parse(value))?new Intl.DateTimeFormat('de-DE',{dateStyle:'medium',timeZone:'Europe/Berlin'}).format(new Date(value)):'Unbekannt';
+    const labels={accepted:'Vom Mailserver angenommen',not_sent:'Nicht versendet',sending:'Versand läuft',uncertain:'Versand unklar',unknown:'Status unbekannt'};
+    list.innerHTML=filtered.map(r=>'<article class="admin-cert-row"><div class="admin-cert-row-main"><strong>'+safe(r.name)+'</strong><small>'+safe(r.email)+'</small><p>'+safe(r.title)+'</p><small>Ausgestellt: '+safe(issuedDate(r.issuedAt))+' · '+safe(r.reference)+'</small></div><div class="admin-cert-row-actions"><span class="admin-cert-mail-status '+safe(r.status)+'">'+safe(labels[r.status])+'</span><button type="button" class="secondary" data-cert-download="'+safe(r.id)+'">PDF öffnen / speichern</button></div></article>').join('')||'<p class="admin-cert-empty">'+(rows.length?'Keine passenden Zertifikate gefunden.':'Noch keine Zertifikate ausgestellt.')+'</p>';
+  }
   function admin(){
     certificateDraft=null;certificatePreviewReady=false;previewSequence++;
-    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Abbate Lernraum</span><h1>Teilnehmerverwaltung</h1><p class="admin-sr-only">Schulungen und Prüfungsergebnisse</p></div><div class="admin-toolbar"><button type="button" class="secondary" data-refresh aria-label="Konten aktualisieren">Aktualisieren</button><details class="admin-tools"><summary>Einstellungen</summary><div class="admin-tools-content">${signaturePanel()}<details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Der QR-Code führt zur Anmeldeseite und kann auf allen Schülerkarten verwendet werden.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code" style="image-rendering:pixelated"></canvas><p class="portal-hint">Der QR-Code enthält keine personenbezogenen Daten.</p><a class="portal-text" href="${AbbateCardQR.target}" target="_blank" rel="noopener noreferrer">Anmeldeseite öffnen ↗</a><button class="secondary" id="download-qr" type="button" disabled>PNG (Druckqualität) herunterladen</button><button class="secondary" id="download-qr-svg" type="button" disabled>SVG (Vektorformat) herunterladen</button></details><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div></details></div></section><section class="portal-stats" aria-label="Kontenübersicht"><div><span>Konten</span><strong>${state.students.filter(p=>p.id!==state.me.id).length}</strong></div><div><span>Wartend</span><strong>${state.students.filter(p=>p.role==='learner'&&p.access==='pending').length}</strong></div><div><span>Aktiv</span><strong>${state.students.filter(p=>p.role==='learner'&&M.access(p)).length}</strong></div><div><span>Inaktiv</span><strong>${state.students.filter(p=>p.role==='learner'&&(p.access==='paused'||(p.access==='active'&&!M.access(p)))).length}</strong></div></section>${annualOverview()}<div class="portal-admin-layout"><aside class="portal-sidebar" id="account-picker"><button type="button" id="account-picker-toggle" class="portal-picker-toggle" aria-expanded="false" aria-controls="account-picker-panel">${pickerLabel()}</button><div id="account-picker-panel" class="portal-picker-panel"><h2 class="admin-list-heading">Teilnehmer</h2><label class="admin-sr-only" for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name oder E-Mail" value="${safe(search)}"><label class="admin-sr-only" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></div></aside><div id="account-detail" class="portal-detail">${detail()}</div></div>`;
+    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Abbate Lernraum</span><h1>Teilnehmerverwaltung</h1><p class="admin-sr-only">Schulungen und Prüfungsergebnisse</p></div><div class="admin-toolbar"><button type="button" class="secondary" data-refresh aria-label="Konten aktualisieren">Aktualisieren</button>${state.me.role==='admin'?'<button type="button" class="secondary admin-cert-overview-trigger" data-cert-overview-open aria-haspopup="dialog">Ausgestellte Zertifikate</button>':''}<details class="admin-tools"><summary>Einstellungen</summary><div class="admin-tools-content">${signaturePanel()}<details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Der QR-Code führt zur Anmeldeseite und kann auf allen Schülerkarten verwendet werden.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code" style="image-rendering:pixelated"></canvas><p class="portal-hint">Der QR-Code enthält keine personenbezogenen Daten.</p><a class="portal-text" href="${AbbateCardQR.target}" target="_blank" rel="noopener noreferrer">Anmeldeseite öffnen ↗</a><button class="secondary" id="download-qr" type="button" disabled>PNG (Druckqualität) herunterladen</button><button class="secondary" id="download-qr-svg" type="button" disabled>SVG (Vektorformat) herunterladen</button></details><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div></details></div></section><section class="portal-stats" aria-label="Kontenübersicht"><div><span>Konten</span><strong>${state.students.filter(p=>p.id!==state.me.id).length}</strong></div><div><span>Wartend</span><strong>${state.students.filter(p=>p.role==='learner'&&p.access==='pending').length}</strong></div><div><span>Aktiv</span><strong>${state.students.filter(p=>p.role==='learner'&&M.access(p)).length}</strong></div><div><span>Inaktiv</span><strong>${state.students.filter(p=>p.role==='learner'&&(p.access==='paused'||(p.access==='active'&&!M.access(p)))).length}</strong></div></section>${annualOverview()}<div class="portal-admin-layout"><aside class="portal-sidebar" id="account-picker"><button type="button" id="account-picker-toggle" class="portal-picker-toggle" aria-expanded="false" aria-controls="account-picker-panel">${pickerLabel()}</button><div id="account-picker-panel" class="portal-picker-panel"><h2 class="admin-list-heading">Teilnehmer</h2><label class="admin-sr-only" for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name oder E-Mail" value="${safe(search)}"><label class="admin-sr-only" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></div></aside><div id="account-detail" class="portal-detail">${detail()}</div></div>${certificateOverview()}`;
     document.querySelector('#account-filter').value=filter;
     const canvas=document.querySelector('#portal-qr');
     AbbateCardQR.render(canvas).then(()=>{
@@ -416,9 +451,10 @@
       event.preventDefault();setPickerOpen(false,true);
     }
   });
-  root.addEventListener('input',event=>{if(view==='admin'&&event.target.id==='account-search'){search=event.target.value;document.querySelector('#account-list').innerHTML=peopleList();}});
+  root.addEventListener('input',event=>{if(event.target.id==='cert-overview-search'){renderCertificateOverview();return;}if(view==='admin'&&event.target.id==='account-search'){search=event.target.value;document.querySelector('#account-list').innerHTML=peopleList();}});
   root.addEventListener('change',async event=>{
     if(view!=='admin'||!B.isStaff(state.me))return;
+    if(event.target.id==='cert-overview-filter'){renderCertificateOverview();return;}
     if(event.target.closest('#certificate-form')&&['course','field','completedAt','notification'].includes(event.target.name)){
       const current=event.target.closest('#certificate-form');
       const annual=current.elements.course.value==='jaehrliche-unterweisung';
@@ -439,6 +475,8 @@
     if(event.target.id==='record-kind'){const title=document.querySelector('#record-form [name="title"]');title.maxLength=event.target.value==='annual_instruction'?176:200;const outcome=document.querySelector('#record-outcome');outcome.querySelector('[value="attended"]').disabled=event.target.value==='exam';if(event.target.value==='exam'&&outcome.value==='attended')outcome.value='passed';}
   });
   root.addEventListener('click',async event=>{
+    if(event.target.closest('[data-cert-overview-open]')){if(view==='admin'&&state.me?.role==='admin'){const d=root.querySelector('#certificate-overview');if(d&&!d.open){renderCertificateOverview();d.showModal();}}return;}
+    if(event.target.closest('[data-cert-overview-close]')){root.querySelector('#certificate-overview')?.close();return;}
     const viewerMode=event.target.closest('[data-cert-viewer-mode]');
     if(viewerMode){const page=viewerMode.closest('dialog')?.querySelector('.admin-viewer-page');if(page){page.dataset.mode=page.dataset.mode==='reading'?'original':'reading';viewerMode.textContent=page.dataset.mode==='reading'?'Original-PDF':'Leseansicht';page.scrollTop=0;}return;}
     const viewerClose=event.target.closest('[data-cert-viewer-close]');
@@ -459,7 +497,7 @@
       if(action!=='download'&&(!person||!confirm(action==='mail'?'Zertifikat an '+person.email+' versenden?':(annualRecord(record)?'Teilnahme an der jährlichen Unterweisung für ':'Bestandene Theorieprüfung für ')+person.name+' bestätigen und Zertifikat ausstellen?')))return;
       certButton.disabled=true;
       try{const data=await certCall({action,completionId:id,confirmed:true,email:person?.email});if(action==='download')downloadCertificate(data);else{await load();admin();notice(action==='mail'?mailLabel(data.mailStatus):'Zertifikat ausgestellt.');}}
-      catch(e){notice(e.message);}finally{certButton.disabled=false;}
+      catch(e){const error=certButton.closest('#certificate-overview')?.querySelector('#cert-overview-error');if(error)error.textContent=e.message;else notice(e.message);}finally{certButton.disabled=false;}
       return;
     }
     if(view!=='admin'||!B.isStaff(state?.me))return;

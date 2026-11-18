@@ -95,13 +95,23 @@
    if(!await monitorStaffIdle(me,session)){me=null;return null;}
    return me;
  }
+ // Read all staff records in bounded, deterministically ordered pages rather than
+ // silently letting PostgREST's default row limit truncate the certificate archive.
+ async function allPages(query,pageSize=200){
+   const data=[];
+   for(let start=0;;start+=pageSize){
+     const r=await query().range(start,start+pageSize-1);fail(r.error);
+     data.push(...r.data);
+     if(r.data.length<pageSize)return {data,error:null};
+   }
+ }
  async function state(){
    const user=await identity();if(!user)return {me:null,students:[],completions:[]};
-   const [members,profiles,records]=await Promise.all([
-     client.from('abbate_memberships').select('*').eq('school_id',user.school),
-     client.from('abbate_profiles').select('*').eq('school_id',user.school),
-     client.from('abbate_completions').select('id,participant_id,kind,outcome,completed_at,reference,revoked_at,abbate_courses(title)').eq('school_id',user.school).order('completed_at',{ascending:false})
-   ]);[members,profiles,records].forEach(r=>fail(r.error));
+   const membersQuery=()=>client.from('abbate_memberships').select('*').eq('school_id',user.school).order('user_id');
+   const profilesQuery=()=>client.from('abbate_profiles').select('*').eq('school_id',user.school).order('user_id');
+   const recordsQuery=()=>client.from('abbate_completions').select('id,participant_id,kind,outcome,completed_at,reference,revoked_at,abbate_courses(title)').eq('school_id',user.school).order('completed_at',{ascending:false}).order('id');
+   const read=query=>['admin','trainer'].includes(user.role)?allPages(query):query();
+   const [members,profiles,records]=await Promise.all([read(membersQuery),read(profilesQuery),read(recordsQuery)]);[members,profiles,records].forEach(r=>fail(r.error));
    return {me:user,students:members.data.map(m=>person(m,profiles.data.find(p=>p.user_id===m.user_id))),
      completions:records.data.map(r=>({id:r.id,student:r.participant_id,title:r.abbate_courses?.title||'Schulung',
        kind:r.kind==='refresher'?'instruction':r.kind,outcome:r.outcome,completedAt:r.completed_at,reference:r.reference,revokedAt:r.revoked_at}))};
