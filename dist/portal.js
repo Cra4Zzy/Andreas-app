@@ -145,22 +145,46 @@
 
   let certificateDraft=null,certificatePreviewReady=false,previewSequence=0;
   let pdfLibrary;
+  // Only the server-rendered, verified draft supplies the reading view's text and signature.
+  const previewText=new WeakMap();
+  function certificateText(content){
+    const line=y=>content.items.filter(i=>typeof i.str==='string'&&i.transform&&Math.abs(i.transform[5]-y)<1).map(i=>i.str).join(' ').replace(/\s+/g,' ').trim();
+    const result={school:line(485),subtitle:line(403),intro:line(356),name:line(310),statement:line(281),subject:line(253),standard:line(231),date:line(208),note:line(169),signedDate:line(111),footer:line(42)};
+    if(Object.values(result).some(v=>!v)||result.school!=='FAHRSCHULE ANDREAS ABBATE'||!result.footer.includes('Noch nicht ausgestellt'))return null;
+    return result;
+  }
+  function cropCertificateArt(source,canvas,x,y,w,h){
+    const sx=source.width/842,sy=source.height/595;
+    canvas.width=Math.max(1,Math.round(w*sx));canvas.height=Math.max(1,Math.round(h*sy));
+    canvas.getContext('2d',{alpha:false}).drawImage(source,x*sx,(595-y-h)*sy,w*sx,h*sy,0,0,canvas.width,canvas.height);
+  }
   function openCertificateViewer(target){
     if(!certificatePreviewReady||!target?.isConnected)return;
     const source=target.querySelector('.admin-preview-stage canvas'),dialog=target.querySelector('.admin-certificate-viewer');
-    const canvas=dialog?.querySelector('canvas');
-    if(!source||source.hidden||!canvas||dialog.open||typeof dialog.showModal!=='function')return;
+    const canvas=dialog?.querySelector('.admin-viewer-original canvas'),page=dialog?.querySelector('.admin-viewer-page');
+    if(!source||source.hidden||!canvas||!page||dialog.open||typeof dialog.showModal!=='function')return;
     canvas.width=source.width;canvas.height=source.height;
     const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return;
     ctx.drawImage(source,0,0);
-    dialog.showModal();
+    const info=previewText.get(source),paper=page.querySelector('.admin-viewer-paper'),toggle=dialog.querySelector('[data-cert-viewer-mode]');
+    if(info){
+      for(const node of paper.querySelectorAll('[data-pdf-text]'))node.textContent=info[node.dataset.pdfText]||'';
+      const annual=info.subtitle==='TEILNAHMENACHWEIS';
+      paper.querySelector('[data-pdf-date-label]').textContent=annual?'Unterweisungsdatum':'Prüfungsdatum';
+      paper.querySelector('[data-pdf-signer-role]').textContent=annual?'Unterweisungsverantwortlicher':'Prüfungsverantwortlicher';
+      cropCertificateArt(source,paper.querySelector('[data-pdf-logo]'),388,504,66,49);
+      cropCertificateArt(source,paper.querySelector('[data-pdf-signature]'),522,102,156,55);
+    }
+    page.dataset.mode=info&&window.matchMedia('(max-width:700px) and (orientation:portrait)').matches?'reading':'original';
+    toggle.hidden=!info;toggle.textContent=page.dataset.mode==='reading'?'Original-PDF':'Leseansicht';
+    dialog.showModal();page.scrollTop=0;
   }
   async function renderCertificateCanvas(canvas,bytes){
     if(!pdfLibrary)pdfLibrary=import(new URL('./vendor/pdfjs/pdf.min.mjs',document.baseURI).href).then(pdf=>{pdf.GlobalWorkerOptions.workerSrc=new URL('./vendor/pdfjs/pdf.worker.min.mjs',document.baseURI).href;return pdf;}).catch(error=>{pdfLibrary=null;throw error;});
     const pdf=await pdfLibrary;
     const task=pdf.getDocument({data:bytes,standardFontDataUrl:new URL('./vendor/pdfjs/standard_fonts/',document.baseURI).href,wasmUrl:new URL('./vendor/pdfjs/wasm/',document.baseURI).href,isEvalSupported:false,enableXfa:false,useSystemFonts:true});
     let doc;
-    try{doc=await task.promise;if(doc.numPages!==1)throw Error('Ungültige Zertifikatsseitenzahl.');const page=await doc.getPage(1),base=page.getViewport({scale:1});const width=Math.min(2200,Math.max(window.matchMedia('(max-width:700px)').matches?1600:1200,Math.round((canvas.parentElement?.clientWidth||600)*Math.min(window.devicePixelRatio||1,2))));const viewport=page.getViewport({scale:width/base.width});canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)throw Error('Canvas nicht verfügbar.');await page.render({canvas,canvasContext:ctx,viewport}).promise;page.cleanup();}finally{if(doc)await doc.destroy();else await task.destroy();}
+    try{doc=await task.promise;if(doc.numPages!==1)throw Error('Ungültige Zertifikatsseitenzahl.');const page=await doc.getPage(1),base=page.getViewport({scale:1});const width=Math.min(2200,Math.max(window.matchMedia('(max-width:700px)').matches?1600:1200,Math.round((canvas.parentElement?.clientWidth||600)*Math.min(window.devicePixelRatio||1,2))));const viewport=page.getViewport({scale:width/base.width});canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)throw Error('Canvas nicht verfügbar.');await page.render({canvas,canvasContext:ctx,viewport}).promise;try{previewText.set(canvas,certificateText(await page.getTextContent()));}catch{previewText.delete(canvas);}page.cleanup();}finally{if(doc)await doc.destroy();else await task.destroy();}
   }
   function certificatePanel(p){
     const C=globalThis.ABBATE_CERTIFICATES;if(!C)return '';
@@ -186,7 +210,7 @@
     const sequence=++previewSequence;certificatePreviewReady=false;
     const marker=JSON.stringify(draft);certificateDraft=marker;
     target.setAttribute('data-abbate-update-block','');
-    target.innerHTML=`<div class="cert-review"><div class="admin-preview-status"><strong>PDF-Vorschau</strong><span>Noch nicht ausgestellt</span></div><div id="certificate-preview-stage" class="admin-preview-stage" data-preview-state="loading"><p class="admin-preview-message" role="status">PDF wird geladen …</p><button type="button" class="admin-preview-thumbnail" data-cert-viewer-open aria-haspopup="dialog" aria-label="PDF-Vorschau vergrößern" hidden><canvas class="admin-pdf-canvas" role="img" aria-label="Zertifikatsvorschau mit Unterschrift" hidden></canvas><span class="admin-preview-tap"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>Antippen zum Vergrößern</span></button></div><dialog class="admin-certificate-viewer" aria-label="Große PDF-Vorschau"><header class="admin-viewer-header"><div><strong>PDF-Vorschau</strong><small>Noch nicht ausgestellt</small></div><button type="button" class="admin-viewer-close" data-cert-viewer-close aria-label="Vorschau schließen" autofocus><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header><div class="admin-viewer-page"><canvas class="admin-pdf-canvas" role="img" aria-label="Vergrößerte Zertifikatsvorschau"></canvas></div></dialog><div class="cert-review-summary"><strong>${draft.notification==='email'?'Empfänger: '+safe(draft.email):'Ohne E-Mail-Versand'}</strong></div><label class="portal-consent"><input type="checkbox" name="certificateConfirmed" value="yes"> <span>${draft.kind==='instruction'?'Ich bestätige die tatsächlich durchgeführte jährliche Unterweisung und die Teilnahme.':'Ich bestätige die bestandene Theorieprüfung.'}</span></label><div class="admin-certificate-actions">${state.me.role==='admin'?'<button class="primary" name="intent" value="issue" type="submit" disabled>Zertifikat ausstellen'+(draft.notification==='email'?' und versenden':'')+'</button>':''}<button class="secondary" name="intent" value="save" type="submit">Nur Nachweis speichern</button></div></div>`;
+    target.innerHTML=`<div class="cert-review"><div class="admin-preview-status"><strong>PDF-Vorschau</strong><span>Noch nicht ausgestellt</span></div><div id="certificate-preview-stage" class="admin-preview-stage" data-preview-state="loading"><p class="admin-preview-message" role="status">PDF wird geladen …</p><button type="button" class="admin-preview-thumbnail" data-cert-viewer-open aria-haspopup="dialog" aria-label="PDF-Vorschau vergrößern" hidden><canvas class="admin-pdf-canvas" role="img" aria-label="Zertifikatsvorschau mit Unterschrift" hidden></canvas><span class="admin-preview-tap"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>Antippen zum Vergrößern</span></button></div><dialog class="admin-certificate-viewer" aria-label="Große PDF-Vorschau"><header class="admin-viewer-header"><div><strong>PDF-Vorschau</strong><small>Noch nicht ausgestellt</small></div><div class="admin-viewer-tools"><button type="button" class="admin-viewer-mode" data-cert-viewer-mode hidden>Original-PDF</button><button type="button" class="admin-viewer-close" data-cert-viewer-close aria-label="Vorschau schließen" autofocus><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></header><div class="admin-viewer-page" data-mode="original"><div class="admin-viewer-original"><canvas class="admin-pdf-canvas" role="img" aria-label="Originale Zertifikatsvorschau"></canvas></div><article class="admin-viewer-paper" aria-label="Mobile Leseansicht der PDF-Vorschau"><div class="admin-paper-frame"><div class="admin-paper-brand"><canvas data-pdf-logo role="img" aria-label="Fahrschullogo"></canvas><p data-pdf-text="school"></p></div><div class="admin-paper-title"><h2>Zertifikat</h2><p data-pdf-text="subtitle"></p></div><div class="admin-paper-content"><p data-pdf-text="intro"></p><h3 data-pdf-text="name"></h3><p data-pdf-text="statement"></p><strong data-pdf-text="subject"></strong><p class="admin-paper-standard" data-pdf-text="standard"></p><p data-pdf-text="date"></p><p class="admin-paper-note" data-pdf-text="note"></p></div><div class="admin-paper-signoff"><div><span data-pdf-text="signedDate"></span><strong data-pdf-date-label></strong></div><div><canvas data-pdf-signature role="img" aria-label="Unterschrift aus der PDF-Vorschau"></canvas><strong>Andreas Abbate</strong><small data-pdf-signer-role></small></div></div><div class="admin-paper-footer"><span data-pdf-text="footer"></span><small>Mobile Leseansicht · Original-PDF unverändert</small></div></div></article></div></dialog><div class="cert-review-summary"><strong>${draft.notification==='email'?'Empfänger: '+safe(draft.email):'Ohne E-Mail-Versand'}</strong></div><label class="portal-consent"><input type="checkbox" name="certificateConfirmed" value="yes"> <span>${draft.kind==='instruction'?'Ich bestätige die tatsächlich durchgeführte jährliche Unterweisung und die Teilnahme.':'Ich bestätige die bestandene Theorieprüfung.'}</span></label><div class="admin-certificate-actions">${state.me.role==='admin'?'<button class="primary" name="intent" value="issue" type="submit" disabled>Zertifikat ausstellen'+(draft.notification==='email'?' und versenden':'')+'</button>':''}<button class="secondary" name="intent" value="save" type="submit">Nur Nachweis speichern</button></div></div>`;
     const stage=target.querySelector('.admin-preview-stage'),message=stage.querySelector('.admin-preview-message'),canvas=stage.querySelector('canvas'),issue=target.querySelector('[value="issue"]');
     const current=()=>target.isConnected&&certificateDraft===marker&&sequence===previewSequence&&stage.isConnected;
     if(state.me.role!=='admin'||!certStatus.signatureReady){
@@ -415,6 +439,8 @@
     if(event.target.id==='record-kind'){const title=document.querySelector('#record-form [name="title"]');title.maxLength=event.target.value==='annual_instruction'?176:200;const outcome=document.querySelector('#record-outcome');outcome.querySelector('[value="attended"]').disabled=event.target.value==='exam';if(event.target.value==='exam'&&outcome.value==='attended')outcome.value='passed';}
   });
   root.addEventListener('click',async event=>{
+    const viewerMode=event.target.closest('[data-cert-viewer-mode]');
+    if(viewerMode){const page=viewerMode.closest('dialog')?.querySelector('.admin-viewer-page');if(page){page.dataset.mode=page.dataset.mode==='reading'?'original':'reading';viewerMode.textContent=page.dataset.mode==='reading'?'Original-PDF':'Leseansicht';page.scrollTop=0;}return;}
     const viewerClose=event.target.closest('[data-cert-viewer-close]');
     if(viewerClose){const dialog=viewerClose.closest('dialog'),trigger=dialog?.closest('#certificate-preview')?.querySelector('[data-cert-viewer-open]');dialog?.close();trigger?.focus({preventScroll:true});return;}
     const viewerOpen=event.target.closest('[data-cert-viewer-open]');

@@ -44,16 +44,18 @@ test('lightbox shows the complete PDF with single X and cannot open a stale draf
  assert.match(p,/data-cert-viewer-close aria-label="Vorschau schließen"/);
  assert.match(p,/dialog\?\.close\(\);trigger\?\.focus/);
  assert.match(p,/viewer\?\.open\)viewer\.close\(\)/);
- assert.match(c,/height:92dvh/);assert.match(c,/object-fit:fill/);
+ assert.match(c,/height:92dvh/);assert.match(c,/object-fit:contain/);
  assert.doesNotMatch(p,/Zurück zur Ausstellung|250 %|175 %/);
 });
 
-test('large lightbox fills its entire content area in both dimensions without cropping',()=>{
+test('mobile reading view reflows authentic PDF text and artwork without distorting the original',()=>{
  const p=fs.readFileSync('dist/portal.js','utf8'),c=fs.readFileSync('dist/admin-workspace.css','utf8');
- assert.doesNotMatch(p,/page\.scrollLeft|--pdf-ratio/);
- assert.match(c,/grid-template-columns:minmax\(0,1fr\);grid-template-rows:auto minmax\(0,1fr\)/);
- assert.match(c,/width:calc\(100% - 12px\);height:92vh;height:92dvh/);
- assert.match(c,/\.admin-viewer-page\{display:block;width:100%;height:100%;[^}]*overflow:hidden/);
- assert.match(c,/\.admin-viewer-page \.admin-pdf-canvas\{[^}]*width:100%;height:100%;[^}]*max-width:100%;max-height:100%;object-fit:fill/);
- assert.doesNotMatch(c,/100cqh|--pdf-ratio|height:fit-content/);
+ assert.match(p,/certificateText\(await page\.getTextContent\(\)\)/);
+ assert.match(p,/node\.textContent=info\[node\.dataset\.pdfText\]/);
+ assert.match(p,/cropCertificateArt\(source,paper\.querySelector\('\[data-pdf-signature\]'\),522,102,156,55\)/);
+ assert.match(p,/data-cert-viewer-mode/);
+ assert.match(c,/\.admin-viewer-original \.admin-pdf-canvas\{[^}]*object-fit:contain/);
+ assert.match(c,/\.admin-paper-frame\{[^}]*justify-content:space-between/);
+ assert.match(c,/\.admin-viewer-page\{[^}]*overflow:auto/);
+ assert.doesNotMatch(c,/object-fit:fill/);
 });
