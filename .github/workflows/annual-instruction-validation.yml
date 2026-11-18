@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - 'staging/annual-instruction/**'
+      - 'tests/certificate.test.cjs'
+      - 'backend/functions/abbate-certificates/**'
       - 'tests/annual-instruction*'
       - 'dist/certificate-model.js'
       - 'dist/portal.js'
@@ -22,7 +24,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node --check dist/portal.js
-      - run: node --test tests/annual-instruction*.test.cjs
+      - run: npm test
       - run: npm install --no-save --package-lock=false --ignore-scripts pdf-lib@1.17.1
       - run: node staging/annual-instruction/verify-pdf.cjs
       - uses: actions/upload-artifact@v4
