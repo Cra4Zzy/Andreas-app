@@ -46,8 +46,32 @@
   function personStatus(person){return person.access==='active'&&!M.access(person)?'Abgelaufen':M.statuses[person.access];}
   function badge(person){return `<span class="portal-badge ${M.access(person)?'active':person.access}">${safe(personStatus(person))}</span>`;}
   function recordCard(r,editable=false){return `<article class="portal-record"><div class="portal-record-top"><span>${safe(M.kinds[r.kind])}</span><span class="portal-result ${r.outcome}">${r.outcome==='failed'?'×':'✓'} ${safe(M.outcomes[r.outcome])}</span></div><h3>${safe(r.title)}</h3><dl><div><dt>Durchgeführt am</dt><dd>${day(r.completedAt)}</dd></div><div><dt>Erfasst durch</dt><dd>Fahrschule Abbate</dd></div><div><dt>Referenz</dt><dd>${safe(r.reference)}</dd></div></dl>${certActions(r,editable)}${editable?`<label class="portal-result-edit">Ergebnis ändern<select data-result="${safe(r.id)}">${Object.entries(M.outcomes).filter(([value])=>r.kind!=='exam'||value!=='attended').map(([value,label])=>`<option value="${value}" ${r.outcome===value?'selected':''}>${safe(label)}</option>`).join('')}</select></label><button class="portal-text" data-revoke="${safe(r.id)}">Fehleintrag zurückziehen</button>`:''}</article>`;}
+  let resendUntil=0,resendBusy=false;
+  function resendControl(){return '<button type="button" class="secondary" data-resend-confirmation '+(resendBusy||Date.now()<resendUntil?'disabled':'')+'>Bestätigungs-E-Mail erneut senden</button><p class="portal-hint" data-resend-status role="status" aria-live="polite"></p>';}
+  function syncResendControls(){root.querySelectorAll('[data-resend-confirmation]').forEach(b=>{b.disabled=resendBusy||Date.now()<resendUntil;});}
+  async function resendConfirmation(){
+    if(view!=='login'||state?.me||resendBusy||Date.now()<resendUntil)return;
+    const input=root.querySelector('#login-form [name="email"]');
+    if(input&&!input.reportValidity()){input.focus();return;}
+    const email=(input?.value||registrationSuccessEmail||'').trim();if(!email)return;
+    const show=text=>{const status=root.querySelector('[data-resend-status]');if(status)status.textContent=text;notice(text);};
+    resendBusy=true;resendUntil=Date.now()+60000;syncResendControls();
+    show('Bestätigungs-E-Mail wird angefordert …');
+    try{
+      const {error}=await B.client.auth.resend({type:'signup',email,options:{emailRedirectTo:globalThis.ABBATE_CONFIG.portalUrl}});
+      if(error)throw error;
+      show('Falls deine E-Mail-Adresse noch nicht bestätigt ist, erhältst du einen neuen Bestätigungslink. Bitte prüfe auch deinen Spamordner.');
+    }catch(error){
+      const text=String(error?.message||'');
+      if(error?.status===429||/rate_limit/.test(error?.code||'')||/you can only request this after/i.test(text)){
+        const seconds=Number(text.match(/after\s+(\d+)\s+seconds?/i)?.[1]||0);
+        resendUntil=Math.max(resendUntil,Date.now()+Math.min(3600,seconds)*1000);
+        show('Bitte warte, bevor du eine weitere E-Mail anforderst. Prüfe in der Zwischenzeit deinen Spamordner.');
+      }else show('Die E-Mail konnte momentan nicht angefordert werden. Bitte versuche es später erneut oder wende dich an die Fahrschule.');
+    }finally{resendBusy=false;syncResendControls();setTimeout(syncResendControls,Math.max(0,resendUntil-Date.now())+100);}
+  }
   function login(){
-    root.innerHTML=`<section class="portal-login-heading"><span class="portal-eyebrow">Persönlicher Zugang</span><h1>Schulungen und Prüfungsergebnisse</h1><p>Melde dich an, um die von deiner Fahrschule dokumentierten Schulungen und Prüfungsergebnisse einzusehen.</p></section><div class="portal-login-grid"><section class="portal-panel"><span class="portal-step">01 / Bereits registriert</span><h2>Deinen Bereich öffnen</h2><form id="login-form"><label>E-Mail-Adresse<input type="email" name="email" required autocomplete="username" maxlength="254"></label><label>Passwort<input type="password" name="password" required autocomplete="current-password"></label><button class="primary" type="submit">Anmelden ↗</button><p role="alert" class="portal-error"></p></form><button class="portal-text" data-recovery>Passwort vergessen?</button></section><section class="portal-panel"><span class="portal-step">02 / Registrierung</span><h2>Konto erstellen</h2><p class="portal-hint">Die Registrierung ist kostenfrei. <strong>Wichtig:</strong> Nach dem Absenden musst du deine E-Mail-Adresse über einen Link in deinem Postfach bestätigen. Erst danach kannst du dich anmelden. Die Fahrschule schaltet deinen Lernzugang anschließend frei. Es entsteht kein Abonnement.</p><form id="register-form"><label>Vor- und Nachname<input name="name" maxlength="120" required autocomplete="name"></label><label>E-Mail-Adresse<input name="email" type="email" maxlength="254" required autocomplete="email"></label><label>Passwort<input name="password" type="password" minlength="12" required autocomplete="new-password" aria-describedby="password-hint"></label><p id="password-hint" class="portal-hint">Mindestens 12 Zeichen. Verwende ein eigenes, sicheres Passwort.</p><label class="portal-consent"><input type="checkbox" name="termsAccepted" value="yes" required> <span>Ich akzeptiere die <a href="./agb.html" target="_blank" rel="noopener">AGB und Nutzungsbedingungen</a> (Fassung 02.11.2026).</span></label><p class="portal-hint">Unsere <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a> und Informationen zu <a href="./widerruf.html" target="_blank" rel="noopener">Widerruf und Verbraucherrechten</a> kannst du jederzeit einsehen. Die Registrierung ist kostenlos und keine Bestellung.</p><button class="secondary" type="submit">Konto registrieren</button><p role="alert" class="portal-error"></p></form></section></div>`;
+    root.innerHTML=`<section class="portal-login-heading"><span class="portal-eyebrow">Persönlicher Zugang</span><h1>Schulungen und Prüfungsergebnisse</h1><p>Melde dich an, um die von deiner Fahrschule dokumentierten Schulungen und Prüfungsergebnisse einzusehen.</p></section><div class="portal-login-grid"><section class="portal-panel"><span class="portal-step">01 / Bereits registriert</span><h2>Deinen Bereich öffnen</h2><form id="login-form"><label>E-Mail-Adresse<input type="email" name="email" required autocomplete="username" maxlength="254"></label><label>Passwort<input type="password" name="password" required autocomplete="current-password"></label><button class="primary" type="submit">Anmelden ↗</button><p role="alert" class="portal-error"></p></form><div class="portal-actions"><button class="portal-text" data-recovery>Passwort vergessen?</button>${resendControl()}</div></section><section class="portal-panel"><span class="portal-step">02 / Registrierung</span><h2>Konto erstellen</h2><p class="portal-hint">Die Registrierung ist kostenfrei. <strong>Wichtig:</strong> Nach dem Absenden musst du deine E-Mail-Adresse über einen Link in deinem Postfach bestätigen. Erst danach kannst du dich anmelden. Die Fahrschule schaltet deinen Lernzugang anschließend frei. Es entsteht kein Abonnement.</p><form id="register-form"><label>Vor- und Nachname<input name="name" maxlength="120" required autocomplete="name"></label><label>E-Mail-Adresse<input name="email" type="email" maxlength="254" required autocomplete="email"></label><label>Passwort<input name="password" type="password" minlength="12" required autocomplete="new-password" aria-describedby="password-hint"></label><p id="password-hint" class="portal-hint">Mindestens 12 Zeichen. Verwende ein eigenes, sicheres Passwort.</p><label class="portal-consent"><input type="checkbox" name="termsAccepted" value="yes" required> <span>Ich akzeptiere die <a href="./agb.html" target="_blank" rel="noopener">AGB und Nutzungsbedingungen</a> (Fassung 02.11.2026).</span></label><p class="portal-hint">Unsere <a href="./datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a> und Informationen zu <a href="./widerruf.html" target="_blank" rel="noopener">Widerruf und Verbraucherrechten</a> kannst du jederzeit einsehen. Die Registrierung ist kostenlos und keine Bestellung.</p><button class="secondary" type="submit">Konto registrieren</button><p role="alert" class="portal-error"></p></form></section></div>`;
   }
   function registrationComplete(email){
     // Do not hide the next steps in a short-lived toast: successful signup still requires e-mail confirmation.
@@ -63,7 +87,7 @@
         <li class="current"><span class="portal-registration-complete__step-num">2</span><div><strong>2. E-Mail-Adresse bestätigen</strong><span>Öffne die E-Mail und klicke auf den Bestätigungslink.</span></div></li>
         <li><span class="portal-registration-complete__step-num">3</span><div><strong>3. Freischaltung durch die Fahrschule</strong><span>Nach der Bestätigung wird dein Lernzugang von der Fahrschule freigeschaltet.</span></div></li>
       </ol>
-      <div class="portal-registration-complete__help"><strong>Keine E-Mail gefunden?</strong><p>Bitte prüfe auch deinen Spamordner und gib der Zustellung etwas Zeit. <strong>Registriere dich nicht erneut.</strong> Falls nichts ankommt, wende dich an die Fahrschule.</p></div>
+      <div class="portal-registration-complete__help"><strong>Keine E-Mail gefunden?</strong><p>Bitte prüfe auch deinen Spamordner und gib der Zustellung etwas Zeit. <strong>Registriere dich nicht erneut.</strong> </p>${resendControl()}</div>
       <a class="primary" href="./konto.html">Nach der Bestätigung zur Anmeldung ↗</a>
     </section>`;
     root.querySelector('#registration-complete-title')?.focus();
@@ -367,6 +391,7 @@
   });
   root.addEventListener('click',async event=>{
     if(event.target.closest('[data-refresh]')){await render();return;}
+    if(event.target.closest('[data-resend-confirmation]')){await resendConfirmation();return;}
     if(event.target.closest('[data-recovery]')){location.hash='passwort';recovery();return;}
     if(event.target.closest('[data-logout]')){await B.client.auth.signOut({scope:'local'});location.replace('./konto.html');return;}
     const certButton=event.target.closest('[data-cert-download],[data-cert-issue],[data-cert-mail]');
