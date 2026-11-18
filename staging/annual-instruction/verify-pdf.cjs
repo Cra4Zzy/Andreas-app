@@ -1,6 +1,6 @@
 'use strict';
 const assert=require('node:assert/strict');
-const {readFileSync}=require('node:fs');
+const {readFileSync,writeFileSync,mkdirSync}=require('node:fs');
 const {transformSync}=require('esbuild');
 const {PDFDocument,StandardFonts,rgb}=require('pdf-lib');
 const C=require('../../dist/certificate-model.js');
@@ -22,7 +22,12 @@ async function main(){
    const exam=await PDFDocument.load(await createPDF('Test Person',field.label,date,signature,false));
    assert.equal(exam.getTitle(),'Abbate – Nachweis der Theorieprüfung');
  }
- const draft=await PDFDocument.load(await createPDF('Test Person','Jährliche Unterweisung',date,signature,true,C.fields[0].label));
+ const sample=await createPDF('Musterteilnehmer','Jährliche Unterweisung',date,signature,true,C.fields[0].label);
+ const draft=await PDFDocument.load(sample);
+ mkdirSync('review-pdfs',{recursive:true});
+ writeFileSync('review-pdfs/Abbate-Jaehrliche-Unterweisung-MUSTER.pdf',Buffer.from(sample,'base64'));
+ const theory=await createPDF('Musterteilnehmer',C.fields[0].label,date,signature,true);
+ writeFileSync('review-pdfs/Abbate-Theoriepruefung-MUSTER.pdf',Buffer.from(theory,'base64'));
  assert.equal(draft.getPageCount(),1);
  console.log('15 real PDF generation/load cases passed, using synthetic signature and no real participants.');
 }
