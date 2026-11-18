@@ -30,7 +30,7 @@ test('learning, account, records and admin share all 26 native-language options'
       assert.ok(html.includes('data-nav="'+code+'"'),file+' missing navigation '+code);
     assert.match(html,/i18n-packs\.js\?v=9/);
     assert.match(html,/i18n\.js\?v=12/);
-    assert.match(html,/portal-language\.js\?v=3/);
+    assert.match(html,/portal-language\.js\?v=4/);
     assert.match(html,file==='dist/konto.html'?/portal\.js\?v=20/:/portal\.js\?v=20/);
     assert.match(html,/portal\.css\?v=9/);
     assert.doesNotMatch(html,/<select id="portal-language"/,'Outdated four-language selector in '+file);
@@ -69,6 +69,33 @@ test('cross-page locale scripts and entry points are syntactically valid',()=>{
 });
 
 // Visual regression guard: the Schulungspass does not show a redundant read-only label.
+test('English covers actual login, registration and password recovery text fragments',async()=>{
+  const registry=languageRegistry();
+  await registry.load('en');
+  const context={console,globalThis:{ABBATE_I18N:registry},document:{getElementById:()=>null}};
+  vm.createContext(context);
+  const source=read('dist/portal-language.js').replace(
+    'if(!button||!dialog||!grid||!search||!I18N)return;',
+    'globalThis.portalWords=words;return;');
+  vm.runInContext(source,context);
+  const words=context.globalThis.portalWords;
+  const portal=read('dist/portal.js');
+  for(const name of ['login','registrationComplete','recovery','newPassword','passwordResetSuccess','invalidResetLink']){
+    const start=portal.indexOf('function '+name+'(');
+    const template=portal.slice(start).match(/root\.innerHTML=`([\s\S]*?)`/)[1];
+    const withoutExpressions=template.replace(/\$\{[^}]*\}/g,'');
+    for(const match of withoutExpressions.matchAll(/>([^<>]+)</g)){
+      const text=match[1].trim();
+      if(!text||!/[A-Za-zÀ-ž]/.test(text))continue;
+      assert.notEqual(words[text]?.en||registry.text(text),text, name+' leaves German fragment: '+text);
+    }
+  }
+  assert.equal(words['Passwort'].en,'Password');
+  assert.equal(words['Passwort'].ru,'Пароль','Existing locales must remain intact');
+  assert.equal(words['Falls ein Konto mit dieser Adresse existiert, erhältst du einen Link zum Zurücksetzen. Bitte auch den Spamordner prüfen.'].en,
+    'If an account exists for this address, you will receive a password reset link. Please also check your spam folder.');
+});
+
 test('training record page has no Nur ansehen badge',()=>{
   const source=read('dist/portal.js');
   assert.doesNotMatch(source,/class=\"portal-readonly\"/);
