@@ -9,7 +9,10 @@ const courses:Record<string,string>={"Fahr- und Steuerpersonal / Gabelstaplerfah
 const annualLabel="Jährliche Unterweisung";
 courses[annualLabel]="DGUV Vorschrift 1 § 4; bei Arbeitsmitteln § 12 BetrSichV";
 const annualTitle=annualLabel+" · Unterweisungsnachweis";
-const isAnnual=(r:any)=>r.kind==="refresher"&&r.outcome==="attended"&&r.abbate_courses?.title===annualTitle;
+const fields=Object.keys(courses).filter(x=>x!==annualLabel);
+const annualFields=new Map(fields.map(x=>[annualLabel+" · "+x+" · Unterweisungsnachweis",x]));
+const titleOf=(r:any)=>r.abbate_courses?.title||"";
+const isAnnual=(r:any)=>r.kind==="refresher"&&r.outcome==="attended"&&(titleOf(r)===annualTitle||annualFields.has(titleOf(r)));
 const eligible=(r:any)=>r.kind==="exam"&&r.outcome==="passed"||isAnnual(r);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const bucket="abbate-certificate-assets";
@@ -35,7 +38,7 @@ async function sendCertificate(admin:any,r:any,pdf:string,expectedEmail:string){
 }
 const signaturePath=(school:string)=>school+"/signature.png";
 const textDate=(s:string)=>new Intl.DateTimeFormat("de-DE",{dateStyle:"long",timeZone:"Europe/Berlin"}).format(new Date(s+"T12:00:00Z"));
-async function createPDF(name:string,label:string,record:any,signature:ArrayBuffer,draft=false){
+async function createPDF(name:string,label:string,record:any,signature:ArrayBuffer,draft=false,field:string|null=null){
  const pdf=await PDFDocument.create(), p=pdf.addPage([842,595]);
  const serif=await pdf.embedFont(StandardFonts.TimesRoman), bold=await pdf.embedFont(StandardFonts.HelveticaBold), regular=await pdf.embedFont(StandardFonts.Helvetica), italic=await pdf.embedFont(StandardFonts.TimesRomanItalic);
  const ink=rgb(.13,.17,.14), gold=rgb(.63,.53,.30), muted=rgb(.37,.40,.36);
@@ -57,7 +60,7 @@ async function createPDF(name:string,label:string,record:any,signature:ArrayBuff
  center("Hiermit bestätigen wir, dass",356,13,regular,muted);
  try{center(name,310,34,serif);}catch(e){if(e instanceof Fault)throw e;throw new Fault("Der Name enthält Zeichen, die die PDF-Schrift noch nicht unterstützt. Kein Zertifikat ausgestellt.");}
  center(annual?"an der folgenden Unterweisung teilgenommen hat:":"die Theorieprüfung im Ausbildungsbereich",281,13,regular,muted);
- center(label,253,19,bold);
+ center(annual&&field?annualLabel+" – "+field:label,253,19,bold);
  if(courses[label])center(courses[label],231,12,regular,muted);
  center("am "+textDate(record.completed_at)+(annual?"":" erfolgreich bestanden hat."),208,13,regular,muted);
  center(annual?"Betriebsspezifische Unterweisungsinhalte sind gesondert zu dokumentieren.":"Herzlichen Glückwunsch zu dieser Leistung.",169,annual?12:17,annual?regular:italic);
@@ -116,7 +119,9 @@ Deno.serve(async req=>{
    if(profileError||!profile?.display_name)throw new Fault("Teilnehmername fehlt.");
    const {data:sig,error:sigError}=await admin.storage.from(bucket).download(signaturePath(m.school_id));
    if(sigError||!sig)throw new Fault("Die freigegebene Unterschrift fehlt.",409);
-   const pdf=await createPDF(profile.display_name,label,{completed_at:date,reference:"ENTWURF"},await sig.arrayBuffer(),true);
+   const field=label===annualLabel?body.field:null;
+   if(label===annualLabel&&(typeof field!=="string"||!fields.includes(field)))throw new Fault("Bitte gültigen Fachbereich auswählen.");
+   const pdf=await createPDF(profile.display_name,label,{completed_at:date,reference:"ENTWURF"},await sig.arrayBuffer(),true,field);
    return json({pdf,draft:true});
   }
   if(action==="list"){
@@ -134,7 +139,7 @@ Deno.serve(async req=>{
   if(!uuid.test(String(body.completionId||"")))throw new Fault("Ungültige Prüfungsreferenz.");
   // RLS checks school, active account and live session; a learner can only read their own unrevoked record.
   const {data:r,error:recordError}=await caller.from("abbate_completions").select("id,school_id,participant_id,kind,outcome,completed_at,reference,revoked_at,abbate_courses(title)").eq("id",body.completionId).maybeSingle();
-  if(recordError||!r||r.revoked_at||!eligible(r))throw new Fault("Kein berechtigter bestandener Prüfungseintrag.",404);
+  if(recordError||!r||r.revoked_at||!eligible(r))throw new Fault("Kein berechtigter Zertifikatseintrag.",404);
   const m=members.find((m:any)=>m.school_id===r.school_id);
   if(!m||(["issue","mail"].includes(action)?!active(m):!(active(m)||m.role==="trainer"||r.participant_id===auth.user.id)))throw new Fault("Keine Berechtigung.",403);
   const {data:existing,error:existingError}=await admin.from("abbate_certificates").select("pdf_base64,invalidated_at,issued_at,mail_status").eq("completion_id",r.id).maybeSingle();
@@ -146,7 +151,7 @@ Deno.serve(async req=>{
    return json({mailStatus,reference:r.reference});
   }
   if(action==="download"){
-   if(!existing)throw new Fault("Für diese Prüfung wurde noch kein Zertifikat ausgestellt.",404);
+   if(!existing)throw new Fault("Für diesen Nachweis wurde noch kein Zertifikat ausgestellt.",404);
    return json({pdf:existing.pdf_base64,reference:r.reference,issuedAt:existing.issued_at});
   }
   if(body.confirmed!==true)throw new Fault("Bitte Ausstellung ausdrücklich bestätigen.");
@@ -158,7 +163,7 @@ Deno.serve(async req=>{
   if(profileError||!profile?.display_name)throw new Fault("Teilnehmername fehlt.");
   const {data:sig,error:sigError}=await admin.storage.from(bucket).download(signaturePath(r.school_id));
   if(sigError||!sig)throw new Fault("Die freigegebene Unterschrift muss zuerst hinterlegt werden.",409);
-  const pdf=await createPDF(profile.display_name,label,r,await sig.arrayBuffer());
+  const pdf=await createPDF(profile.display_name,label,r,await sig.arrayBuffer(),false,isAnnual(r)?annualFields.get(title)||null:null);
   const {error:saveError}=await admin.from("abbate_certificates").insert({completion_id:r.id,issued_by:auth.user.id,pdf_base64:pdf});
   if(saveError){if(saveError.code==="23505"){const {data:stored}=await admin.from("abbate_certificates").select("pdf_base64,invalidated_at,issued_at,mail_status").eq("completion_id",r.id).maybeSingle();if(stored&&!stored.invalidated_at)return json({pdf:stored.pdf_base64,reference:r.reference,issuedAt:stored.issued_at,mailStatus:stored.mail_status||"not_sent"});}throw new Fault("Zertifikat konnte nicht gespeichert werden.",409);}
   return json({pdf,reference:r.reference,mailStatus:"not_sent"});
