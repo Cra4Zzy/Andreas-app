@@ -152,9 +152,21 @@
     const oldWidth=canvas.getBoundingClientRect().width||stage.clientWidth;
     const center=initial?.5:(stage.scrollLeft+stage.clientWidth/2)/oldWidth;
     stage.dataset.zoom=String(scale);
-    for(const button of target.querySelectorAll('[data-cert-zoom]'))button.setAttribute('aria-pressed',String(Number(button.dataset.certZoom)===scale));
+    for(const button of target.querySelectorAll(target.matches?.('dialog')?'[data-cert-zoom]':'.admin-preview-zoom [data-cert-zoom]'))button.setAttribute('aria-pressed',String(Number(button.dataset.certZoom)===scale));
     const width=canvas.getBoundingClientRect().width||stage.clientWidth;
     stage.scrollLeft=scale===100?0:Math.max(0,width*center-stage.clientWidth/2);
+  }
+  function openCertificateViewer(target){
+    if(!certificatePreviewReady||!target?.isConnected)return;
+    const source=target.querySelector('.admin-preview-stage canvas'),dialog=target.querySelector('.admin-certificate-viewer');
+    const stage=dialog?.querySelector('.admin-preview-stage'),canvas=stage?.querySelector('canvas');
+    if(!source||source.hidden||!canvas||dialog.open||typeof dialog.showModal!=='function')return;
+    canvas.width=source.width;canvas.height=source.height;
+    const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return;
+    ctx.drawImage(source,0,0);
+    stage.dataset.previewState='ready';stage.dataset.zoom='100';dialog.showModal();
+    stage.scrollTop=0;
+    setCertificateZoom(dialog,window.matchMedia('(max-width:700px)').matches?250:175,true);
   }
   async function renderCertificateCanvas(canvas,bytes){
     if(!pdfLibrary)pdfLibrary=import(new URL('./vendor/pdfjs/pdf.min.mjs',document.baseURI).href).then(pdf=>{pdf.GlobalWorkerOptions.workerSrc=new URL('./vendor/pdfjs/pdf.worker.min.mjs',document.baseURI).href;return pdf;}).catch(error=>{pdfLibrary=null;throw error;});
@@ -177,6 +189,7 @@
       stage.dataset.previewState='stale';status.hidden=false;status.textContent='Angaben geändert. Bitte PDF-Vorschau erneut prüfen.';
       const canvas=stage.querySelector('canvas');if(canvas)canvas.hidden=true;
       const zoom=target.querySelector('.admin-preview-zoom');if(zoom)zoom.hidden=true;
+      const viewer=target.querySelector('.admin-certificate-viewer');if(viewer?.open)viewer.close();
     }
     const confirmed=target.querySelector('[name="certificateConfirmed"]');if(confirmed)confirmed.checked=false;
     target.querySelectorAll('.admin-certificate-actions button').forEach(button=>button.disabled=true);
@@ -186,7 +199,7 @@
     const sequence=++previewSequence;certificatePreviewReady=false;
     const marker=JSON.stringify(draft);certificateDraft=marker;
     target.setAttribute('data-abbate-update-block','');
-    target.innerHTML=`<div class="cert-review"><div class="admin-preview-status"><strong>PDF-Vorschau</strong><span>Noch nicht ausgestellt</span></div><div class="admin-preview-zoom" role="group" aria-label="PDF-Vergrößerung" hidden><button type="button" class="secondary" data-cert-zoom="100" aria-pressed="false" aria-controls="certificate-preview-stage">Ganze Seite</button><button type="button" class="secondary" data-cert-zoom="175" aria-pressed="false" aria-controls="certificate-preview-stage">175 %</button><button type="button" class="secondary" data-cert-zoom="250" aria-pressed="false" aria-controls="certificate-preview-stage">250 %</button><p class="admin-preview-hint">Zum Lesen vergrößern und seitlich wischen.</p></div><div id="certificate-preview-stage" class="admin-preview-stage" data-preview-state="loading" data-zoom="100" tabindex="0" role="region" aria-label="Scrollbare PDF-Vorschau"><p class="admin-preview-message" role="status">PDF wird geladen …</p><canvas class="admin-pdf-canvas" role="img" aria-label="Zertifikatsvorschau mit Unterschrift" hidden></canvas></div><div class="cert-review-summary"><strong>${draft.notification==='email'?'Empfänger: '+safe(draft.email):'Ohne E-Mail-Versand'}</strong></div><label class="portal-consent"><input type="checkbox" name="certificateConfirmed" value="yes"> <span>${draft.kind==='instruction'?'Ich bestätige die tatsächlich durchgeführte jährliche Unterweisung und die Teilnahme.':'Ich bestätige die bestandene Theorieprüfung.'}</span></label><div class="admin-certificate-actions">${state.me.role==='admin'?'<button class="primary" name="intent" value="issue" type="submit" disabled>Zertifikat ausstellen'+(draft.notification==='email'?' und versenden':'')+'</button>':''}<button class="secondary" name="intent" value="save" type="submit">Nur Nachweis speichern</button></div></div>`;
+    target.innerHTML=`<div class="cert-review"><div class="admin-preview-status"><strong>PDF-Vorschau</strong><span>Noch nicht ausgestellt</span></div><div class="admin-preview-zoom" role="group" aria-label="PDF-Vergrößerung" hidden><button type="button" class="secondary" data-cert-zoom="100" aria-pressed="false" aria-controls="certificate-preview-stage">Ganze Seite</button><button type="button" class="secondary" data-cert-zoom="175" aria-pressed="false" aria-controls="certificate-preview-stage">175 %</button><button type="button" class="secondary" data-cert-zoom="250" aria-pressed="false" aria-controls="certificate-preview-stage">250 %</button><button type="button" class="primary admin-preview-fullscreen" data-cert-viewer-open>Große Ansicht öffnen</button><p class="admin-preview-hint">Zum Lesen vergrößern und seitlich wischen.</p></div><div id="certificate-preview-stage" class="admin-preview-stage" data-preview-state="loading" data-zoom="100" tabindex="0" role="region" aria-label="Scrollbare PDF-Vorschau"><p class="admin-preview-message" role="status">PDF wird geladen …</p><canvas class="admin-pdf-canvas" role="img" aria-label="Zertifikatsvorschau mit Unterschrift" hidden></canvas></div><dialog class="admin-certificate-viewer" aria-label="Große PDF-Vorschau"><header class="admin-viewer-header"><div><strong>PDF-Vorschau</strong><small>Noch nicht ausgestellt</small></div><button type="button" class="secondary" data-cert-viewer-close autofocus>Schließen</button></header><div class="admin-viewer-controls" role="group" aria-label="Vergrößerung"><button type="button" class="secondary" data-cert-zoom="100" aria-pressed="false">Ganze Seite</button><button type="button" class="secondary" data-cert-zoom="175" aria-pressed="false">175 %</button><button type="button" class="secondary" data-cert-zoom="250" aria-pressed="false">250 %</button></div><div class="admin-preview-stage" data-preview-state="ready" data-zoom="100" tabindex="0" role="region" aria-label="Große scrollbare PDF-Vorschau"><canvas class="admin-pdf-canvas" role="img" aria-label="Zertifikatsvorschau"></canvas></div><footer class="admin-viewer-footer"><small>Seitlich und nach unten wischen, um alle Details zu lesen.</small><button type="button" class="primary" data-cert-viewer-close>Zurück zur Ausstellung</button></footer></dialog><div class="cert-review-summary"><strong>${draft.notification==='email'?'Empfänger: '+safe(draft.email):'Ohne E-Mail-Versand'}</strong></div><label class="portal-consent"><input type="checkbox" name="certificateConfirmed" value="yes"> <span>${draft.kind==='instruction'?'Ich bestätige die tatsächlich durchgeführte jährliche Unterweisung und die Teilnahme.':'Ich bestätige die bestandene Theorieprüfung.'}</span></label><div class="admin-certificate-actions">${state.me.role==='admin'?'<button class="primary" name="intent" value="issue" type="submit" disabled>Zertifikat ausstellen'+(draft.notification==='email'?' und versenden':'')+'</button>':''}<button class="secondary" name="intent" value="save" type="submit">Nur Nachweis speichern</button></div></div>`;
     const stage=target.querySelector('.admin-preview-stage'),message=stage.querySelector('.admin-preview-message'),canvas=stage.querySelector('canvas'),issue=target.querySelector('[value="issue"]');
     const current=()=>target.isConnected&&certificateDraft===marker&&sequence===previewSequence&&stage.isConnected;
     if(state.me.role!=='admin'||!certStatus.signatureReady){
@@ -205,6 +218,7 @@
       setCertificateZoom(target,window.matchMedia('(max-width:700px)').matches?175:100,true);
       certificatePreviewReady=true;
       if(issue)issue.disabled=false;
+      if(window.matchMedia('(max-width:700px)').matches){try{openCertificateViewer(target);}catch{/* Inline preview remains usable. */}}
     }catch(e){
       if(!current())return;
       certificatePreviewReady=false;
@@ -416,8 +430,12 @@
     if(event.target.id==='record-kind'){const title=document.querySelector('#record-form [name="title"]');title.maxLength=event.target.value==='annual_instruction'?176:200;const outcome=document.querySelector('#record-outcome');outcome.querySelector('[value="attended"]').disabled=event.target.value==='exam';if(event.target.value==='exam'&&outcome.value==='attended')outcome.value='passed';}
   });
   root.addEventListener('click',async event=>{
+    const viewerClose=event.target.closest('[data-cert-viewer-close]');
+    if(viewerClose){viewerClose.closest('dialog')?.close();return;}
+    const viewerOpen=event.target.closest('[data-cert-viewer-open]');
+    if(viewerOpen){if(view==='admin'&&B.isStaff(state?.me))openCertificateViewer(viewerOpen.closest('#certificate-preview'));return;}
     const zoomButton=event.target.closest('[data-cert-zoom]');
-    if(zoomButton){if(view==='admin'&&B.isStaff(state?.me)&&certificatePreviewReady)setCertificateZoom(zoomButton.closest('#certificate-preview'),Number(zoomButton.dataset.certZoom));return;}
+    if(zoomButton){if(view==='admin'&&B.isStaff(state?.me)&&certificatePreviewReady)setCertificateZoom(zoomButton.closest('.admin-certificate-viewer')||zoomButton.closest('#certificate-preview'),Number(zoomButton.dataset.certZoom));return;}
     if(event.target.closest('[data-refresh]')){await render();return;}
     if(event.target.closest('[data-resend-confirmation]')){await resendConfirmation();return;}
     if(event.target.closest('[data-recovery]')){location.hash='passwort';recovery();return;}
