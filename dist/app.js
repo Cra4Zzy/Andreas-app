@@ -261,13 +261,15 @@ function startRun(mode,topicId,courseId) {
   close(); go('uebung');
 }
 // Optional visual context, scoped to the approved pilot category. No answers or scoring metadata are changed.
-const QUIZ_ILLUSTRATIONS = Object.freeze({"g-lastschwerpunkt":"./assets/quiz/g-lastschwerpunkt.svg","g-schieflast":"./assets/quiz/g-schieflast.svg","g-personen":"./assets/quiz/g-personen.svg","g-kurvenfahrt":"./assets/quiz/g-kurvenfahrt.svg","g2-sichtladung":"./assets/quiz/g2-sichtladung.svg","g2-fahrweg":"./assets/quiz/g2-fahrweg.svg","g2-rollenlast":"./assets/quiz/g2-rollenlast.svg","g2-lagerregal":"./assets/quiz/g2-lagerregal.svg"});
+const QUIZ_ILLUSTRATIONS = Object.freeze({"g-kurvenfahrt":"./assets/quiz/premium/g-kurvenfahrt.webp","g-lastschwerpunkt":"./assets/quiz/premium/g-lastschwerpunkt.webp","g-personen":"./assets/quiz/premium/g-personen.webp","g2-lagerregal":"./assets/quiz/premium/g2-lagerregal.webp","g2-sichtladung":"./assets/quiz/premium/g2-sichtladung.webp"});
+const QUIZ_ILLUSTRATION_DIMENSIONS = Object.freeze({"g-kurvenfahrt":[587,444],"g-lastschwerpunkt":[882,437],"g-personen":[595,444],"g2-lagerregal":[575,444],"g2-sichtladung":[882,437]});
 function questionIllustration(q,large=false){
   if(!q||q.course!=='gabelstapler'||!Object.hasOwn(QUIZ_ILLUSTRATIONS,q.id))return '';
   const src=QUIZ_ILLUSTRATIONS[q.id],alt=esc(q.context),preview=esc(I18N.t(10));
-  const image='<img src="'+src+'" alt="'+alt+'" width="800" height="400" decoding="async">';
+  const [width,height]=QUIZ_ILLUSTRATION_DIMENSIONS[q.id];
+  const image='<img src="'+src+'" alt="'+alt+'" width="'+width+'" height="'+height+'" decoding="async">';
   if(large)return '<figure class="question-illustration-large">'+image+'</figure>';
-  return '<figure class="question-illustration"><button type="button" data-action="quiz-illustration" aria-haspopup="dialog" aria-label="'+preview+': '+alt+'">'+image+'<span class="question-illustration-enlarge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5M8 10.5h5M10.5 8v5"/></svg>'+preview+'</span></button></figure>';
+  return '<figure class="question-illustration" style="max-width:'+Math.min(680,Math.round(width/height*340))+'px"><button type="button" data-action="quiz-illustration" aria-haspopup="dialog" aria-label="'+preview+': '+alt+'">'+image+'<span class="question-illustration-enlarge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5M8 10.5h5M10.5 8v5"/></svg>'+preview+'</span></button></figure>';
 }
 function quizView() {
   if(!run)return examStart();
