@@ -260,10 +260,19 @@ function startRun(mode,topicId,courseId) {
   run={mode,course:activeCourseId,ids:selectRoundQuestions(activeCourseId,topicId),index:0,answers:{},checked:[],at:new Date().toISOString()};
   close(); go('uebung');
 }
+// Optional visual context, scoped to the approved pilot category. No answers or scoring metadata are changed.
+const QUIZ_ILLUSTRATIONS = Object.freeze({"g-lastschwerpunkt":"./assets/quiz/g-lastschwerpunkt.svg","g-schieflast":"./assets/quiz/g-schieflast.svg","g-personen":"./assets/quiz/g-personen.svg","g-kurvenfahrt":"./assets/quiz/g-kurvenfahrt.svg","g2-sichtladung":"./assets/quiz/g2-sichtladung.svg","g2-fahrweg":"./assets/quiz/g2-fahrweg.svg","g2-rollenlast":"./assets/quiz/g2-rollenlast.svg","g2-lagerregal":"./assets/quiz/g2-lagerregal.svg"});
+function questionIllustration(q,large=false){
+  if(!q||q.course!=='gabelstapler'||!Object.hasOwn(QUIZ_ILLUSTRATIONS,q.id))return '';
+  const src=QUIZ_ILLUSTRATIONS[q.id],alt=esc(q.context),preview=esc(I18N.t(10));
+  const image='<img src="'+src+'" alt="'+alt+'" width="800" height="400" decoding="async">';
+  if(large)return '<figure class="question-illustration-large">'+image+'</figure>';
+  return '<figure class="question-illustration"><button type="button" data-action="quiz-illustration" aria-haspopup="dialog" aria-label="'+preview+': '+alt+'">'+image+'<span class="question-illustration-enlarge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5M8 10.5h5M10.5 8v5"/></svg>'+preview+'</span></button></figure>';
+}
 function quizView() {
   if(!run)return examStart();
   const q=localizedQuestion(question(run.ids[run.index])), t=q.course==='gabelstapler'?topic(q.topic):null, courseName=courseLabel(q.course||run.course), categoryLabel=t?.name||courseName, chosen=run.answers[q.id], checked=run.checked.includes(q.id), correct=chosen===q.correct;
-  return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.training?'Dein Fehlertraining':run.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${esc(categoryLabel)}</span><span>${run.index+1} / ${run.ids.length}</span></div>${selectedLanguage==='de'||QUESTION_LOCALES[selectedLanguage]?.[q.id]?'':'<p class="question-language-notice" role="note">Übersetzung nicht verfügbar – diese Frage wird auf Deutsch angezeigt.</p>'}<h1>${esc(q.title)}</h1><p class="question-context">${esc(q.context)}</p><div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${esc(answer)}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${esc(q.why)}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
+  return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.training?'Dein Fehlertraining':run.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${esc(categoryLabel)}</span><span>${run.index+1} / ${run.ids.length}</span></div>${selectedLanguage==='de'||QUESTION_LOCALES[selectedLanguage]?.[q.id]?'':'<p class="question-language-notice" role="note">Übersetzung nicht verfügbar – diese Frage wird auf Deutsch angezeigt.</p>'}<h1>${esc(q.title)}</h1><p class="question-context">${esc(q.context)}</p>${questionIllustration(q)}<div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${esc(answer)}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${esc(q.why)}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
 }
 function rememberCorrect(id) { const list=data.mastered[student().id]||[]; if(!list.includes(id))list.push(id); data.mastered[student().id]=list; }
 let completingRun=false;
@@ -363,12 +372,20 @@ document.addEventListener('input',event=>{
     option.hidden=!option.textContent.toLocaleLowerCase().includes(query);
   }
 });
+// A failed optional image must not block or change an exercise.
+document.addEventListener('error',event=>{
+  if(event.target?.matches?.('.question-illustration img,.question-illustration-large img'))event.target.closest('figure').hidden=true;
+},true);
 document.addEventListener('click',async event=>{
   const nav=event.target.closest('a[href^="#"]');
   if(nav&&run&&nav.getAttribute('href')!=='#uebung') { event.preventDefault();pendingRoute=nav.getAttribute('href').slice(1);askExit();return; }
   const el=event.target.closest('[data-action]');if(!el||el.disabled)return;
   const action=el.dataset.action;
   if(action==='close'||action==='close-modal')close();
+  else if(action==='quiz-illustration'&&run&&route==='uebung'){
+    const q=localizedQuestion(question(run.ids[run.index]));
+    const illustration=questionIllustration(q,true);if(illustration)modal(esc(I18N.t(10)),illustration);
+  }
   else if(action==='about')about();
   else if(action==='language')languagePicker();
   else if(action==='set-language'){
