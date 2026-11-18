@@ -1,0 +1,27 @@
+name: Annual instruction validation
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'staging/annual-instruction/**'
+      - 'tests/annual-instruction*'
+      - 'dist/certificate-model.js'
+      - 'dist/portal.js'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolated-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node --check dist/portal.js
+      - run: node --test tests/annual-instruction*.test.cjs
+      - run: npm install --no-save --package-lock=false --ignore-scripts pdf-lib@1.17.1
+      - run: node staging/annual-instruction/verify-pdf.cjs
