@@ -47,3 +47,12 @@ test('lightbox shows the complete PDF with single X and cannot open a stale draf
  assert.match(c,/height:92dvh/);assert.match(c,/object-fit:contain/);
  assert.doesNotMatch(p,/Zurück zur Ausstellung|250 %|175 %/);
 });
+
+test('large PDF fills the viewer while preserving its intrinsic aspect ratio and scroll access',()=>{
+ const p=fs.readFileSync('dist/portal.js','utf8'),c=fs.readFileSync('dist/admin-workspace.css','utf8');
+ assert.match(p,/canvas\.style\.setProperty\('--pdf-ratio',String\(source\.width\/source\.height\)\)/);
+ assert.match(p,/page\.scrollLeft=Math\.max\(0,\(page\.scrollWidth-page\.clientWidth\)\/2\)/);
+ assert.match(c,/\.admin-viewer-page\{display:block;[^}]*overflow:auto;container-type:size/);
+ assert.match(c,/width:max\(100%,calc\(100cqh \* var\(--pdf-ratio, 1\.414\)\)\)/);
+ assert.match(c,/\.admin-viewer-page \.admin-pdf-canvas\{[^}]*height:auto;max-width:none;max-height:none/);
+});
