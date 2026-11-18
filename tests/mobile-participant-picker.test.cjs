@@ -30,3 +30,9 @@ test('desktop selection keeps the list available',async()=>{
  await s.handlers.click({target:{closest:q=>q==='[data-person]'?{dataset:{person:'p18'}}:null}});
  assert.equal(s.detailId(),'p18');assert.ok(s.classes.has('is-open'));
 });
+
+test('selection from the archive closes its dialog and opens the actual participant',async()=>{
+ const s=setup();let closed=false;const dialog={close(){closed=true;}};
+ await s.handlers.click({target:{closest:q=>q==='[data-person]'?{dataset:{person:'p19'}}:q==='#certificate-overview'?dialog:null}});
+ assert.equal(closed,true);assert.equal(s.detailId(),'p19');
+});

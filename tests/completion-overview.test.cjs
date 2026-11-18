@@ -32,7 +32,7 @@ test('completed records are read-only inside the existing administrator archive'
  assert.match(js,/function certificateOverview\(\)\{\s*if\(state\.me\?\.role!=='admin'\)return ''/);
  assert.match(js,/data-overview-mode="completions"/);
  assert.match(js,/if\(dialog\.dataset\.overviewMode==='completions'\)\{renderCompletionOverview\(dialog\);return;\}/);
- assert.match(js,/person\.closest\('#certificate-overview'\)\?\.close\(\)/);
+ assert.match(js,/event\.target\.closest\('#certificate-overview'\)\?\.close\(\)/);
  const markup=js.slice(js.indexOf('  function completionOverviewMarkup('),js.indexOf('  function admin(){'));
  assert.doesNotMatch(markup,/data-cert-issue|data-cert-mail|B\.addCompletion|B\.updateRecord/);
  assert.match(markup,/Durchgeführt am/);

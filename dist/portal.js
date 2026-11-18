@@ -553,7 +553,7 @@
     const pickerToggle=event.target.closest('#account-picker-toggle');
     if(pickerToggle){setPickerOpen(pickerToggle.getAttribute('aria-expanded')!=='true',true);return;}
     const person=event.target.closest('[data-person]');if(person){
-      person.closest('#certificate-overview')?.close();
+      event.target.closest('#certificate-overview')?.close();
       selected=person.dataset.person;
       document.querySelector('#account-list').innerHTML=peopleList();
       document.querySelector('#account-picker-toggle').innerHTML=pickerLabel();
