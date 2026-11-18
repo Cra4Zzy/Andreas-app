@@ -48,12 +48,12 @@ test('lightbox shows the complete PDF with single X and cannot open a stale draf
  assert.doesNotMatch(p,/Zurück zur Ausstellung|250 %|175 %/);
 });
 
-test('large lightbox keeps its original size and fits the entire landscape certificate inside it',()=>{
+test('large lightbox keeps its original size and presents a width-fitted PDF directly below its header',()=>{
  const p=fs.readFileSync('dist/portal.js','utf8'),c=fs.readFileSync('dist/admin-workspace.css','utf8');
  assert.doesNotMatch(p,/page\.scrollLeft|--pdf-ratio/);
  assert.match(c,/grid-template-columns:minmax\(0,1fr\);grid-template-rows:auto minmax\(0,1fr\)/);
  assert.match(c,/width:calc\(100% - 12px\);height:92vh;height:92dvh/);
- assert.match(c,/\.admin-viewer-page\{display:block;[^}]*width:100%;height:100%;[^}]*overflow:hidden/);
- assert.match(c,/\.admin-viewer-page \.admin-pdf-canvas\{[^}]*width:100%;height:100%;[^}]*max-width:100%;max-height:100%;object-fit:contain;object-position:center/);
+ assert.match(c,/\.admin-viewer-page\{display:flex;align-items:flex-start;justify-content:center;width:100%;height:100%;[^}]*overflow:hidden/);
+ assert.match(c,/\.admin-viewer-page \.admin-pdf-canvas\{[^}]*width:100%;height:auto;[^}]*max-width:100%;max-height:100%;object-fit:contain;object-position:top center/);
  assert.doesNotMatch(c,/100cqh|--pdf-ratio|height:fit-content/);
 });
