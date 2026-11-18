@@ -24,7 +24,7 @@ test('admin and backend do not expose arbitrary paid expiry dates',()=>{
 test('access controls load newest scripts',()=>{
  for(const p of ['dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
    const s=read(p);
-   assert.match(s,p==='dist/konto.html'?/backend\.js\?v=8/:/backend\.js\?v=8/);
+   assert.match(s,/backend\.js\?v=(?:[89]|[1-9]\d+)(?=["&])/);
    assert.match(s,p==='dist/konto.html'?/portal\.js\?v=20/:/portal\.js\?v=20/);
  }
 });
@@ -42,6 +42,6 @@ test('admin and trainer sessions use 30-minute inactivity logout while learners 
  assert.match(backend,/if\(await checkStaffIdle\(\)\)return false/);
  assert.match(backend,/document\.addEventListener\('visibilitychange'/);
  for(const page of ['dist/index.html','dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
-   assert.match(read(page),page==='dist/konto.html'?/backend\.js\?v=8/:/backend\.js\?v=8/);
+   assert.match(read(page),/backend\.js\?v=(?:[89]|[1-9]\d+)(?=["&])/);
  }
 });

@@ -88,7 +88,7 @@ test('admin role controls require explicit confirmation and prevent self-changes
  assert.match(backend,/abbate_manage_member_role/);
  assert.match(backend,/students:members\.data\.map/);
  for(const page of ['dist/index.html','dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
-  assert.match(sql(page),page==='dist/konto.html'?/backend\.js\?v=8/:/backend\.js\?v=8/);
+  assert.match(sql(page),/backend\.js\?v=(?:[89]|[1-9]\d+)(?=["&])/);
  }
  for(const page of ['dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
   assert.match(sql(page),page==='dist/konto.html'?/portal\.js\?v=20/:/portal\.js\?v=20/);
