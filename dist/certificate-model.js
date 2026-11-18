@@ -9,7 +9,8 @@
     {id:'lasten',label:'Anschlagen von Lasten',standard:'Fachlicher Bezug: DGUV Regel 109-017 (Anhang B)'},
     {id:'bagger',label:'Erdbaumaschinen & Bagger',standard:'Fachlicher Bezug: DGUV Grundsatz 301-005 (Hydraulikbagger und Radlader)'},
     {id:'ladungssicherung',label:'Ladungssicherung',standard:'Fachlicher Bezug: DGUV Regel 114-615 und VDI 2700'},
-    {id:'abseilen',label:'Abseilen aus Höhen',standard:'Fachlicher Bezug: DGUV Regeln 112-198 und 112-199'}
+    {id:'abseilen',label:'Abseilen aus Höhen',standard:'Fachlicher Bezug: DGUV Regeln 112-198 und 112-199'},
+    {id:'jaehrliche-unterweisung',label:'Jährliche Unterweisung',standard:'DGUV Vorschrift 1 § 4; bei Arbeitsmitteln § 12 BetrSichV',kind:'instruction'}
   ].map(Object.freeze));
   const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date());
   const dateOK=v=>/^\d{4}-\d{2}-\d{2}$/.test(v||'')&&!isNaN(Date.parse(v+'T12:00:00Z'))&&new Date(v+'T12:00:00Z').toISOString().slice(0,10)===v;
@@ -17,11 +18,11 @@
     if(!person||person.role!=='learner'||!person.id||!String(person.name||'').trim())throw Error('Bitte ein Teilnehmerkonto auswählen.');
     const course=courses.find(c=>c.id===values.course);
     if(!course)throw Error('Bitte den Ausbildungsbereich auswählen.');
-    if(!dateOK(values.completedAt)||values.completedAt>asOf)throw Error('Bitte das tatsächliche Prüfungsdatum angeben; es darf nicht in der Zukunft liegen.');
+    if(!dateOK(values.completedAt)||values.completedAt>asOf)throw Error('Bitte das tatsächliche Datum angeben; es darf nicht in der Zukunft liegen.');
     if(!['none','email'].includes(values.notification))throw Error('Bitte eine Versandoption auswählen.');
     const email=String(person.email||'').trim();
     if(values.notification==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Für den E-Mail-Versand fehlt eine gültige Teilnehmeradresse.');
-    return Object.freeze({student:person.id,name:person.name,email,course:course.id,label:course.label,standard:course.standard,completedAt:values.completedAt,notification:values.notification,title:course.label+' · Theorieprüfung',kind:'exam',outcome:'passed'});
+    return Object.freeze({student:person.id,name:person.name,email,course:course.id,label:course.label,standard:course.standard,completedAt:values.completedAt,notification:values.notification,title:course.label+(course.kind==='instruction'?' · Unterweisungsnachweis':' · Theorieprüfung'),kind:course.kind||'exam',outcome:course.kind==='instruction'?'attended':'passed'});
   }
   const api=Object.freeze({courses,today,prepare});if(typeof module!=='undefined'&&module.exports)module.exports=api;root.ABBATE_CERTIFICATES=api;
 })(globalThis);
