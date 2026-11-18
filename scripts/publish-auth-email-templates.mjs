@@ -7,14 +7,14 @@ const projectRef = process.env.SUPABASE_PROJECT_REF || 'qyizzwqrruwojtriqfuc';
 const apply = process.argv.includes('--apply');
 const token = process.env.SUPABASE_ACCESS_TOKEN;
 const templates = [
-  ['emails/confirm-signup.html', 'mailer_subjects_confirmation', 'mailer_templates_confirmation_content', 'Bestätige deine E-Mail-Adresse | Abbate Lernraum'],
+  ['emails/confirm-signup.html', 'mailer_subjects_confirmation', 'mailer_templates_confirmation_content', 'Abbate Lernraum – Bitte bestätige deine E-Mail-Adresse'],
   ['emails/reset-password.html', 'mailer_subjects_recovery', 'mailer_templates_recovery_content', 'Passwort zurücksetzen | Abbate Lernraum'],
 ];
 if (!/^[a-z0-9]{20}$/.test(projectRef)) throw new Error('Ungültige Supabase-Projektreferenz.');
-const patch = {};
+const patch = {smtp_sender_name:'Abbate Lernraum'};
 for (const [file, subjectKey, contentKey, subject] of templates) {
   const html = await readFile(new URL('../' + file, import.meta.url), 'utf8');
-  if (!html.includes('{{ .ConfirmationURL }}') || !html.includes('<!doctype html>') || html.includes('<script')) {
+  if (!(file.includes('confirm-signup') ? html.includes('#token_hash={{ .TokenHash }}') : html.includes('{{ .ConfirmationURL }}')) || !html.includes('<!doctype html>') || html.includes('<script')) {
     throw new Error('HTML-Vorlage ungültig: ' + file);
   }
   patch[subjectKey] = subject;
@@ -37,8 +37,14 @@ const before = await send('GET');
 for (const key of Object.keys(patch)) if (!(key in before)) {
   throw new Error('Konfigurationsschlüssel nicht erkannt: ' + key + '. Veröffentlichung gestoppt.');
 }
+const publicBase = 'https://app.gabelstaplerfahrschule-andreas.de/dist/';
+for (const [file,marker] of [['confirm-email.html','id="confirm"'],['confirm-email.js',"type:'email'"]]) {
+ const res=await fetch(publicBase+file,{cache:'no-store',redirect:'error'});
+ if(!res.ok||!(await res.text()).includes(marker))throw new Error('Bestätigungsseite noch nicht veröffentlicht: '+file);
+}
+if(!before.smtp_host||!before.smtp_admin_email)throw new Error('Bestehende SMTP-Konfiguration nicht erkannt. Keine Änderung.');
 await send('PATCH', patch);
 const after = await send('GET');
 const mismatches = Object.entries(patch).filter(([key, value]) => after[key] !== value).map(([key]) => key);
 if (mismatches.length) throw new Error('Veröffentlichung nicht vollständig verifiziert: ' + mismatches.join(', '));
-console.log('Bestätigt: Beide HTML-Vorlagen samt Betreff sind in Supabase gespeichert.');
+console.log('Bestätigt: Beide HTML-Vorlagen, Betreff und SMTP-Absendername sind in Supabase gespeichert.');

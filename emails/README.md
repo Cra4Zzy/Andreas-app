@@ -4,7 +4,7 @@ Dieses Verzeichnis enthält drei bewusst als **Transaktions-E-Mails** gestaltete
 
 | Datei | Supabase-Einstellung | Betreff |
 |---|---|---|
-| `confirm-signup.html` | Authentication → Email Templates → **Confirm signup** | `Bestätige deine E-Mail-Adresse | Abbate Lernraum` |
+| `confirm-signup.html` | Authentication → Email Templates → **Confirm signup** | `Abbate Lernraum – Bitte bestätige deine E-Mail-Adresse` |
 | `reset-password.html` | Authentication → Email Templates → **Reset password** | `Passwort zurücksetzen | Abbate Lernraum` |
 | `welcome.html` | **Nicht** als Standard-Auth-Vorlage verfügbar | `Willkommen im Abbate Lernraum!` |
 
@@ -28,7 +28,7 @@ node scripts/publish-auth-email-templates.mjs
 node scripts/publish-auth-email-templates.mjs --apply
 ```
 
-Der erste Aufruf validiert nur die Dateien. `--apply` aktualisiert **ausschließlich** Betreff und Inhalt der beiden Auth-Vorlagen, vergleicht danach die Konfiguration über die Management API und meldet etwaige Fehler. Das Script gibt keinen Access-Token aus. Es setzt standardmäßig das Projekt `qyizzwqrruwojtriqfuc` voraus. Niemals einen Supabase Access Token ins GitHub-Repository oder in einen Chat kopieren.
+Der erste Aufruf validiert nur die Dateien. `--apply` aktualisiert **ausschließlich** Betreff und Inhalt der beiden Auth-Vorlagen sowie den SMTP-Absendernamen, vergleicht danach die Konfiguration über die Management API und meldet etwaige Fehler. Das Script gibt keinen Access-Token aus. Es setzt standardmäßig das Projekt `qyizzwqrruwojtriqfuc` voraus. Niemals einen Supabase Access Token ins GitHub-Repository oder in einen Chat kopieren.
 
 ## Willkommensmail
 
@@ -36,10 +36,14 @@ Die Willkommensmail ist **keine** eingebaute Auth-Template-Kategorie. Sie darf n
 
 ## Hinweise
 
-- `{{ .ConfirmationURL }}` ist eine **Supabase-Templatevariable** und darf nicht durch eine feste URL ersetzt werden.
+- Registrierung: eigene App-Domain mit `{{ .TokenHash }}` im URL-Fragment, Bestätigung erst per explizitem Klick. Vor Aktivierung die Veröffentlichung von `dist/confirm-email.html` und `dist/confirm-email.js` prüfen. Passwort-Reset behält `{{ .ConfirmationURL }}` unverändert.
 - Nach dem Wechsel per Dashboard/API sollte ein echter End-to-End-Test mit Testkonto folgen.
 - Die eigene App-Domain sowie die Redirect-URL-Allowlist müssen in Supabase Auth korrekt hinterlegt sein.
 - Das Repository beinhaltet weder SMTP-Passwort noch Supabase Management API Access Tokens.
 - Da E-Mail-Clients externe Bilder blockieren können, bleibt das Abbate-Wortlogo als HTML-Text sichtbar.
 
 Referenz: https://supabase.com/docs/guides/auth/auth-email-templates
+
+## Zustellbarkeit
+
+Absendername in Authentication → SMTP Settings: **Abbate Lernraum**. Bestehende SMTP-Adresse, Host und Zugangsdaten unverändert lassen. Vor Dashboard-Aktivierung alte Vorlage sichern und die neue Bestätigungsseite ohne Token öffnen. Dann Testkonto registrieren, bestätigen, anmelden und Passwort-Reset separat testen. `confirm-signup.txt` ist für späteren Multipart-Versand vorbereitet, aber nicht aktiv: Standard-Auth-Templates unterstützen HTML. Ein Send Email Hook würde alle Auth-Mails ersetzen und muss vor Aktivierung separat vollständig getestet werden. Keine DNS-Änderung, kein kostenpflichtiges Add-on. Die API-Domain und die Fahrschulfreigabe bleiben unverändert.

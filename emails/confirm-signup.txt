@@ -1,0 +1,16 @@
+Abbate Lernraum – Bitte bestätige deine E-Mail-Adresse
+
+Hallo,
+
+du hast ein Konto im Abbate Lernraum erstellt. Bitte bestätige deine E-Mail-Adresse:
+
+https://app.gabelstaplerfahrschule-andreas.de/dist/confirm-email.html#token_hash={{ .TokenHash }}
+
+Klicke auf der Bestätigungsseite auf „E-Mail-Adresse bestätigen“. Danach kannst du dich anmelden. Deinen Lernzugang schaltet die Fahrschule separat frei.
+
+Du hast dich nicht registriert? Dann kannst du diese E-Mail ignorieren. Bitte leite den persönlichen Link nicht weiter.
+
+Viele Grüße
+Dein Abbate-Team
+Gabelstaplerfahrschule Andreas
+Automatisch versendete Nachricht.
