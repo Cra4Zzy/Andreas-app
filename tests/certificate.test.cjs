@@ -26,3 +26,13 @@ test('all seven certificate categories use verified subject references in fronte
  assert.match(edge,/center\(courses\[label\],231,12,regular,muted\)/);
  assert.match(edge,/Nur Theorieprüfung/);
 });
+
+test('mobile PDF preview starts enlarged without changing issuance or PDF aspect ratio',()=>{
+ const p=fs.readFileSync('dist/portal.js','utf8'),c=fs.readFileSync('dist/admin-workspace.css','utf8');
+ assert.match(p,/matches\?175:100,true/);
+ assert.match(p,/data-cert-zoom="100"/);assert.match(p,/data-cert-zoom="175"/);assert.match(p,/data-cert-zoom="250"/);
+ assert.match(p,/stage\.scrollLeft=scale===100\?0/);
+ assert.match(p,/zoom\.hidden=true/);
+ assert.match(c,/data-zoom="175"[^\n]+width:175%/);assert.match(c,/data-zoom="250"[^\n]+width:250%/);
+ assert.match(c,/height:auto;max-width:none/);assert.match(c,/overflow:auto/);
+});
