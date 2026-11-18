@@ -255,3 +255,25 @@ body[data-view=admin] .admin-cert-overview-filters input,body[data-view=admin] .
  .admin-cert-row-actions{justify-items:start;grid-template-columns:minmax(0,1fr) auto;align-items:center}
  body[data-view=admin] .admin-cert-row-actions button{font-size:12px;padding:8px;white-space:normal}
 }
+
+/* Shared archive: preserve the existing certificate list and add completion history. */
+.admin-overview-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:5px;background:#e8eee7;border:1px solid #c6d3c8;border-radius:12px;margin-bottom:16px}
+body[data-view=admin] .admin-overview-switch button{min-width:0;min-height:46px;padding:8px 10px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--ad-ink);font-size:14px;font-weight:750;line-height:1.3;cursor:pointer}
+body[data-view=admin] .admin-overview-switch button[aria-pressed=true]{background:#173f41;color:#fff;border-color:#173f41}
+body[data-view=admin] .admin-overview-switch button:focus-visible{outline:3px solid #d6aa34;outline-offset:2px}
+#certificate-overview-pane[hidden],#completion-overview-pane[hidden],#cert-overview-error:empty{display:none}
+.admin-completion-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+.admin-completion-search{grid-column:1/-1}
+.admin-completion-row-actions{display:grid;justify-items:end;gap:6px;min-width:0}
+.admin-completion-certificate{font-size:12px;color:var(--ad-mid)}
+.admin-completion-links{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.admin-record-outcome.passed{color:#24513b;background:#e0eee4}
+.admin-record-outcome.attended{color:#214c62;background:#e4edf0}
+.admin-record-outcome.failed{color:#8b302d;background:#f7e5e0}
+@media(max-width:700px){
+ .admin-completion-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .admin-completion-row-actions{justify-items:start}
+ .admin-completion-links{justify-content:flex-start}
+ body[data-view=admin] .admin-completion-links button{font-size:13px;padding:8px 10px}
+ body[data-view=admin] .admin-overview-switch button{font-size:13px;padding:7px 5px}
+}
