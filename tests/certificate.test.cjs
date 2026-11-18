@@ -48,13 +48,12 @@ test('lightbox shows the complete PDF with single X and cannot open a stale draf
  assert.doesNotMatch(p,/Zurück zur Ausstellung|250 %|175 %/);
 });
 
-test('large PDF is fully visible within both viewport dimensions, without horizontal scrolling',()=>{
+test('large lightbox keeps its original size and fits the entire landscape certificate inside it',()=>{
  const p=fs.readFileSync('dist/portal.js','utf8'),c=fs.readFileSync('dist/admin-workspace.css','utf8');
- assert.match(p,/dialog\.style\.setProperty\('--pdf-ratio',String\(source\.width\/source\.height\)\)/);
- assert.doesNotMatch(p,/page\.scrollLeft/);
- assert.match(c,/width:min\(calc\(100% - 12px\),1100px,calc\(\(92dvh - 88px\)\*var\(--pdf-ratio,1\.414\)\)\)/);
- assert.match(c,/height:fit-content/);
- assert.match(c,/\.admin-viewer-page\{display:block;[^}]*overflow:hidden/);
- assert.match(c,/\.admin-viewer-page \.admin-pdf-canvas\{[^}]*width:100%;height:auto;max-width:100%;object-fit:contain/);
- assert.doesNotMatch(c,/100cqh/);
+ assert.doesNotMatch(p,/page\.scrollLeft|--pdf-ratio/);
+ assert.match(c,/grid-template-columns:minmax\(0,1fr\);grid-template-rows:auto minmax\(0,1fr\)/);
+ assert.match(c,/width:calc\(100% - 12px\);height:92vh;height:92dvh/);
+ assert.match(c,/\.admin-viewer-page\{display:block;[^}]*width:100%;height:100%;[^}]*overflow:hidden/);
+ assert.match(c,/\.admin-viewer-page \.admin-pdf-canvas\{[^}]*width:100%;height:100%;[^}]*max-width:100%;max-height:100%;object-fit:contain;object-position:center/);
+ assert.doesNotMatch(c,/100cqh|--pdf-ratio|height:fit-content/);
 });

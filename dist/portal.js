@@ -153,7 +153,6 @@
     canvas.width=source.width;canvas.height=source.height;
     const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return;
     ctx.drawImage(source,0,0);
-    dialog.style.setProperty('--pdf-ratio',String(source.width/source.height));
     dialog.showModal();
   }
   async function renderCertificateCanvas(canvas,bytes){
