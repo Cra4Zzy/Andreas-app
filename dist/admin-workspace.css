@@ -166,3 +166,19 @@ body[data-view=admin] .cert-section-toggle[aria-expanded=true]{border-bottom:1px
 body[data-view=admin] .cert-section-toggle:focus-visible{outline-offset:-4px}
 body[data-view=admin] #certificate-section-content{display:none}
 body[data-view=admin] #certificate-section-content.is-open{display:block}
+
+/* Readable PDF preview: zoom preserves the original page aspect ratio. */
+.admin-preview-zoom{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
+body[data-view=admin] .admin-preview-zoom button{min-height:44px;flex:1 1 auto;padding:9px 12px;font-size:14px;white-space:nowrap}
+body[data-view=admin] .admin-preview-zoom button[aria-pressed=true]{background:#183438;color:#fff;border-color:#183438}
+.admin-preview-hint{flex:1 0 100%;margin:3px 0 0;color:var(--ad-mid);font-size:13px}
+.admin-preview-stage[data-preview-state=ready]{display:block;aspect-ratio:auto;min-height:0;max-height:72vh;overflow:auto;overscroll-behavior-inline:contain;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
+body[data-view=admin] .admin-preview-stage[data-preview-state=ready] .admin-pdf-canvas{display:block;width:100%;height:auto;max-width:none;margin:0;border:0}
+body[data-view=admin] .admin-preview-stage[data-preview-state=ready][data-zoom="175"] .admin-pdf-canvas{width:175%}
+body[data-view=admin] .admin-preview-stage[data-preview-state=ready][data-zoom="250"] .admin-pdf-canvas{width:250%}
+.admin-preview-stage:focus-visible{outline:2px solid #183438;outline-offset:2px}
+@media(max-width:700px){
+ body[data-view=admin] #certificate-preview{min-width:0}
+ body[data-view=admin] .admin-preview-stage{max-height:72svh}
+ body[data-view=admin] .admin-preview-zoom button{padding:9px 8px}
+}
