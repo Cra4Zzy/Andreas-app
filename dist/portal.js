@@ -550,7 +550,7 @@
   });
   root.addEventListener('click',async event=>{
     if(event.target.closest('[data-cert-overview-open]')){if(view==='admin'&&state.me?.role==='admin'){const d=root.querySelector('#certificate-overview');if(d&&!d.open){setCertificateOverviewMode(d,d.dataset.overviewMode||'certificates');d.showModal();}}return;}
-    const overviewMode=event.target.closest('[data-overview-mode]');if(overviewMode){setCertificateOverviewMode(overviewMode.closest('#certificate-overview'),overviewMode.dataset.overviewMode);return;}
+    const overviewMode=event.target.closest('button[data-overview-mode]');if(overviewMode){setCertificateOverviewMode(overviewMode.closest('#certificate-overview'),overviewMode.dataset.overviewMode);return;}
     if(event.target.closest('[data-cert-overview-close]'))return; // Native method=dialog form handles dismissal.
     const viewerMode=event.target.closest('[data-cert-viewer-mode]');
     if(viewerMode){const page=viewerMode.closest('dialog')?.querySelector('.admin-viewer-page');if(page){page.dataset.mode=page.dataset.mode==='reading'?'original':'reading';viewerMode.textContent=page.dataset.mode==='reading'?'Original-PDF':'Leseansicht';page.scrollTop=0;}return;}

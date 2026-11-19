@@ -65,3 +65,15 @@ test('archive record navigation opens history and focuses and scrolls to the exa
  new Function('document',helper+'return focusOverviewRecord;')({querySelector:()=>detail})('r2');
  assert.equal(history.open,true);assert.deepEqual(calls,['admin-record-target','tabindex-1','focus','scroll']);
 });
+
+test('archive action clicks are not intercepted as tab switches by the dialog mode attribute',async()=>{
+ const source=js.slice(js.indexOf("  root.addEventListener('click'"),js.indexOf("    const certButton=",js.indexOf("  root.addEventListener('click'")));
+ let click,printed=null,switches=0;
+ const dialog={dataset:{overviewMode:'completions'}};
+ const button={dataset:{recordPrint:'record-123'}};
+ const root={addEventListener:(type,fn)=>{click=fn;}};
+ new Function('root','printCompletionRecord','setCertificateOverviewMode',source+'\n});')(root,id=>{printed=id;},()=>{switches++;});
+ await click({target:{closest:selector=>selector==='[data-overview-mode]'?dialog:selector==='[data-record-print]'?button:null}});
+ assert.equal(printed,'record-123');
+ assert.equal(switches,0);
+});
