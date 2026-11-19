@@ -1,0 +1,133 @@
+{
+  "status": "awaiting-image-assets",
+  "style": "Leicht stilisierte 3D-Schulungsillustration wie Gabelstapler; klare Formen, satte natürliche Farben, glatte Materialien; keine Fotorealistik, keine Antwortmarkierungen; fachlich von Andreas prüfen lassen.",
+  "directory": "dist/assets/quiz/premium",
+  "format": "webp",
+  "questions": [
+    {
+      "id": "a-kennzeichnung",
+      "file": "a-kennzeichnung.webp",
+      "motif": "Nahaufnahme eines textilen Hebebands mit Tragfähigkeitsetikett, keine lesbare Zahl"
+    },
+    {
+      "id": "a-sichtpruefung",
+      "file": "a-sichtpruefung.webp",
+      "motif": "Hebeband mit sichtbarem Schnitt, unbelastet auf Werkbank"
+    },
+    {
+      "id": "a-neigungswinkel",
+      "file": "a-neigungswinkel.webp",
+      "motif": "Zweisträngiges Gehänge vor einer Last, seitlich sichtbarer Neigungswinkel"
+    },
+    {
+      "id": "a-schwerpunkt",
+      "file": "a-schwerpunkt.webp",
+      "motif": "Asymmetrische Maschinenkomponente auf Werkstattboden"
+    },
+    {
+      "id": "a-kantenschutz",
+      "file": "a-kantenschutz.webp",
+      "motif": "Textilband an scharfkantigem Stahlbauteil, ohne Hub"
+    },
+    {
+      "id": "a-haken",
+      "file": "a-haken.webp",
+      "motif": "Detail eines unbelasteten Kranhakens und Anschlagmittels"
+    },
+    {
+      "id": "a-knoten",
+      "file": "a-knoten.webp",
+      "motif": "Zu langes textiles Hebeband auf Werkbank, ohne Knoten und ohne Hub"
+    },
+    {
+      "id": "a-probehub",
+      "file": "a-probehub.webp",
+      "motif": "Werkstatt mit Kran und Last knapp über der Unterlage"
+    },
+    {
+      "id": "a-lastweg",
+      "file": "a-lastweg.webp",
+      "motif": "Hallenkran mit abgegrenztem Arbeitsbereich und Last"
+    },
+    {
+      "id": "a-haende",
+      "file": "a-haende.webp",
+      "motif": "Last kurz vor dem Absetzen auf Unterlage, keine Hände im Gefahrenbereich"
+    },
+    {
+      "id": "a-vierstraenge",
+      "file": "a-vierstraenge.webp",
+      "motif": "Viersträngiges Gehänge und starre Last, noch auf Boden"
+    },
+    {
+      "id": "a-chemikalien",
+      "file": "a-chemikalien.webp",
+      "motif": "Unbelastetes textiles Anschlagmittel neben unbeschriftetem Flüssigkeitsgebinde"
+    },
+    {
+      "id": "a-aufbewahrung",
+      "file": "a-aufbewahrung.webp",
+      "motif": "Anschlagmittel und Aufbewahrungsregal in Werkstatt"
+    },
+    {
+      "id": "a-auswahl",
+      "file": "a-auswahl.webp",
+      "motif": "Lackierte Maschinenkomponente und Auswahl verschiedener Anschlagmittel"
+    },
+    {
+      "id": "a-abstimmung",
+      "file": "a-abstimmung.webp",
+      "motif": "Anschläger mit Funkgerät in Industriehalle, aus sicherer Entfernung"
+    },
+    {
+      "id": "l-ketten",
+      "file": "l-ketten.webp",
+      "motif": "Ein deutlich verformtes Kettenglied auf Werkbank, unbelastet"
+    },
+    {
+      "id": "l-drehung",
+      "file": "l-drehung.webp",
+      "motif": "Große Last im Hallenkran, ohne Personen im Gefahrenbereich"
+    },
+    {
+      "id": "l-ablegen",
+      "file": "l-ablegen.webp",
+      "motif": "Auf Böcken abgestellte Stahlkomponente mit losem Anschlagmittel"
+    },
+    {
+      "id": "l2-seilbruch",
+      "file": "l2-seilbruch.webp",
+      "motif": "Drahtseil mit sichtbar gebrochenen Einzeldrähten, unbelastet"
+    },
+    {
+      "id": "l2-schaekel",
+      "file": "l2-schaekel.webp",
+      "motif": "Schäkel mit Bolzen auf neutraler Werkbank"
+    },
+    {
+      "id": "l2-schweissnaht",
+      "file": "l2-schweissnaht.webp",
+      "motif": "Stahlbauteil ohne ausgewiesene Anschlagpunkte, auf Boden"
+    },
+    {
+      "id": "l2-heisse-last",
+      "file": "l2-heisse-last.webp",
+      "motif": "Wärmebehandelte Stahlkomponente neben Industrieofen, ohne Hebevorgang"
+    },
+    {
+      "id": "l2-lose-teile",
+      "file": "l2-lose-teile.webp",
+      "motif": "Maschinenkomponente auf Boden mit losen Werkzeugen darauf"
+    },
+    {
+      "id": "l2-wind",
+      "file": "l2-wind.webp",
+      "motif": "Großflächiges Bauteil auf Freigelände bei Wind, noch auf Boden"
+    },
+    {
+      "id": "l2-unterlage",
+      "file": "l2-unterlage.webp",
+      "motif": "Rundes Stahlbauteil vor geeigneten Auflagen, ohne Personen"
+    }
+  ]
+}
