@@ -91,7 +91,8 @@ async function createPDF(name:string,label:string,record:any,signature:ArrayBuff
     center("Gültigkeit laut Ausbildervorgabe: 12 Monate ab Ausstellung.",167,10.5);
     center("Wiederkehrende Unterweisung mindestens jährlich, inklusive praktischer Übungen.",153,10.5);
    }else{
-    center("Unternehmen: "+details.company+(details.department?"  ·  Bereich: "+details.department:""),309,11);
+    center("Unternehmen: "+details.company,315,11);
+    if(details.department)center("Abteilung / Bereich: "+details.department,299,11);
     center("Ausbildung zum Brandschutzhelfer",280,20,bold);
     center(special.standard,261,11,regular,muted);
     center("Vorbeugender Brandschutz, Aufgaben der Brandschutzhelfer, Brandlehre",242,11);
@@ -170,7 +171,7 @@ Deno.serve(async req=>{
    const m=members.find((m:any)=>m.school_id===body.school&&active(m));
    if(!m)throw new Fault("Administratorrechte erforderlich.",403);
    const label=body.label,date=body.completedAt,today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Berlin"}).format(new Date());
-   const special=body.template?templates[body.template]:null;
+   const special=typeof body.template==="string"&&Object.hasOwn(templates,body.template)?templates[body.template]:null;
    if(body.template&&(!special||special.label!==label))throw new Fault("Ungültige Nachweisart.");
    if(typeof label!=="string"||(!Object.hasOwn(courses,label)&&!special)||!uuid.test(String(body.participantId||""))||typeof date!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+"T12:00:00Z"))||new Date(date+"T12:00:00Z").toISOString().slice(0,10)!==date||date>today)throw new Fault("Ungültige Vorschauangaben.");
    const {data:learner,error:learnerError}=await caller.from("abbate_memberships").select("user_id").eq("school_id",m.school_id).eq("user_id",body.participantId).eq("role","learner").maybeSingle();
@@ -219,6 +220,7 @@ Deno.serve(async req=>{
   if(existing)return json({pdf:existing.pdf_base64,reference:r.reference,issuedAt:existing.issued_at,mailStatus:existing.mail_status||"not_sent"});
   const title=(r.abbate_courses as any)?.title||"",suffix=" · Theorieprüfung";
   const special=specialOf(r);
+  if(body.template&&!special)throw new Fault("Nachweisart passt nicht zum gespeicherten Abschluss.");
   const label=special?special.label:isAnnual(r)?annualLabel:title.endsWith(suffix)?title.slice(0,-suffix.length):"";
   if((!Object.hasOwn(courses,label)&&!special)||(label===annualLabel&&!isAnnual(r)))throw new Fault("Bitte einen Prüfungseintrag aus der Zertifikatsvorbereitung auswählen.");
   const {data:profile,error:profileError}=await caller.from("abbate_profiles").select("display_name").eq("school_id",r.school_id).eq("user_id",r.participant_id).maybeSingle();
