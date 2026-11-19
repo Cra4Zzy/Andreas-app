@@ -49,7 +49,7 @@
   
   function personStatus(person){return person.access==='active'&&!M.access(person)?'Abgelaufen':M.statuses[person.access];}
   function badge(person){return `<span class="portal-badge ${M.access(person)?'active':person.access}">${safe(personStatus(person))}</span>`;}
-  function recordCard(r,editable=false){return `<article class="portal-record"><div class="portal-record-top"><span>${safe(M.kinds[r.kind])}</span><span class="portal-result ${r.outcome}">${r.outcome==='failed'?'×':'✓'} ${safe(M.outcomes[r.outcome])}</span></div><h3>${safe(r.title)}</h3><dl><div><dt>Durchgeführt am</dt><dd>${day(r.completedAt)}</dd></div><div><dt>Erfasst durch</dt><dd>Fahrschule Abbate</dd></div><div><dt>Referenz</dt><dd>${safe(r.reference)}</dd></div></dl>${certActions(r,editable)}${editable?`<label class="portal-result-edit">Ergebnis ändern<select data-result="${safe(r.id)}">${Object.entries(M.outcomes).filter(([value])=>r.kind!=='exam'||value!=='attended').map(([value,label])=>`<option value="${value}" ${r.outcome===value?'selected':''}>${safe(label)}</option>`).join('')}</select></label><button class="portal-text" data-revoke="${safe(r.id)}">Fehleintrag zurückziehen</button>`:''}</article>`;}
+  function recordCard(r,editable=false){return `<article class="portal-record" data-record-id="${safe(r.id)}"><div class="portal-record-top"><span>${safe(M.kinds[r.kind])}</span><span class="portal-result ${r.outcome}">${r.outcome==='failed'?'×':'✓'} ${safe(M.outcomes[r.outcome])}</span></div><h3>${safe(r.title)}</h3><dl><div><dt>Durchgeführt am</dt><dd>${day(r.completedAt)}</dd></div><div><dt>Erfasst durch</dt><dd>Fahrschule Abbate</dd></div><div><dt>Referenz</dt><dd>${safe(r.reference)}</dd></div></dl>${certActions(r,editable)}${editable?`<label class="portal-result-edit">Ergebnis ändern<select data-result="${safe(r.id)}">${Object.entries(M.outcomes).filter(([value])=>r.kind!=='exam'||value!=='attended').map(([value,label])=>`<option value="${value}" ${r.outcome===value?'selected':''}>${safe(label)}</option>`).join('')}</select></label><button class="portal-text" data-revoke="${safe(r.id)}">Fehleintrag zurückziehen</button>`:''}</article>`;}
   let resendUntil=0,resendBusy=false;
   function resendControl(){return '<button type="button" class="secondary" data-resend-confirmation '+(resendBusy||Date.now()<resendUntil?'disabled':'')+'>Bestätigungs-E-Mail erneut senden</button><p class="portal-hint" data-resend-status role="status" aria-live="polite"></p>';}
   function syncResendControls(){root.querySelectorAll('[data-resend-confirmation]').forEach(b=>{b.disabled=resendBusy||Date.now()<resendUntil;});}
@@ -273,6 +273,37 @@
     const q=String(query).trim().toLocaleLowerCase('de-DE');
     return rows.filter(r=>(kind==='all'||r.kind===kind)&&(outcome==='all'||r.outcome===outcome)&&(!from||r.completedAt>=from)&&(!to||r.completedAt<=to)&&(!q||[r.name,r.email,r.title,r.reference].some(v=>String(v||'').toLocaleLowerCase('de-DE').includes(q))));
   }
+  // Print a documentation extract, never an official certificate or a signature.
+  function completionPrintMarkup(record,person){
+    return '<h1>Schulungs- und Prüfungseintrag</h1><p>Fahrschule Abbate · Abbate Lernraum</p><dl>'+[
+      ['Teilnehmer',person?.name||'Teilnehmer nicht verfügbar'],['Bezeichnung',record.title],['Nachweisart',M.kinds[record.kind]],['Ergebnis',M.outcomes[record.outcome]],['Durchgeführt am',day(record.completedAt)],['Referenz',record.reference]
+    ].map(([label,value])=>'<div><dt>'+safe(label)+'</dt><dd>'+safe(value)+'</dd></div>').join('')+'</dl><p class="admin-print-note">Auszug aus der Teilnehmerverwaltung. Kein ausgestelltes Zertifikat und kein Ersatz für einen offiziellen Befähigungsnachweis.</p>';
+  }
+  function printCompletionRecord(id){
+    if(view!=='admin'||state.me?.role!=='admin')return;
+    const record=completedRecordRows(state,certRecords,!!certStatus.listUnavailable).find(r=>r.id===id);
+    if(!record)return;
+    document.querySelector('#admin-print-record')?.remove();
+    const sheet=document.createElement('section');
+    sheet.id='admin-print-record';
+    sheet.innerHTML=completionPrintMarkup(record,state.students.find(p=>p.id===record.student));
+    document.body.append(sheet);
+    const clean=()=>{sheet.remove();window.removeEventListener('afterprint',clean);};
+    window.addEventListener('afterprint',clean,{once:true});
+    try{window.print();}catch(error){clean();throw error;}
+  }
+  function focusOverviewRecord(id){
+    const detail=document.querySelector('#account-detail');
+    if(!detail)return;
+    const history=detail.querySelector('.portal-admin-history');
+    if(history)history.open=true;
+    const record=Array.from(detail.querySelectorAll('[data-record-id]')).find(node=>node.dataset.recordId===id);
+    const target=record||history||detail.querySelector('.portal-account-heading')||detail;
+    target.classList.add('admin-record-target');
+    target.setAttribute('tabindex','-1');
+    target.focus({preventScroll:true});
+    target.scrollIntoView({block:'start',behavior:'instant'});
+  }
   function completionOverviewMarkup(){
     return '<section id="completion-overview-pane" hidden aria-label="Abgeschlossene Prüfungen und Schulungen"><div id="completion-overview-stats" class="admin-cert-overview-stats"></div><div class="admin-cert-overview-filters admin-completion-filters"><label class="admin-completion-search">Name, Fachbereich oder Referenz<input id="completion-overview-search" type="search" placeholder="Teilnehmer oder Schulung suchen" autocomplete="off"></label><label>Nachweisart<select id="completion-overview-kind"><option value="all">Alle Arten</option><option value="exam">Prüfungen</option><option value="training">Schulungen</option><option value="instruction">Unterweisungen</option></select></label><label>Ergebnis<select id="completion-overview-outcome"><option value="all">Alle Ergebnisse</option><option value="passed">Bestanden</option><option value="attended">Teilgenommen</option><option value="failed">Nicht bestanden</option></select></label><label>Durchgeführt ab<input id="completion-overview-from" type="date"></label><label>Durchgeführt bis<input id="completion-overview-to" type="date"></label></div><p class="portal-hint" id="completion-overview-count" role="status"></p><div id="completion-overview-results" class="admin-cert-overview-results"></div><p class="portal-hint">Nur von der Fahrschule bestätigte Einträge. Lern-App-Übungsrunden und zurückgezogene Einträge werden nicht berücksichtigt. Die Übersicht zählt einzelne Durchführungen, nicht eindeutige Teilnehmer.</p></section>';
   }
@@ -286,7 +317,7 @@
     const list=pane.querySelector('#completion-overview-results');
     if(value('from')&&value('to')&&value('from')>value('to')){list.innerHTML='<p class="admin-cert-empty">Bitte einen gültigen Zeitraum auswählen.</p>';return;}
     const labels={issued:'Zertifikat ausgestellt',none:'Kein Zertifikat hinterlegt',unknown:'Zertifikatsstatus unbekannt'};
-    list.innerHTML=filtered.map(r=>'<article class="admin-cert-row"><div class="admin-cert-row-main"><strong>'+safe(r.name)+'</strong><small>'+safe(r.email)+'</small><p>'+safe(r.title)+'</p><small>'+safe(M.kinds[r.kind])+' · Durchgeführt am '+safe(day(r.completedAt))+'</small><small>Referenz: '+safe(r.reference)+'</small></div><div class="admin-completion-row-actions"><span class="admin-cert-mail-status admin-record-outcome '+safe(r.outcome)+'">'+safe(M.outcomes[r.outcome])+'</span><small class="admin-completion-certificate">'+safe(labels[r.certificate])+'</small><div class="admin-completion-links">'+(r.certificate==='issued'?'<button type="button" class="secondary" data-cert-download="'+safe(r.id)+'">PDF</button>':'')+(r.personAvailable?'<button type="button" class="secondary" data-person="'+safe(r.student)+'">Teilnehmer öffnen</button>':'')+'</div></div></article>').join('')||'<p class="admin-cert-empty">'+(rows.length?'Keine passenden Einträge gefunden.':'Noch keine Schulungen oder Prüfungen dokumentiert.')+'</p>';
+    list.innerHTML=filtered.map(r=>'<article class="admin-cert-row"><div class="admin-cert-row-main"><strong>'+safe(r.name)+'</strong><small>'+safe(r.email)+'</small><p>'+safe(r.title)+'</p><small>'+safe(M.kinds[r.kind])+' · Durchgeführt am '+safe(day(r.completedAt))+'</small><small>Referenz: '+safe(r.reference)+'</small></div><div class="admin-completion-row-actions"><span class="admin-cert-mail-status admin-record-outcome '+safe(r.outcome)+'">'+safe(M.outcomes[r.outcome])+'</span><small class="admin-completion-certificate">'+safe(labels[r.certificate])+'</small><div class="admin-completion-links">'+(r.certificate==='issued'?'<button type="button" class="secondary" data-cert-download="'+safe(r.id)+'">PDF öffnen / speichern</button>':'<button type="button" class="secondary" data-record-print="'+safe(r.id)+'">Eintrag als PDF speichern</button>')+(r.personAvailable?'<button type="button" class="primary" data-person="'+safe(r.student)+'" data-overview-record="'+safe(r.id)+'">Teilnehmer öffnen</button>':'')+'</div></div></article>').join('')||'<p class="admin-cert-empty">'+(rows.length?'Keine passenden Einträge gefunden.':'Noch keine Schulungen oder Prüfungen dokumentiert.')+'</p>';
   }
   function setCertificateOverviewMode(dialog,mode){
     if(!dialog||state.me?.role!=='admin')return;
@@ -531,6 +562,8 @@
     if(event.target.closest('[data-resend-confirmation]')){await resendConfirmation();return;}
     if(event.target.closest('[data-recovery]')){location.hash='passwort';recovery();return;}
     if(event.target.closest('[data-logout]')){await B.client.auth.signOut({scope:'local'});location.replace('./konto.html');return;}
+    const printButton=event.target.closest('[data-record-print]');
+    if(printButton){try{printCompletionRecord(printButton.dataset.recordPrint);}catch(e){const error=printButton.closest('#certificate-overview')?.querySelector('#cert-overview-error');if(error)error.textContent='Druckansicht konnte nicht geöffnet werden.';}return;}
     const certButton=event.target.closest('[data-cert-download],[data-cert-issue],[data-cert-mail]');
     if(certButton){
       const id=certButton.dataset.certDownload||certButton.dataset.certIssue||certButton.dataset.certMail;
@@ -556,12 +589,22 @@
     const pickerToggle=event.target.closest('#account-picker-toggle');
     if(pickerToggle){setPickerOpen(pickerToggle.getAttribute('aria-expanded')!=='true',true);return;}
     const person=event.target.closest('[data-person]');if(person){
+      const archiveRecord=person.dataset.overviewRecord;
       event.target.closest('#certificate-overview')?.close();
       selected=person.dataset.person;
+      if(archiveRecord){
+        search='';filter='all';
+        const input=document.querySelector('#account-search'),status=document.querySelector('#account-filter');
+        if(input)input.value='';if(status)status.value='all';
+      }
       document.querySelector('#account-list').innerHTML=peopleList();
       document.querySelector('#account-picker-toggle').innerHTML=pickerLabel();
       renderDetail();
-      if(window.matchMedia('(max-width:700px)').matches)setPickerOpen(false,true);
+      if(archiveRecord){
+        setPickerOpen(false,false);
+        const participant=selected;
+        requestAnimationFrame(()=>{if(selected===participant)focusOverviewRecord(archiveRecord);});
+      }else if(window.matchMedia('(max-width:700px)').matches)setPickerOpen(false,true);
       else document.querySelector('#account-list [data-person][aria-pressed="true"]')?.focus({preventScroll:true});
       return;
     }

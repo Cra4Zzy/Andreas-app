@@ -5,7 +5,7 @@ function setup(mobile=true){
  const handlers={},nodes={},classes=new Set();let focused=null,detailId=null;
  for(const id of ['account-picker','account-picker-toggle','account-search','account-list'])nodes['#'+id]={innerHTML:'',attrs:{'aria-expanded':'false'},classList:{toggle(c,on){on?classes.add(c):classes.delete(c)}},setAttribute(k,v){this.attrs[k]=v},getAttribute(k){return this.attrs[k]},focus(){focused=id}};
  const students=Array.from({length:200},(_,i)=>({id:'p'+i,name:'Teilnehmer '+i,email:'person'+i+'@example.test',access:'active',role:'learner'}));
- const c={state:{students,me:{id:'staff',role:'admin'}},selected:'p0',search:'',filter:'all',view:'admin',safe:x=>String(x).replaceAll('<','&lt;'),badge:()=>'',M:{access:()=>true},B:{isStaff:()=>true},window:{matchMedia:()=>({matches:mobile})},document:{querySelector:s=>nodes[s]},root:{addEventListener:(name,fn)=>handlers[name]=fn},renderDetail:()=>{detailId=c.selected}};
+ const c={state:{students,me:{id:'staff',role:'admin'}},selected:'p0',search:'',filter:'all',view:'admin',safe:x=>String(x).replaceAll('<','&lt;'),badge:()=>'',M:{access:()=>true},B:{isStaff:()=>true},window:{matchMedia:()=>({matches:mobile})},document:{querySelector:s=>nodes[s]},requestAnimationFrame:fn=>fn(),focusOverviewRecord:id=>{c.focusedRecord=id},root:{addEventListener:(name,fn)=>handlers[name]=fn},renderDetail:()=>{detailId=c.selected}};
  vm.runInNewContext(source.slice(source.indexOf('  function people()'),source.indexOf('  function detail()')),c);
  vm.runInNewContext(source.slice(source.indexOf("  root.addEventListener('keydown'"),source.indexOf('  B.client.auth.onAuthStateChange')),c);
  return {c,nodes,classes,handlers,focused:()=>focused,detailId:()=>detailId};
@@ -35,4 +35,12 @@ test('selection from the archive closes its dialog and opens the actual particip
  const s=setup();let closed=false;const dialog={close(){closed=true;}};
  await s.handlers.click({target:{closest:q=>q==='[data-person]'?{dataset:{person:'p19'}}:q==='#certificate-overview'?dialog:null}});
  assert.equal(closed,true);assert.equal(s.detailId(),'p19');
+});
+
+test('archive navigates to the exact record and resets conflicting account filters',async()=>{
+ const s=setup();let closed=false;const dialog={close(){closed=true;}};
+ s.c.search='other';s.c.filter='paused';
+ await s.handlers.click({target:{closest:q=>q==='[data-person]'?{dataset:{person:'p19',overviewRecord:'record19'}}:q==='#certificate-overview'?dialog:null}});
+ assert.equal(closed,true);assert.equal(s.detailId(),'p19');assert.equal(s.c.focusedRecord,'record19');assert.equal(s.c.search,'');assert.equal(s.c.filter,'all');
+ assert.match(s.nodes['#account-list'].innerHTML,/data-person="p19" aria-pressed="true"/);
 });

@@ -48,3 +48,20 @@ test('archive close button uses native dialog submission, bypassing all mutation
  const css=fs.readFileSync('dist/admin-workspace.css','utf8');
  assert.match(css,/\.admin-overview-dismiss button\{[^}]*pointer-events:auto/);
 });
+
+test('archive offers the issued PDF or a distinctly labelled printable record',()=>{
+ const markup=js.slice(js.indexOf('  function renderCompletionOverview('),js.indexOf('  function setCertificateOverviewMode('));
+ assert.match(markup,/r\.certificate==='issued'[\s\S]*PDF öffnen \/ speichern[\s\S]*data-record-print/);
+ assert.match(markup,/data-overview-record/);
+ const helper=js.slice(js.indexOf('  function completionPrintMarkup('),js.indexOf('  function printCompletionRecord('));
+ const print=new Function('M','day','safe',helper+'return completionPrintMarkup;')({kinds:{training:'Schulung'},outcomes:{passed:'Bestanden'}},v=>v,v=>String(v??'').replace(/</g,'&lt;'));
+ const output=print({title:'<script>',kind:'training',outcome:'passed',completedAt:'2026-11-14',reference:'AB-123'},{name:'Muster'});
+ assert.match(output,/Kein ausgestelltes Zertifikat/);assert.match(output,/AB-123/);assert.doesNotMatch(output,/<script>/);
+});
+test('archive record navigation opens history and focuses and scrolls to the exact record',()=>{
+ const helper=js.slice(js.indexOf('  function focusOverviewRecord('),js.indexOf('  function completionOverviewMarkup('));
+ const history={open:false},calls=[],record={dataset:{recordId:'r2'},classList:{add:v=>calls.push(v)},setAttribute:(k,v)=>calls.push(k+v),focus:()=>calls.push('focus'),scrollIntoView:()=>calls.push('scroll')};
+ const detail={querySelector:()=>history,querySelectorAll:()=>[{dataset:{recordId:'r1'}},record]};
+ new Function('document',helper+'return focusOverviewRecord;')({querySelector:()=>detail})('r2');
+ assert.equal(history.open,true);assert.deepEqual(calls,['admin-record-target','tabindex-1','focus','scroll']);
+});
