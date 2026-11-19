@@ -1,16 +1,5 @@
-# Rigging image integration — staging only
+# Anschlagen von Lasten – Quizbilder
 
-The 12 new local WebP assets must be copied into dist/assets/quiz/premium/ before merging. All 25 rigging and 25 forklift question mappings are now in place. Missing files deliberately cannot pass the illustration tests. Run node --test tests/quiz-illustrations.test.cjs and the full test suite before merging; review image technical accuracy.
+25 von 50 Lastenfragen sind bebildert. 12 zusätzliche WebP-Motive und das vorhandene neutrale Winkelbild werden inhaltlich passenden Fragen zugeordnet. Die bisherigen 25 Gabelstapler-Bildzuordnungen bleiben unverändert. Redundante oder missverständliche Motive wurden nicht übernommen. Die Illustrationen sind schematische Lernhilfen, keine eigenständigen Anweisungen für reale Hebevorgänge.
 
-- lasten-kettengehange.webp
-- lasten-lastschwerpunkt.webp
-- lasten-kantenschutz.webp
-- lasten-kantenschutz-detail.webp
-- lasten-hebe-band-pruefung.webp
-- lasten-beschaedigte-anschlagmittel.webp
-- lasten-faserschaden.webp
-- lasten-haken-geschlossen.webp
-- lasten-anschlagpunkte.webp
-- lasten-gefahrenbereich.webp
-- lasten-absperrung.webp
-- lasten-vierstraenge.webp
+Cache-Version 53, App-Script-Version 45. Bildvorschau und Vergrößerung verwenden die vorhandene Quiz-Komponente.
