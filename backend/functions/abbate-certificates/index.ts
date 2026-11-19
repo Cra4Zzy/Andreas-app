@@ -13,7 +13,19 @@ const fields=Object.keys(courses).filter(x=>x!==annualLabel);
 const annualFields=new Map(fields.map(x=>[annualLabel+" · "+x+" · Unterweisungsnachweis",x]));
 const titleOf=(r:any)=>r.abbate_courses?.title||"";
 const isAnnual=(r:any)=>r.kind==="refresher"&&r.outcome==="attended"&&(titleOf(r)===annualTitle||annualFields.has(titleOf(r)));
-const eligible=(r:any)=>r.kind==="exam"&&r.outcome==="passed"||isAnnual(r);
+const templates:Record<string,any>={"cargo":{"id":"cargo","course":"ladungssicherung","label":"Ladungssicherung","title":"Ladungssicherung nach VDI 2700ff · Teilnahmebescheinigung","outcome":"attended","proof":"Teilnahmebescheinigung","standard":"VDI 2700ff"},"rope":{"id":"rope","course":"abseilen","label":"Abseilen aus Höhen","title":"Abseilen aus Höhen und Tiefen · Ausbildungsnachweis","outcome":"passed","proof":"Ausbildungsnachweis (Theorie & Praxis)","standard":"DGUV Regeln 112-198 und 112-199"},"fire":{"id":"fire","course":"brandschutzhelfer","label":"Brandschutzhelfer","title":"Brandschutzhelfer · Ausbildungsbescheinigung","outcome":"attended","proof":"Ausbildungsbescheinigung (Theorie & Praxis)","standard":"§ 10 ArbSchG · ASR A2.2 · DGUV Information 205-023"}};
+const specialOf=(r:any)=>r.kind==="training"?Object.values(templates).find(t=>titleOf(r)===t.title&&r.outcome===t.outcome):null;
+function templateDetails(t:any,body:any,date:string){
+ if(!t||body.template!==t.id||!body.details||typeof body.details!=="object"||Array.isArray(body.details))throw new Fault("Bitte vollständige Vorlagenangaben bestätigen.");
+ const d=body.details;const clean=(v:any,max:number,label:string)=>{if(typeof v!=="string"||!v.trim()||v.trim().length>max||/[\x00-\x1f\x7f]/.test(v))throw new Fault(label+" bitte vollständig angeben.");return v.trim();};
+ const out:Record<string,string>={};
+ if(t.id==="cargo"||t.id==="rope"){const v=d.birthDate;if(typeof v!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(v)||!Number.isFinite(Date.parse(v+"T12:00:00Z"))||new Date(v+"T12:00:00Z").toISOString().slice(0,10)!==v||v>date)throw new Fault("Ungültiges Geburtsdatum.");out.birthDate=v;}
+ if(t.id!=="cargo"){if(body.theory!==true||body.practice!==true)throw new Fault("Theorie und Praxis müssen ausdrücklich bestätigt sein.");out.company=clean(d.company,100,"Unternehmen");out.location=clean(d.location,80,"Schulungsort");}
+ if(t.id==="rope")out.birthPlace=clean(d.birthPlace,80,"Geburtsort");
+ if(t.id==="fire"&&d.department)out.department=clean(d.department,100,"Abteilung / Bereich");
+ return out;
+}
+const eligible=(r:any)=>r.kind==="exam"&&r.outcome==="passed"||isAnnual(r)||!!specialOf(r);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const bucket="abbate-certificate-assets";
 const smtp=()=>({host:Deno.env.get("CERT_SMTP_HOST"),user:Deno.env.get("CERT_SMTP_USER"),pass:Deno.env.get("CERT_SMTP_PASSWORD"),from:Deno.env.get("CERT_SMTP_FROM")});
@@ -30,7 +42,7 @@ async function sendCertificate(admin:any,r:any,pdf:string,expectedEmail:string){
  const s=smtp();let status="uncertain",id=null;
  try{
   const transport=nodemailer.createTransport({host:s.host,port:465,secure:true,auth:{user:s.user,pass:s.pass},connectionTimeout:12000,greetingTimeout:12000,socketTimeout:20000,tls:{rejectUnauthorized:true}});
-  const info=await transport.sendMail({from:{name:"Fahrschule Andreas Abbate",address:s.from!},to:{name:"",address:email},subject:isAnnual(r)?"Dein Nachweis – jährliche Unterweisung":"Dein Zertifikat – bestandene Theorieprüfung",text:isAnnual(r)?"Guten Tag,\n\nim Anhang findest du deinen Teilnahmenachweis zur jährlichen Unterweisung.\n\nViele Grüße\nFahrschule Andreas Abbate":mailText,attachments:[{filename:"Abbate-"+r.reference+".pdf",content:pdf,encoding:"base64",contentType:"application/pdf"}],disableFileAccess:true,disableUrlAccess:true});
+  const info=await transport.sendMail({from:{name:"Fahrschule Andreas Abbate",address:s.from!},to:{name:"",address:email},subject:specialOf(r)?"Dein Schulungsnachweis":isAnnual(r)?"Dein Nachweis – jährliche Unterweisung":"Dein Zertifikat – bestandene Theorieprüfung",text:specialOf(r)?"Guten Tag,\n\nim Anhang findest du deinen Schulungsnachweis der Fahrschule Andreas Abbate.\n\nViele Grüße\nFahrschule Andreas Abbate":isAnnual(r)?"Guten Tag,\n\nim Anhang findest du deinen Teilnahmenachweis zur jährlichen Unterweisung.\n\nViele Grüße\nFahrschule Andreas Abbate":mailText,attachments:[{filename:"Abbate-"+r.reference+".pdf",content:pdf,encoding:"base64",contentType:"application/pdf"}],disableFileAccess:true,disableUrlAccess:true});
   if(info.accepted?.length){status="accepted";id=info.messageId||null;}
  }catch(e){console.error("Certificate SMTP result uncertain",e instanceof Error?e.name:"unknown");}
  const {error:finishError}=await admin.from("abbate_certificates").update({mail_status:status,mail_accepted_at:status==="accepted"?new Date().toISOString():null,mail_message_id:id}).eq("completion_id",r.id).eq("mail_status","sending");
@@ -38,7 +50,7 @@ async function sendCertificate(admin:any,r:any,pdf:string,expectedEmail:string){
 }
 const signaturePath=(school:string)=>school+"/signature.png";
 const textDate=(s:string)=>new Intl.DateTimeFormat("de-DE",{dateStyle:"long",timeZone:"Europe/Berlin"}).format(new Date(s+"T12:00:00Z"));
-async function createPDF(name:string,label:string,record:any,signature:ArrayBuffer,draft=false,field:string|null=null){
+async function createPDF(name:string,label:string,record:any,signature:ArrayBuffer,draft=false,field:string|null=null,special:any=null,details:Record<string,string>={}){
  const pdf=await PDFDocument.create(), p=pdf.addPage([842,595]);
  const serif=await pdf.embedFont(StandardFonts.TimesRoman), bold=await pdf.embedFont(StandardFonts.HelveticaBold), regular=await pdf.embedFont(StandardFonts.Helvetica), italic=await pdf.embedFont(StandardFonts.TimesRomanItalic);
  const ink=rgb(.13,.17,.14), gold=rgb(.63,.53,.30), muted=rgb(.37,.40,.36);
@@ -56,6 +68,52 @@ async function createPDF(name:string,label:string,record:any,signature:ArrayBuff
  center("FAHRSCHULE ANDREAS ABBATE",485,12,bold);
  center("Z E R T I F I K A T",428,42,serif);
  const annual=label===annualLabel;
+ if(special){
+  const sub=special.id==="cargo"?"TEILNAHMEBESCHEINIGUNG":special.id==="rope"?"AUSBILDUNGSNACHWEIS":"AUSBILDUNGSBESCHEINIGUNG";
+  center(sub,403,13,bold,gold);
+  center("Hiermit bestätigen wir, dass",365,12,regular,muted);
+  center(name,333,30,serif);
+  if(special.id==="cargo"){
+   center("Geburtsdatum: "+textDate(details.birthDate),306,12,regular,muted);
+   center("erfolgreich an der Schulung",276,14);
+   center("Ladungssicherung nach VDI 2700ff",245,22,bold);
+   center("am "+textDate(record.completed_at)+" teilgenommen hat.",212,14);
+  }else{
+   if(special.id==="rope"){
+    center("Geburtsdatum: "+textDate(details.birthDate)+"  ·  Geburtsort: "+details.birthPlace,310,11);
+    center("Unternehmen: "+details.company,294,11);
+    center("Fachkunde für das Abseilen aus Höhen und Tiefen",270,18,bold);
+    center("mit persönlichen Absturzschutzausrüstungen",249,16,bold);
+    center(special.standard,232,11,regular,muted);
+    center("Material- und Gerätekunde: Auffanggurte, Seile, Abseil- und Rettungsgeräte",213,11);
+    center("Praktische Übungen: richtiges Anschlagen und Handhabung von Abseilgeräten",198,11);
+    center("Schriftliche und praktische Abschlussprüfung erfolgreich abgelegt.",183,11,bold);
+    center("Gültigkeit laut Ausbildervorgabe: 12 Monate ab Ausstellung.",167,10.5);
+    center("Wiederkehrende Unterweisung mindestens jährlich, inklusive praktischer Übungen.",153,10.5);
+   }else{
+    center("Unternehmen: "+details.company+(details.department?"  ·  Bereich: "+details.department:""),309,11);
+    center("Ausbildung zum Brandschutzhelfer",280,20,bold);
+    center(special.standard,261,11,regular,muted);
+    center("Vorbeugender Brandschutz, Aufgaben der Brandschutzhelfer, Brandlehre",242,11);
+    center("Brandschutzordnung, Brandverhütung, Verhalten im Brandfall, Brandmeldung und Notruf",227,11);
+    center("Brandabschnitte, Brandschutztüren, Flucht- und Rettungswege/-pläne",212,11);
+    center("Evakuierung / Räumung, besondere Risiken auf Baustellen",197,11);
+    center("Abwehrender Brandschutz, Löschmittel, Feuerlöscher, Wandhydranten, Personenbrände",182,11);
+    center("Lernzielkontrolle, Brandschutzpraxis, praktische Löschübung am Fire-Trainer (Wasser)",167,11);
+    center("Theorie und praktische Löschübung erfolgreich absolviert.",152,11,bold);
+   }
+   center("Schulung: "+textDate(record.completed_at)+"  ·  Ort: "+details.location,137,11);
+  }
+  if(special.id==="fire")center("Die betriebliche Bestellung erfolgt gesondert durch den Arbeitgeber.",116,10.5,regular,muted);
+  const sig=await pdf.embedPng(signature),s=Math.min(155/sig.width,47/sig.height);
+  p.drawImage(sig,{x:600-sig.width*s/2,y:65,width:sig.width*s,height:sig.height*s});
+  for(const x of [242,600])p.drawLine({start:{x:x-94,y:63},end:{x:x+94,y:63},color:gold,thickness:.8});
+  const issued=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Berlin"}).format(new Date());
+  at(textDate(issued),242,76);at("Ausstellungsdatum",242,49,bold);at("Andreas Abbate · Dozent & Prüfer",600,49,bold,10);
+  center(draft?"PDF-Vorschau · Noch nicht ausgestellt":"Schulungsnachweis · "+record.reference,34,10,bold,muted);
+  pdf.setTitle("Abbate – "+special.proof);pdf.setAuthor("Fahrschule Andreas Abbate");
+  return await pdf.saveAsBase64();
+ }
  center(annual?"TEILNAHMENACHWEIS":"ERFOLGREICH BESTANDENE THEORIEPRÜFUNG",403,13,bold,gold);
  center("Hiermit bestätigen wir, dass",356,13,regular,muted);
  try{center(name,310,34,serif);}catch(e){if(e instanceof Fault)throw e;throw new Fault("Der Name enthält Zeichen, die die PDF-Schrift noch nicht unterstützt. Kein Zertifikat ausgestellt.");}
@@ -106,13 +164,15 @@ Deno.serve(async req=>{
     return json({signatureReady:true,mailReady:mailReady()});
    }
    const {data:sig}=await admin.storage.from(bucket).download(signaturePath(m.school_id));
-   return json({signatureReady:!!sig,mailReady:mailReady()});
+   return json({signatureReady:!!sig,mailReady:mailReady(),templatesV2:true});
   }
   if(action==="preview"){
    const m=members.find((m:any)=>m.school_id===body.school&&active(m));
    if(!m)throw new Fault("Administratorrechte erforderlich.",403);
    const label=body.label,date=body.completedAt,today=new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Berlin"}).format(new Date());
-   if(typeof label!=="string"||!Object.hasOwn(courses,label)||!uuid.test(String(body.participantId||""))||typeof date!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+"T12:00:00Z"))||new Date(date+"T12:00:00Z").toISOString().slice(0,10)!==date||date>today)throw new Fault("Ungültige Vorschauangaben.");
+   const special=body.template?templates[body.template]:null;
+   if(body.template&&(!special||special.label!==label))throw new Fault("Ungültige Nachweisart.");
+   if(typeof label!=="string"||(!Object.hasOwn(courses,label)&&!special)||!uuid.test(String(body.participantId||""))||typeof date!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+"T12:00:00Z"))||new Date(date+"T12:00:00Z").toISOString().slice(0,10)!==date||date>today)throw new Fault("Ungültige Vorschauangaben.");
    const {data:learner,error:learnerError}=await caller.from("abbate_memberships").select("user_id").eq("school_id",m.school_id).eq("user_id",body.participantId).eq("role","learner").maybeSingle();
    if(learnerError||!learner)throw new Fault("Teilnehmer nicht verfügbar.",404);
    const {data:profile,error:profileError}=await caller.from("abbate_profiles").select("display_name").eq("school_id",m.school_id).eq("user_id",learner.user_id).maybeSingle();
@@ -121,7 +181,8 @@ Deno.serve(async req=>{
    if(sigError||!sig)throw new Fault("Die freigegebene Unterschrift fehlt.",409);
    const field=label===annualLabel?body.field:null;
    if(label===annualLabel&&(typeof field!=="string"||!fields.includes(field)))throw new Fault("Bitte gültigen Fachbereich auswählen.");
-   const pdf=await createPDF(profile.display_name,label,{completed_at:date,reference:"ENTWURF"},await sig.arrayBuffer(),true,field);
+   const details=special?templateDetails(special,body,date):{};
+   const pdf=await createPDF(profile.display_name,label,{completed_at:date,reference:"ENTWURF"},await sig.arrayBuffer(),true,field,special,details);
    return json({pdf,draft:true});
   }
   if(action==="list"){
@@ -157,13 +218,15 @@ Deno.serve(async req=>{
   if(body.confirmed!==true)throw new Fault("Bitte Ausstellung ausdrücklich bestätigen.");
   if(existing)return json({pdf:existing.pdf_base64,reference:r.reference,issuedAt:existing.issued_at,mailStatus:existing.mail_status||"not_sent"});
   const title=(r.abbate_courses as any)?.title||"",suffix=" · Theorieprüfung";
-  const label=isAnnual(r)?annualLabel:title.endsWith(suffix)?title.slice(0,-suffix.length):"";
-  if(!Object.hasOwn(courses,label)||(label===annualLabel&&!isAnnual(r)))throw new Fault("Bitte einen Prüfungseintrag aus der Zertifikatsvorbereitung auswählen.");
+  const special=specialOf(r);
+  const label=special?special.label:isAnnual(r)?annualLabel:title.endsWith(suffix)?title.slice(0,-suffix.length):"";
+  if((!Object.hasOwn(courses,label)&&!special)||(label===annualLabel&&!isAnnual(r)))throw new Fault("Bitte einen Prüfungseintrag aus der Zertifikatsvorbereitung auswählen.");
   const {data:profile,error:profileError}=await caller.from("abbate_profiles").select("display_name").eq("school_id",r.school_id).eq("user_id",r.participant_id).maybeSingle();
   if(profileError||!profile?.display_name)throw new Fault("Teilnehmername fehlt.");
   const {data:sig,error:sigError}=await admin.storage.from(bucket).download(signaturePath(r.school_id));
   if(sigError||!sig)throw new Fault("Die freigegebene Unterschrift muss zuerst hinterlegt werden.",409);
-  const pdf=await createPDF(profile.display_name,label,r,await sig.arrayBuffer(),false,isAnnual(r)?annualFields.get(title)||null:null);
+  const details=special?templateDetails(special,body,r.completed_at):{};
+  const pdf=await createPDF(profile.display_name,label,r,await sig.arrayBuffer(),false,isAnnual(r)?annualFields.get(title)||null:null,special,details);
   const {error:saveError}=await admin.from("abbate_certificates").insert({completion_id:r.id,issued_by:auth.user.id,pdf_base64:pdf});
   if(saveError){if(saveError.code==="23505"){const {data:stored}=await admin.from("abbate_certificates").select("pdf_base64,invalidated_at,issued_at,mail_status").eq("completion_id",r.id).maybeSingle();if(stored&&!stored.invalidated_at)return json({pdf:stored.pdf_base64,reference:r.reference,issuedAt:stored.issued_at,mailStatus:stored.mail_status||"not_sent"});}throw new Fault("Zertifikat konnte nicht gespeichert werden.",409);}
   return json({pdf,reference:r.reference,mailStatus:"not_sent"});

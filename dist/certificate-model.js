@@ -12,6 +12,8 @@
     {id:'abseilen',label:'Abseilen aus Höhen',standard:'Fachlicher Bezug: DGUV Regeln 112-198 und 112-199'},
     {id:'jaehrliche-unterweisung',label:'Jährliche Unterweisung',standard:'DGUV Vorschrift 1 § 4; bei Arbeitsmitteln § 12 BetrSichV',kind:'instruction'}
   ].map(Object.freeze));
+  const templates=Object.freeze(Object.fromEntries(Object.entries({"cargo":{"id":"cargo","course":"ladungssicherung","label":"Ladungssicherung","title":"Ladungssicherung nach VDI 2700ff · Teilnahmebescheinigung","outcome":"attended","proof":"Teilnahmebescheinigung","standard":"VDI 2700ff"},"rope":{"id":"rope","course":"abseilen","label":"Abseilen aus Höhen","title":"Abseilen aus Höhen und Tiefen · Ausbildungsnachweis","outcome":"passed","proof":"Ausbildungsnachweis (Theorie & Praxis)","standard":"DGUV Regeln 112-198 und 112-199"},"fire":{"id":"fire","course":"brandschutzhelfer","label":"Brandschutzhelfer","title":"Brandschutzhelfer · Ausbildungsbescheinigung","outcome":"attended","proof":"Ausbildungsbescheinigung (Theorie & Praxis)","standard":"§ 10 ArbSchG · ASR A2.2 · DGUV Information 205-023"}}).map(([k,v])=>[k,Object.freeze(v)])));
+  const specialRecord=r=>r.kind==='training'&&Object.values(templates).some(t=>r.title===t.title&&r.outcome===t.outcome);
   const fields=Object.freeze(courses.filter(c=>!c.kind));
   const annualPrefix='Jährliche Unterweisung · ';
   const annualSuffix=' · Unterweisungsnachweis';
@@ -20,7 +22,10 @@
   const dateOK=v=>/^\d{4}-\d{2}-\d{2}$/.test(v||'')&&!isNaN(Date.parse(v+'T12:00:00Z'))&&new Date(v+'T12:00:00Z').toISOString().slice(0,10)===v;
   function prepare(person,values,asOf=today()){
     if(!person||person.role!=='learner'||!person.id||!String(person.name||'').trim())throw Error('Bitte ein Teilnehmerkonto auswählen.');
-    const course=courses.find(c=>c.id===values.course);
+    const course=courses.find(c=>c.id===values.course)||(values.course==='brandschutzhelfer'?{id:'brandschutzhelfer',label:'Brandschutzhelfer',standard:templates.fire.standard}:null);
+    const type=values.proofType||'theory';
+    const template=type==='theory'?null:templates[type];
+    if((type!=='theory'&&(!template||template.course!==values.course))||(values.course==='brandschutzhelfer'&&type!=='fire'))throw Error('Bitte eine passende Nachweisart auswählen.');
     if(!course)throw Error('Bitte den Ausbildungsbereich auswählen.');
     if(!dateOK(values.completedAt)||values.completedAt>asOf)throw Error('Bitte das tatsächliche Datum angeben; es darf nicht in der Zukunft liegen.');
     if(!['none','email'].includes(values.notification))throw Error('Bitte eine Versandoption auswählen.');
@@ -28,6 +33,21 @@
     if(course.kind==='instruction'&&!field)throw Error('Bitte den unterwiesenen Fachbereich auswählen.');
     const email=String(person.email||'').trim();
     if(values.notification==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Für den E-Mail-Versand fehlt eine gültige Teilnehmeradresse.');
+    if(template){
+      const clean=(v,max,label)=>{const s=String(v||'').trim();if(!s||s.length>max||/[\x00-\x1f\x7f]/.test(s))throw Error(label+' bitte vollständig angeben.');return s;};
+      const details={};
+      if(template.id==='cargo'||template.id==='rope'){
+        if(!dateOK(values.birthDate)||values.birthDate>values.completedAt)throw Error('Bitte gültiges Geburtsdatum angeben.');
+        details.birthDate=values.birthDate;
+      }
+      if(template.id!=='cargo'){details.company=clean(values.company,100,'Unternehmen');details.location=clean(values.location,80,'Schulungsort');}
+      if(template.id==='rope')details.birthPlace=clean(values.birthPlace,80,'Geburtsort');
+      if(template.id==='fire')details.department=String(values.department||'').trim();
+      if(details.department&&(details.department.length>100||/[\x00-\x1f\x7f]/.test(details.department)))throw Error('Bitte gültigen Einsatzbereich eingeben.');
+      const theory=values.theoryConfirmed==='yes',practice=values.practiceConfirmed==='yes';
+      if(template.id!=='cargo'&&(!theory||!practice))throw Error('Bitte Theorie und praktische Durchführung ausdrücklich bestätigen.');
+      return Object.freeze({student:person.id,name:person.name,email,course:course.id,label:template.label,standard:template.standard,completedAt:values.completedAt,notification:values.notification,field:null,title:template.title,kind:'training',outcome:template.outcome,template:template.id,details:Object.freeze(details),theory,practice});
+    }
     return Object.freeze({student:person.id,name:person.name,email,course:course.id,label:course.label,standard:course.standard,completedAt:values.completedAt,notification:values.notification,field:field?.label||null,title:field?annualPrefix+field.label+annualSuffix:course.label+' · Theorieprüfung',kind:course.kind||'exam',outcome:course.kind==='instruction'?'attended':'passed'});
   }
   function nextDue(date){
@@ -45,5 +65,5 @@
     }
     return [...latest.values()].map(r=>({...r,due:nextDue(r.completedAt)})).map(r=>({...r,days:(Date.parse(r.due+'T00:00:00Z')-Date.parse(asOf+'T00:00:00Z'))/86400000})).filter(r=>r.days<=windowDays).sort((a,b)=>a.due.localeCompare(b.due));
   }
-  const api=Object.freeze({courses,fields,annualField,today,prepare,nextDue,reminders});if(typeof module!=='undefined'&&module.exports)module.exports=api;root.ABBATE_CERTIFICATES=api;
+  const api=Object.freeze({courses,fields,annualField,today,prepare,nextDue,reminders,templates,specialRecord});if(typeof module!=='undefined'&&module.exports)module.exports=api;root.ABBATE_CERTIFICATES=api;
 })(globalThis);
