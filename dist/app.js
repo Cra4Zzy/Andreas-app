@@ -504,7 +504,7 @@ async function checkAccess(){
   const work=(async()=>{
     try{
       const me=await B.identity();
-      if(!me){location.replace('./pruefung.html');return false;}
+      if(!me){location.replace('./konto.html');return false;}
       if(!await B.termsAccepted()){location.replace('./konto.html#bedingungen');return false;}
       if(!active(me)){location.replace('./nachweise.html');return false;}
       data.students=[me];return true;
