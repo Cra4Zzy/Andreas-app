@@ -5,7 +5,7 @@ const vm=require('node:vm');
 const fs=require('node:fs');
 const app=fs.readFileSync('dist/app.js','utf8');
 const begin=app.indexOf('const ROUND_QUESTION_LIMIT=20;');
-const end=app.indexOf('function startRun(',begin);
+const end=app.indexOf('async function startRun(',begin);
 assert.ok(begin>0&&end>begin,'Adaptive picker must be present');
 const pickerCode=app.slice(begin,end)+'\nglobalThis.pick=selectRoundQuestions;globalThis.state=questionLearningState;';
 const BASE=Date.parse('2026-11-12T12:00:00Z');
