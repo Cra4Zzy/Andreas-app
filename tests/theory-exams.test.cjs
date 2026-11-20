@@ -21,7 +21,7 @@ test('actual PostgreSQL exam start, scoring, retry, staff review and isolation',
   create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
   create function auth.jwt() returns jsonb language sql stable as $$select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb$$;
   grant execute on function auth.uid(),auth.jwt() to authenticated;`);
-  for(const name of ['schema','accounts','live','theory-exams'])await db.exec(fs.readFileSync('backend/'+name+'.sql','utf8'));
+  for(const name of ['schema','accounts','live','theory-exams','guest-theory-exams','account-only-theory-exams','mandatory-exam-completion'])await db.exec(fs.readFileSync('backend/'+name+'.sql','utf8'));
   await db.exec(`insert into abbate_schools values('${school}','Test'),('${otherSchool}','Other');insert into abbate_private.registration_settings values(true,'${school}');`);
   for(const id of [admin,alice,bob,foreign]){await db.query('insert into auth.users(id,email) values($1,$2)',[id,id+'@example.invalid']);await db.query('insert into auth.sessions(id,user_id) values($1,$2)',[sid(id),id]);}
   await db.exec(`update abbate_memberships set role='admin',access_status='active' where user_id='${admin}';update abbate_memberships set access_status='active',access_until='2099-01-01' where user_id in ('${alice}','${bob}');insert into abbate_memberships(school_id,user_id,role,access_status) values('${otherSchool}','${foreign}','admin','active');`);
@@ -29,6 +29,8 @@ test('actual PostgreSQL exam start, scoring, retry, staff review and isolation',
   await as(alice);const start=()=>value("select abbate_exam_start($1,'abseilen','de') as result",[school]);
   const a=await start();assert.equal(a.ids.length,20);assert.equal(new Set(a.ids).size,20);assert.ok(a.ids.every(id=>keys.get(id).course==='abseilen'));assert.equal((await start()).id,a.id);
   assert.deepEqual(Object.keys(a).sort(),['course','id','ids','language','started_at']);
+  await assert.rejects(value("select abbate_exam_start($1,'krane','de') as result",[school]),/EXAM_IN_PROGRESS/);
+  await assert.rejects(value('select abbate_exam_cancel($1) as result',[a.id]),/permission denied/i);
   await assert.rejects(db.query('select * from abbate_private.exam_keys'),/permission denied/i);
   await assert.rejects(db.query('select * from abbate_private.exam_bank'),/permission denied/i);
   await assert.rejects(value('select abbate_exam_submit($1,$2::jsonb) as result',[a.id,JSON.stringify({fake:0})]),/Invalid answers/);
@@ -38,7 +40,8 @@ test('actual PostgreSQL exam start, scoring, retry, staff review and isolation',
   const retry=await value('select abbate_exam_submit($1,$2::jsonb) as result',[a.id,'{}']);assert.equal(retry.score,15);assert.equal(retry.submitted_at,result.submitted_at);
   await assert.rejects(db.query("update public.abbate_exam_attempts set score=20"),/permission denied/i);
   await assert.rejects(value("select abbate_exam_review($1,'passed') as result",[a.id]),/Staff access/);
-  const b=await start();assert.notEqual(b.id,a.id);await value('select abbate_exam_cancel($1) as result',[b.id]);await assert.rejects(value('select abbate_exam_submit($1,$2::jsonb) as result',[b.id,'{}']),/cancelled/);
+  await assert.rejects(start(),/DAILY_EXAM_LIMIT/);
+  await assert.rejects(value("select abbate_exam_start($1,'gabelstapler','de') as result",[school]),/DAILY_EXAM_LIMIT/);
   await as(bob);assert.equal((await db.query('select * from abbate_exam_attempts')).rows.length,0);await assert.rejects(value('select abbate_exam_submit($1,$2::jsonb) as result',[a.id,'{}']),/not available/);
   await as(foreign);assert.equal((await db.query('select * from abbate_exam_attempts')).rows.length,0);await assert.rejects(value("select abbate_exam_review($1,'failed') as result",[a.id]),/Staff access/);
   await as(admin);assert.equal((await db.query('select * from abbate_exam_attempts where submitted_at is not null')).rows.length,1);const assessed=await value("select abbate_exam_review($1,'passed') as result",[a.id]);assert.equal(assessed.review,'passed');assert.equal(assessed.score,15);assert.equal(assessed.reviewed_by,admin);

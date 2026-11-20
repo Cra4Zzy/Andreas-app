@@ -222,3 +222,17 @@ main{max-width:1500px;padding:clamp(27px,3.6vw,51px) clamp(22px,4.2vw,68px) 56px
 .question-illustration-large[hidden]{display:none}
 
 .exam-locked .desktop-nav,.exam-locked #mobile-nav,.exam-locked .header-tools,.exam-locked .page-footer{display:none!important}.exam-locked .brand{pointer-events:none}.exam-locked .quiz-shell{margin-bottom:30px}
+
+/* A recognizable, direct route to the learner's personal history. */
+.desktop-nav .nav-progress{gap:7px;color:#254d45;background:#dce8da}
+.desktop-nav .nav-progress svg{width:18px;height:18px;flex:none}
+.desktop-nav .nav-progress.active{background:#254d45;color:#fff;box-shadow:none}
+.header-progress{display:none}
+.learning-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 27px}
+.learning-overview>div{min-width:0;background:#fffefa;border:1px solid #dce5de;border-radius:15px;padding:16px 20px;display:flex;flex-direction:column;gap:4px}
+.learning-overview small{font-size:13px;color:#536960;font-weight:700}
+.learning-overview strong{font-family:var(--heading);font-size:clamp(21px,3.2vw,32px);color:#23463e;line-height:1.2}
+@media(max-width:900px){.desktop-nav .nav-progress{gap:4px}.desktop-nav .nav-progress svg{display:none}}
+@media(max-width:650px){.header-inner{flex-wrap:wrap;row-gap:9px}.header-progress{flex:0 0 100%;display:flex;align-items:center;gap:9px;background:#eaf0e7;border:1px solid #dce6d9;color:#254d45;border-radius:10px;padding:9px 12px;font-size:14px;font-weight:700;line-height:22px;text-decoration:none}.header-progress svg{height:18px;width:18px;flex:none}.header-progress svg:last-child{margin-left:auto}.header-progress.active{background:#254d45;color:#fff}.learning-overview{gap:7px}.learning-overview>div{padding:11px 9px}.learning-overview small{font-size:12px}}
+.header-progress:focus-visible{outline:3px solid #b88721;outline-offset:2px}
+.exam-locked .header-progress{display:none!important}

@@ -124,7 +124,13 @@ function heading(label,title,description='',action='') { return `<div class="pag
 function navigation() {
   const nav=[['start','home',tr('home')],['lernen','book',tr('learn')],['pruefung','file',tr('exam')],['ergebnisse','chart',tr('results')]];
   const current=route==='uebung'?(run?.mode==='learn'?'lernen':'pruefung'):route==='ergebnis'?'ergebnisse':route;
-  $('#desktop-nav').innerHTML=nav.map(([id,,name])=>`<a href="#${id}" class="${current===id?'active':''}" ${current===id?'aria-current="page"':''}>${name}</a>`).join('')+`<a href="./nachweise.html">${esc(passLabel())}</a>`;
+  const progressLabel=selectedLanguage==='de'?'Mein Lernstand':tr('results');
+  const progressCurrent=current==='ergebnisse';
+  const shortcut=$('#header-progress');
+  shortcut.classList.toggle('active',progressCurrent);
+  if(progressCurrent)shortcut.setAttribute('aria-current','page');else shortcut.removeAttribute('aria-current');
+  shortcut.innerHTML=icon('chart')+'<span>'+esc(progressLabel)+'</span>'+icon('arrow');
+  $('#desktop-nav').innerHTML=nav.map(([id,,name])=>`<a href="#${id}" class="${current===id?'active':''}${id==='ergebnisse'?' nav-progress':''}" ${current===id?'aria-current="page"':''}>${id==='ergebnisse'?icon('chart')+esc(progressLabel):name}</a>`).join('')+`<a href="./nachweise.html">${esc(passLabel())}</a>`;
   $('#mobile-nav').innerHTML=nav.map(([id,i,name])=>`<a href="#${id}" class="${current===id?'active':''}" ${current===id?'aria-current="page"':''}>${icon(i)}${name}</a>`).join('')+`<a href="./nachweise.html">${icon('shield')}${esc(passLabel())}</a>`;
   document.documentElement.lang=selectedLanguage;
   $('#language-code').textContent=selectedLanguage.toUpperCase();
@@ -373,9 +379,14 @@ function resultView() {
   '<a class="secondary" href="#ergebnisse">Zur Lernhistorie</a></div><p class="form-caption">Übungsergebnis · kein offizieller Prüfungsnachweis.</p></section>'+
   '<section class="compact-result-review" aria-label="Fehlerübersicht"><div class="compact-result-review-heading"><div><span class="overline">Deine Nachbereitung</span><h2>Fehler ansehen <span>('+missed+')</span></h2></div><small>Zum Öffnen antippen</small></div>'+reviewCards(r)+'</section></div>';
 }
+function learningOverview(list){
+  const rounds=list.length,exams=data.exams.length,correct=new Set(mastered()).size;
+  const metrics=[['Gelernte Fragen',correct+' / '+QUESTIONS.length],['Lernrunden',rounds],['Theorieprüfungen',exams]];
+  return '<section class="learning-overview" aria-label="Mein Lernstand">'+metrics.map(([label,value])=>'<div><small>'+esc(label)+'</small><strong>'+esc(value)+'</strong></div>').join('')+'</section>';
+}
 function results() {
   const list=data.results.filter(r=>r.student===student().id).slice().reverse();
-  const header=heading('Prüfungen & Lernen','Deine Ergebnisse','Abgegebene Theorieprüfungen und Lernrunden werden getrennt angezeigt.',accessLine())+officialExamHistory();
+  const header=heading('Prüfungen & Lernen','Deine Ergebnisse','Dein persönlicher Lernstand mit allen bisherigen Lernrunden und Theorieprüfungen.',accessLine())+learningOverview(list)+officialExamHistory();
   if(!list.length)return header+'<section class="empty-state"><span class="topic-symbol">'+icon('chart')+'</span><h2>Noch keine Übungsrunden</h2><p>Nach deiner ersten abgeschlossenen Runde erscheinen hier die kompakte Auswertung, aufklappbare Fehler und das Fehlertraining.</p><button class="primary" data-action="start-learn">Lernrunde starten '+icon('arrow')+'</button></section>';
   return header+'<div class="result-history-intro"><div><span class="overline">Dein Lernverlauf</span><strong>'+list.length+' abgeschlossene '+(list.length===1?'Runde':'Runden')+'</strong></div><span>Fehler anzeigen und gezielt üben</span></div><div class="result-history-list">'+list.map(r=>{
     const total=Number(r.total)||r.ids?.length||3,score=Number(r.score)||0,percentage=total?Math.round(score/total*100):0;
