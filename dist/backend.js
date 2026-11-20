@@ -165,6 +165,7 @@
    fail(r.error);return r.data;
  }
  const examFields='id,participant_id,guest_name,course,language,started_at,submitted_at,score,total,review,reviewed_at,bank_version';
+ async function openExam(){if(!me?.id)return null;const r=await client.from('abbate_exam_attempts').select('id,course,language,started_at,question_ids').eq('participant_id',me.id).is('submitted_at',null).is('cancelled_at',null).order('started_at',{ascending:false}).limit(1).maybeSingle();fail(r.error);return r.data;}
  async function listExams(){
    if(!me?.id)throw Error('Bitte erneut anmelden.');
    const query=()=>client.from('abbate_exam_attempts').select(examFields).eq('school_id',me.school).not('submitted_at','is',null).order('submitted_at',{ascending:false}).order('id');
@@ -198,7 +199,7 @@
    if(/sign in again/i.test(text))return 'Bitte melde dich zur Bestätigung erneut an.';
    return 'Die Anfrage konnte nicht abgeschlossen werden. Bitte neu laden oder die Fahrschule kontaktieren.';
  }
- globalThis.ABBATE_BACKEND={client,identity,state,setRole,setAccess,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,listExams,startExam,submitExam,cancelExam,reviewExam,examDetail,message,
+ globalThis.ABBATE_BACKEND={client,identity,state,setRole,setAccess,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,listExams,openExam,startExam,submitExam,cancelExam,reviewExam,examDetail,message,
    isStaff:p=>!!p&&['admin','trainer'].includes(p.role)&&p.access==='active'&&(!p.until||p.until>=globalThis.ABBATE_ACCOUNTS.today()),
    get me(){return me;}};
 })();
