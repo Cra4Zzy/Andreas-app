@@ -12,7 +12,7 @@ test('abseiling has 50 distinct questions, balanced answer positions and labels 
  for(const phrase of ['Abseilen aus Höhen – Theorie','Ausrüstung, Vorbereitung und Rettungsplanung sicher verstehen.','Abseilen aus Höhen – Theorie üben'])assert.equal(Object.keys(ctx.ABBATE_I18N_MODERN[phrase]).length,25);
 });
 test('abseiling selection and history stay within the new category',()=>{
- const app=read('dist/app.js');const begin=app.indexOf('const ROUND_QUESTION_LIMIT=20;'),end=app.indexOf('function startRun(',begin);
+ const app=read('dist/app.js');const begin=app.indexOf('const ROUND_QUESTION_LIMIT=20;'),end=app.indexOf('async function startRun(',begin);
  const context={data:{results:[]},student:()=>({id:'learner'}),courseQuestions:id=>bank.questions.filter(q=>q.course===id),question:id=>bank.questions.find(q=>q.id===id),Math,Map,Set,Date};
  vm.runInNewContext(app.slice(begin,end)+';globalThis.pick=selectRoundQuestions;',context);
  const first=Array.from(context.pick('abseilen'));assert.equal(first.length,20);assert.ok(first.every(id=>id.startsWith('as-')));
@@ -30,10 +30,11 @@ test('annual instruction is stored through the supported instruction kind and ap
   assert.ok(M.ownPass(state,person.id).records.some(r=>r.title===context.values.title&&r.kind==='instruction'));
  }
 });
-test('new category supports exam simulation and repeats only mistakes with the same answer key',()=>{
- const app=read('dist/app.js');const context={activeCourseId:'gabelstapler',COURSES:Object.keys(bank.courses).map(id=>({id})),run:null,latestResult:null,active:()=>true,student:()=>({id:'learner'}),selectRoundQuestions:id=>bank.questions.filter(q=>q.course===id).slice(0,20).map(q=>q.id),question:id=>bank.questions.find(q=>q.id===id),close(){},go(){},toast(){},Date};
- vm.runInNewContext(app.slice(app.indexOf('function startRun('),app.indexOf('function quizView()'))+app.slice(app.indexOf('function wrongQuestionIds('),app.indexOf('function reviewCards(')),context);
- context.startRun('exam',undefined,'abseilen');assert.equal(context.run.mode,'exam');assert.equal(context.run.course,'abseilen');assert.equal(context.run.ids.length,20);
+test('abseiling uses a server-selected exam and repeats only mistakes during learning',async()=>{
+ const app=read('dist/app.js'),ids=questions.slice(0,20).map(q=>q.id);
+ const context={activeCourseId:'gabelstapler',COURSES:Object.keys(bank.courses).map(id=>({id})),run:null,latestResult:null,active:()=>true,student:()=>({id:'learner'}),selectRoundQuestions(){throw Error('Exam must not use adaptive picker');},question:id=>bank.questions.find(q=>q.id===id),close(){},go(){},toast(message){throw Error(message);},Date,startingRun:false,selectedLanguage:'de',confirm:()=>true,checkAccess:async()=>true,B:{me:{role:'learner'},startExam:async(course,language)=>{assert.equal(course,'abseilen');assert.equal(language,'de');return {id:'server-attempt',course,ids:Array.from(ids),started_at:'2026-11-20T10:00:00Z',language};}}};
+ vm.runInNewContext(app.slice(app.indexOf('async function startRun('),app.indexOf('// Optional visual context'))+app.slice(app.indexOf('function wrongQuestionIds('),app.indexOf('function reviewCards(')),context);
+ await context.startRun('exam',undefined,'abseilen');assert.equal(context.run.mode,'exam');assert.equal(context.run.course,'abseilen');assert.equal(context.run.attemptId,'server-attempt');assert.deepEqual(Array.from(context.run.ids),Array.from(ids));
  const [correctId,wrongId,unansweredId]=context.run.ids;
  const result={course:'abseilen',ids:[correctId,wrongId,unansweredId],answers:{[correctId]:context.question(correctId).correct,[wrongId]:(context.question(wrongId).correct+1)%3}};
  context.run=null;context.startMistakeTraining(result);assert.equal(context.run.course,'abseilen');assert.equal(context.run.training,true);assert.deepEqual(Array.from(context.run.ids),[wrongId,unansweredId]);assert.equal(context.run.mode,'learn');

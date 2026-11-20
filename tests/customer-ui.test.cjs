@@ -96,7 +96,7 @@ test('cached PWA shell uses current app JavaScript and CSS',()=>{
   assert.ok(worker.includes('"./'+experienceAsset+'"'),'Service worker must cache the exact experience CSS version from HTML');
   assert.match(read('dist/index.html'),/practice-bank\.js\?v=1/);
   assert.match(worker,/const CACHE='abbate-learning-v\d+'/);
-  for(const file of ['i18n-ru.js?v=1','i18n-uk.js?v=1','i18n-modern.js?v=5','i18n.js?v=12']){
+  for(const file of ['i18n-ru.js?v=1','i18n-uk.js?v=1','i18n-modern.js?v=6','i18n.js?v=12']){
     assert.ok(html.includes(file),'HTML missing '+file);
     assert.ok(worker.includes(file),'Service worker missing '+file);
   }
@@ -107,10 +107,10 @@ test('homepage hero identifies the certified examination provider',()=>{
   assert.match(read('dist/experience.css'),/\.hero-certification\s*\{/);
 });
 
-test('learning UI stays focused and identifies simulation honestly',()=>{
+test('learning UI stays focused and identifies recorded theory examination honestly',()=>{
   assert.doesNotMatch(read('dist/index.html'),/id="download-banner"/);
   assert.doesNotMatch(read('dist/index.html'),/download-banner\.css/);
-  assert.match(read('dist/app.js'),/Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt/);
+  assert.match(read('dist/app.js'),/Theorieprüfungen werden serverseitig ausgewertet und an die Fahrschule übermittelt/);
   assert.match(read('dist/styles.css'),/\.exam-disclaimer/);
 });
 
@@ -132,10 +132,10 @@ test('server-side desktop web updates verify release revisions and protect in-pr
   assert.doesNotThrow(()=>new (require('node:vm').Script)(manager));
 });
 
-test('exam disclaimer retains the non-certification notice without the editorial review sentence',()=>{
+test('exam disclaimer identifies school responsibility and separate practical qualifications',()=>{
   const app=read('dist/app.js');
   const disclaimer=app.match(/<p class="exam-disclaimer">([^<]+)<\/p>/);
-  assert.equal(disclaimer?.[1],'Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt.');
+  assert.equal(disclaimer?.[1],"Theorieprüfungen werden serverseitig ausgewertet und an die Fahrschule übermittelt. Die fachliche Bewertung erfolgt durch die Fahrschule; praktische Prüfungen und Unterweisungen bleiben gesondert erforderlich.");
   const context={};
   require('node:vm').runInNewContext(read('dist/i18n-modern.js'),context);
   const translated=context.ABBATE_I18N_MODERN[disclaimer[1]];
