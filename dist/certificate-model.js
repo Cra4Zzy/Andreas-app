@@ -42,7 +42,7 @@
       }
       if(template.id!=='cargo'){details.company=clean(values.company,100,'Unternehmen');details.location=clean(values.location,80,'Schulungsort');}
       if(template.id==='rope')details.birthPlace=clean(values.birthPlace,80,'Geburtsort');
-      if(template.id==='fire')details.department=String(values.department||'').trim();
+      if(template.id==='fire'&&String(values.department||'').trim())details.department=String(values.department).trim();
       if(details.department&&(details.department.length>100||/[\x00-\x1f\x7f]/.test(details.department)))throw Error('Bitte gültigen Einsatzbereich eingeben.');
       const theory=values.theoryConfirmed==='yes',practice=values.practiceConfirmed==='yes';
       if(template.id!=='cargo'&&(!theory||!practice))throw Error('Bitte Theorie und praktische Durchführung ausdrücklich bestätigen.');

@@ -31,7 +31,7 @@ test('rate-limit feedback handles the actual Supabase cooldown error',()=>{
 });
 
 test('login screen loads updated registration scripts and styling',()=>{
-  assert.match(html,/portal\.js\?v=20/);
+  assert.match(html,/portal\.js\?v=21/);
   assert.match(html,/portal\.css\?v=9/);
   assert.match(html,/backend\.js\?v=8/);
 });

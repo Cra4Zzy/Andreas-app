@@ -24,3 +24,5 @@ test('server template rules match the client and reject forged or incomplete att
  }
  assert.ok(S.eligible({kind:'exam',outcome:'passed'}));
 });
+
+test('optional department is omitted when blank and kept when supplied',()=>{const d={...v,course:'brandschutzhelfer',proofType:'fire'};for(const department of ['', '  ', undefined])assert.equal(Object.hasOwn(C.prepare(p,{...d,department},'2026-11-19').details,'department'),false);assert.equal(C.prepare(p,{...d,department:' Lagerhalle '},'2026-11-19').details.department,'Lagerhalle');});

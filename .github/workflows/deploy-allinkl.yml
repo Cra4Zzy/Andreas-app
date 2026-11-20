@@ -41,6 +41,11 @@ jobs:
           npm test
           npm run build
 
+      - name: Verify real certificate PDFs with synthetic data
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts pdf-lib@1.17.1
+          node scripts/verify-certificate-pdfs.cjs
+
       - name: Assemble public website only
         shell: bash
         run: |
