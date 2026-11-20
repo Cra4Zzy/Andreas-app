@@ -164,6 +164,18 @@
    const r=await client.rpc('abbate_merge_practice',{p_payload:payload});
    fail(r.error);return r.data;
  }
+ const examFields='id,participant_id,course,language,started_at,submitted_at,score,total,review,reviewed_at,bank_version';
+ async function listExams(){
+   if(!me?.id)throw Error('Bitte erneut anmelden.');
+   const query=()=>client.from('abbate_exam_attempts').select(examFields).eq('school_id',me.school).not('submitted_at','is',null).order('submitted_at',{ascending:false}).order('id');
+   return (await allPages(query)).data;
+ }
+ async function examRpc(name,args){if(!me?.id)throw Error('Bitte erneut anmelden.');const r=await client.rpc(name,args);fail(r.error);return r.data;}
+ async function startExam(course,language){return examRpc('abbate_exam_start',{p_school:me.school,p_course:course,p_language:language});}
+ async function submitExam(id,answers){return examRpc('abbate_exam_submit',{p_attempt:id,p_answers:answers});}
+ async function cancelExam(id){return examRpc('abbate_exam_cancel',{p_attempt:id});}
+ async function reviewExam(id,review){if(!['admin','trainer'].includes(me?.role))throw Error('Staff access required');return examRpc('abbate_exam_review',{p_attempt:id,p_review:review});}
+ async function examDetail(id){const r=await client.from('abbate_exam_attempts').select(examFields+',details').eq('id',id).eq('school_id',me.school).not('submitted_at','is',null).single();fail(r.error);return r.data;}
  function message(error){
    const text=String(error?.message||'');
    if(/invalid login|invalid_credentials/i.test(text))return 'E-Mail oder Passwort stimmt nicht.';
@@ -186,7 +198,7 @@
    if(/sign in again/i.test(text))return 'Bitte melde dich zur Bestätigung erneut an.';
    return 'Die Anfrage konnte nicht abgeschlossen werden. Bitte neu laden oder die Fahrschule kontaktieren.';
  }
- globalThis.ABBATE_BACKEND={client,identity,state,setRole,setAccess,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,message,
+ globalThis.ABBATE_BACKEND={client,identity,state,setRole,setAccess,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,listExams,startExam,submitExam,cancelExam,reviewExam,examDetail,message,
    isStaff:p=>!!p&&['admin','trainer'].includes(p.role)&&p.access==='active'&&(!p.until||p.until>=globalThis.ABBATE_ACCOUNTS.today()),
    get me(){return me;}};
 })();

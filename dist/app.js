@@ -95,7 +95,7 @@ const COURSES=[{"id":"gabelstapler","name":"Gabelstapler","desc":"Fahrbetrieb, F
 let activeCourseId='gabelstapler';
 const courseQuestions=id=>QUESTIONS.filter(q=>(q.course||'gabelstapler')===id);
 const courseLabel=id=>I18N.text(COURSES.find(c=>c.id===id)?.name||'Gabelstapler');
-let data={selected:null,students:[],results:[],mastered:{}};
+let data={selected:null,students:[],results:[],mastered:{},exams:[],examUnavailable:false};
 let run=null, latestResult=null, search='', deferredInstall=null, toastTimer=null, pendingRoute=null;
 const student = () => data.students.find(s=>s.id===data.selected)||{id:'guest',name:'Gast',email:'',until:offsetDate(-1),access:'pending'};
 const question = id => QUESTIONS.find(q=>q.id===id)||LEGACY_GRADED_QUESTIONS.find(q=>q.id===id);
@@ -158,7 +158,7 @@ function installStrip() { return isAppMode()?'':`<aside class="install-strip"><i
 function home() {
   const name=esc(student().name.split(' ')[0]), learned=mastered().length, total=QUESTIONS.length, ok=active(student());
   return heading('Lernübersicht',`Willkommen, ${name}.`,'',accessLine())+languageStatus()+`
-  <section class="home-hero"><div class="hero-text"><div class="course-label"><span></span>Gabelstapler · Dein Theorietraining</div><h2>${esc(I18N.t(20))}</h2><p>Übe die theoretischen Grundlagen für den sicheren Umgang mit Gabelstaplern.</p><div class="hero-actions"><button class="primary" data-action="${ok?'start-learn':'access'}" data-course="gabelstapler">${ok?(learned?'Weiterlernen':'Lernrunde starten'):'Zugang ansehen'} ${icon(ok?'arrow':'lock')}</button><a class="text-link" href="#pruefung">Prüfung vorbereiten ${icon('arrow')}</a></div><div class="hero-proof">${icon('clock')}Übungsrunden ohne Zeitlimit.</div><div class="hero-certification">${icon('check')}<span>IHK-zertifizierter Prüfungsbetrieb</span></div></div><div class="hero-photo"><img src="./assets/abbate-stapler-kundenfoto-hq.avif" alt="Originaler gelber Jungheinrich-Gabelstapler der Fahrschule Andreas Abbate" width="1244" height="1265" decoding="async" fetchpriority="high"></div></section>
+  <section class="home-hero"><div class="hero-text"><div class="course-label"><span></span>Gabelstapler · Dein Theorietraining</div><h2>${esc(I18N.t(20))}</h2><p>Übe die theoretischen Grundlagen für den sicheren Umgang mit Gabelstaplern.</p><div class="hero-actions"><button class="primary" data-action="${ok?'start-learn':'access'}" data-course="gabelstapler">${ok?(learned?'Weiterlernen':'Lernrunde starten'):'Zugang ansehen'} ${icon(ok?'arrow':'lock')}</button><a class="text-link" href="#pruefung">Zur Theorieprüfung ${icon('arrow')}</a></div><div class="hero-proof">${icon('clock')}Übungsrunden ohne Zeitlimit.</div><div class="hero-certification">${icon('check')}<span>IHK-zertifizierter Prüfungsbetrieb</span></div></div><div class="hero-photo"><img src="./assets/abbate-stapler-kundenfoto-hq.avif" alt="Originaler gelber Jungheinrich-Gabelstapler der Fahrschule Andreas Abbate" width="1244" height="1265" decoding="async" fetchpriority="high"></div></section>
   <section class="learning-route" aria-label="Dein Lernweg"><a class="route-step" href="#lernen"><span class="route-number">01</span><span><strong>Verstehen</strong><small>Themen in Ruhe durchgehen</small></span>${icon('arrow')}</a><button class="route-step" data-action="start-learn" data-course="gabelstapler"><span class="route-number">02</span><span><strong>Wissen festigen</strong><small>Mit direkter Rückmeldung üben</small></span>${icon('arrow')}</button><a class="route-step" href="#pruefung"><span class="route-number">03</span><span><strong>Bereit werden</strong><small>Den Prüfungsablauf kennenlernen</small></span>${icon('arrow')}</a></section>
   <div class="home-lower"><section><div class="section-topline"><h2>Ausbildungsbereiche</h2><a class="text-link" href="#lernen">Alle Bereiche ${icon('arrow')}</a></div><div class="topic-list">${topicRows()}</div></section><aside class="progress-note"><div class="note-label">${icon('chart')}Lernfortschritt</div><h3>${learned?'Dein Lernstand':'Noch keine Fragen abgeschlossen'}</h3><p>${learned?`Du hast bereits ${learned} von ${total} Fragen richtig beantwortet.`:'Beginne eine Lernrunde. Zu jeder Antwort erhältst du eine Erläuterung.'}</p><div class="progress-meter" role="progressbar" aria-label="Richtig beantwortete Übungsfragen" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${learned}"><span style="width:${learned/total*100}%"></span></div><div class="progress-count">${learned} von ${total} Fragen richtig beantwortet</div><a class="text-link" href="#ergebnisse">Deine bisherigen Runden ${icon('arrow')}</a></aside></div>${installStrip()}`;
 }
@@ -171,7 +171,7 @@ function learning() {
  '<h2>'+esc(course.name)+'</h2>'+
  '<p>'+esc(course.desc)+'</p>'+
  '<div class="qualification-footer">'+(course.active
-  ?'<button class="primary qualification-cta" data-action="start-learn" data-course="'+esc(course.id)+'">'+Math.min(ROUND_QUESTION_LIMIT,courseQuestions(course.id).length)+' Fragen üben '+icon('arrow')+'</button><button class="text-link" data-action="start-exam" data-course="'+esc(course.id)+'">Prüfungstraining '+icon('arrow')+'</button>'
+  ?'<button class="primary qualification-cta" data-action="start-learn" data-course="'+esc(course.id)+'">'+Math.min(ROUND_QUESTION_LIMIT,courseQuestions(course.id).length)+' Fragen üben '+icon('arrow')+'</button><button class="text-link" data-action="start-exam" data-course="'+esc(course.id)+'">Theorieprüfung '+icon('arrow')+'</button>'
   :'<span class="qualification-awaiting">Lernmaterial noch nicht verfügbar</span>')+'</div>'+
  '<p class="form-caption">Fachliche Grundlage: <a href="'+esc(PRACTICE_BANK.courses[course.id].url)+'" target="_blank" rel="noopener noreferrer">'+esc(PRACTICE_BANK.courses[course.id].source)+'</a></p>'+
  '</article>'
@@ -179,12 +179,12 @@ function learning() {
  return heading('Deine Ausbildung','Was möchtest du lernen?','Wähle deinen Ausbildungsbereich. Alle sieben Bereiche enthalten Übungsfragen. Die fachliche Freigabe durch die Fahrschule steht noch aus.',accessLine())+
  (selectedLanguage==='de'||QUESTION_LOCALES[selectedLanguage]?'':'<p class="form-caption">Übersetzung der Übungsfragen momentan nicht verfügbar; deutsche Texte werden angezeigt.</p>')+
   '<section class="qualification-grid" aria-label="Ausbildungsbereiche">'+cards+'</section>'+
- '<section class="learning-tip"><img src="./assets/theorie-schulung.webp" alt="Teilnehmer bei einer Theorie-Schulung" loading="lazy" width="1100" height="825"><div><h3>Lernmaterial nach Ausbildungsbereich</h3><p>Die Themen sind nach Ausbildungsbereichen gegliedert. Diese Übungsfragen ersetzen keine verbindliche Abschlussprüfung.</p><a class="text-link" href="#pruefung">Zum Prüfungstraining '+icon('arrow')+'</a></div></section>';
+ '<section class="learning-tip"><img src="./assets/theorie-schulung.webp" alt="Teilnehmer bei einer Theorie-Schulung" loading="lazy" width="1100" height="825"><div><h3>Lernmaterial nach Ausbildungsbereich</h3><p>Die Themen sind nach Ausbildungsbereichen gegliedert. Lernrunden und abgegebene Theorieprüfungen werden getrennt ausgewertet.</p><a class="text-link" href="#pruefung">Zum Theorieprüfung '+icon('arrow')+'</a></div></section>';
 }
 function examStart() {
   const name=courseLabel(activeCourseId),pool=courseQuestions(activeCourseId).length,count=Math.min(ROUND_QUESTION_LIMIT,pool);
-  return heading(name+' · Prüfungsvorbereitung','Prüfungsvorbereitung','Wähle eine Übungsform.',accessLine())+
-  '<p class="adaptive-learning-note">Deine Auswahl passt sich an: Neue Fragen zuerst, Fehler zeitversetzt wiederholen und sicher beantwortete Fragen in größeren Abständen auffrischen.</p><div class="mode-grid"><section class="mode-card"><span class="mode-icon">'+icon('book')+'</span><h2>Mit Rückmeldung üben</h2><p>Nach jeder Frage erhältst du eine Erklärung.</p><div class="mode-features"><span>'+icon('check')+'Erklärung direkt nach jeder Frage</span><span>'+icon('check')+'Ohne Zeitlimit üben</span><span>'+icon('check')+count+' individuell gemischte Fragen aus '+pool+' Übungsfragen</span></div><button class="secondary" data-action="start-learn" data-course="'+esc(activeCourseId)+'">Lernrunde starten '+icon('arrow')+'</button></section><section class="mode-card focus"><span class="mode-icon">'+icon('file')+'</span><h2>Den Ablauf kennenlernen</h2><p>Beantworte zunächst alle Fragen. Die Auswertung erfolgt nach dem Abschluss.</p><div class="mode-features"><span>'+icon('check')+'Antworten vor der Abgabe ändern</span><span>'+icon('check')+'Auswertung nach dem Abschluss</span><span>'+icon('check')+count+' individuell gemischte Fragen · ohne Zeitlimit</span></div><button class="primary gold" data-action="start-exam" data-course="'+esc(activeCourseId)+'">Prüfungstraining starten '+icon('arrow')+'</button></section></div><p class="exam-disclaimer">Eine verbindliche Abschlussprüfung oder Unterweisung findet hier nicht statt.</p>';
+  return heading(name+' · Theorieprüfung','Theorieprüfung','Wähle zwischen Lernrunde und Theorieprüfung.',accessLine())+
+  '<p class="adaptive-learning-note">Deine Auswahl passt sich an: Neue Fragen zuerst, Fehler zeitversetzt wiederholen und sicher beantwortete Fragen in größeren Abständen auffrischen.</p><div class="mode-grid"><section class="mode-card"><span class="mode-icon">'+icon('book')+'</span><h2>Mit Rückmeldung üben</h2><p>Nach jeder Frage erhältst du eine Erklärung.</p><div class="mode-features"><span>'+icon('check')+'Erklärung direkt nach jeder Frage</span><span>'+icon('check')+'Ohne Zeitlimit üben</span><span>'+icon('check')+count+' individuell gemischte Fragen aus '+pool+' Übungsfragen</span></div><button class="secondary" data-action="start-learn" data-course="'+esc(activeCourseId)+'">Lernrunde starten '+icon('arrow')+'</button></section><section class="mode-card focus"><span class="mode-icon">'+icon('file')+'</span><h2>Theorieprüfung ablegen</h2><p>Beantworte die Prüfungsfragen ohne Rückmeldung. Die Abgabe wird verbindlich gespeichert und an die Fahrschule übermittelt.</p><div class="mode-features"><span>'+icon('check')+'Antworten vor der Abgabe ändern</span><span>'+icon('check')+'Auswertung nach dem Abschluss</span><span>'+icon('check')+count+' serverseitig ausgewählte Fragen · ohne Zeitlimit</span></div><button class="primary gold" data-action="start-exam" data-course="'+esc(activeCourseId)+'">Theorieprüfung starten '+icon('arrow')+'</button></section></div><p class="exam-disclaimer">Theorieprüfungen werden serverseitig ausgewertet und an die Fahrschule übermittelt. Die fachliche Bewertung erfolgt durch die Fahrschule; praktische Prüfungen und Unterweisungen bleiben gesondert erforderlich.</p>';
 }
 const ROUND_QUESTION_LIMIT=20;
 const DAY_MS=86400000;
@@ -253,10 +253,29 @@ function selectRoundQuestions(courseId,topicId,now=Date.now()){
   }
   return shuffled(selected);
 }
-function startRun(mode,topicId,courseId) {
+let startingRun=false;
+async function startRun(mode,topicId,courseId) {
   if(courseId&&COURSES.some(c=>c.id===courseId))activeCourseId=courseId;
   if(!active(student())) { access(); return; }
   if(run) { modal('Eine Runde läuft noch',`<p>Du kannst deine laufende Runde fortsetzen oder sie beenden und neu anfangen.</p><div class="modal-actions"><button class="primary" data-action="continue-run">Weiterlernen ${icon('arrow')}</button><button class="text-link" data-action="replace-run" data-mode="${mode}" data-topic="${topicId||''}" data-course="${activeCourseId}">Neu beginnen</button></div>`); return; }
+  if(startingRun)return;
+  if(mode==='exam'){
+    if(B.me?.role!=='learner'){toast('Prüfungen sind nur für angemeldete Teilnehmer vorgesehen.');return;}
+    if(!confirm('Theorieprüfung starten? Deine Abgabe wird dauerhaft gespeichert und an die Fahrschule übermittelt. Keine Rückmeldung während der Prüfung.'))return;
+    startingRun=true;
+    const course=activeCourseId;
+    try{
+      if(!await checkAccess())return;
+      const a=await B.startExam(course,selectedLanguage);
+      if(!a?.id||a.course!==course||!Array.isArray(a.ids)||a.ids.length!==20||new Set(a.ids).size!==20||a.ids.some(id=>question(id)?.course!==course))throw Error('Prüfungsfragen nicht verfügbar.');
+      // The server is authoritative. The same open attempt is resumed after reload.
+      run={mode,course,ids:a.ids,index:0,answers:{},checked:[],at:a.started_at,attemptId:a.id,examLanguage:a.language};
+      if(a.language!==selectedLanguage&&supportedLanguage(a.language)){await I18N.load(a.language);await ensureQuestionLocale(a.language);selectedLanguage=a.language;localStorage.setItem(LANGUAGE_STORE,a.language);}
+      close();go('uebung');
+    }catch{toast('Prüfung konnte nicht gestartet werden. Bitte Verbindung prüfen.');}
+    finally{startingRun=false;}
+    return;
+  }
   run={mode,course:activeCourseId,ids:selectRoundQuestions(activeCourseId,topicId),index:0,answers:{},checked:[],at:new Date().toISOString()};
   close(); go('uebung');
 }
@@ -275,7 +294,7 @@ function questionIllustration(q,large=false){
 function quizView() {
   if(!run)return examStart();
   const q=localizedQuestion(question(run.ids[run.index])), t=q.course==='gabelstapler'?topic(q.topic):null, courseName=courseLabel(q.course||run.course), categoryLabel=t?.name||courseName, chosen=run.answers[q.id], checked=run.checked.includes(q.id), correct=chosen===q.correct;
-  return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.training?'Dein Fehlertraining':run.mode==='learn'?'Deine Lernrunde':'Dein Prüfungstraining'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${esc(categoryLabel)}</span><span>${run.index+1} / ${run.ids.length}</span></div>${selectedLanguage==='de'||QUESTION_LOCALES[selectedLanguage]?.[q.id]?'':'<p class="question-language-notice" role="note">Übersetzung nicht verfügbar – diese Frage wird auf Deutsch angezeigt.</p>'}<h1>${esc(q.title)}</h1><p class="question-context">${esc(q.context)}</p>${questionIllustration(q)}<div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${esc(answer)}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${esc(q.why)}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?'Runde abschließen':'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen zählen in dieser Übungsrunde als falsch.'}</p></div>`;
+  return `<div class="quiz-shell"><div class="quiz-top"><span class="quiz-mode">${icon(run.mode==='learn'?'book':'file')}${run.training?'Dein Fehlertraining':run.mode==='learn'?'Deine Lernrunde':'Dein Theorieprüfung'}</span><button class="text-link" data-action="exit-run">Runde beenden ${icon('close')}</button></div><div class="quiz-progress" style="grid-template-columns:repeat(${run.ids.length},1fr)" aria-label="Frage ${run.index+1} von ${run.ids.length}">${run.ids.map((_,i)=>`<span class="${i<run.index?'done':i===run.index?'current':''}"></span>`).join('')}</div><section class="question-card"><div class="question-meta"><span>${esc(categoryLabel)}</span><span>${run.index+1} / ${run.ids.length}</span></div>${selectedLanguage==='de'||QUESTION_LOCALES[selectedLanguage]?.[q.id]?'':'<p class="question-language-notice" role="note">Übersetzung nicht verfügbar – diese Frage wird auf Deutsch angezeigt.</p>'}<h1>${esc(q.title)}</h1><p class="question-context">${esc(q.context)}</p>${questionIllustration(q)}<div class="answers" role="group" aria-label="Antwortmöglichkeiten">${q.answers.map((answer,i)=>`<button class="answer ${chosen===i?'selected':''} ${checked&&i===q.correct?'correct':''} ${checked&&i===chosen&&!correct?'incorrect':''}" data-action="answer" data-index="${i}" aria-pressed="${chosen===i}" ${checked?'disabled':''}><span class="answer-letter">${String.fromCharCode(65+i)}</span><span>${esc(answer)}</span>${checked&&i===q.correct?icon('check'):''}</button>`).join('')}</div>${checked?`<div class="feedback ${correct?'':'again'}">${icon(correct?'check':'help')}<div><h3>${correct?'Richtig beantwortet.':'Antwort nicht korrekt.'}</h3><p>${esc(q.why)}</p></div></div>`:''}<div class="quiz-bottom"><button class="secondary" data-action="previous" ${run.index===0?'disabled':''}>Zurück</button>${run.mode==='learn'&&!checked?`<button class="primary" data-action="check-answer" ${chosen===undefined?'disabled':''}>Antwort prüfen ${icon('check')}</button>`:`<button class="primary" data-action="next">${run.index===run.ids.length-1?(run.mode==='exam'?'Prüfung abgeben':'Runde abschließen'):'Nächste Frage'} ${icon('arrow')}</button>`}</div></section><p class="question-note">${run.mode==='learn'?'Eine passende Antwort pro Frage. Nimm dir Zeit für die Erklärung.':'Unbeantwortete Fragen werden als falsch gewertet. Deine Abgabe wird gespeichert.'}</p></div>`;
 }
 function rememberCorrect(id) { const list=data.mastered[student().id]||[]; if(!list.includes(id))list.push(id); data.mastered[student().id]=list; }
 let completingRun=false;
@@ -286,6 +305,13 @@ async function completeRun() {
     if(!await checkAccess())return;
     if(!run)return;
     if(!active(student())) { run=null;close();go('start');access();return; }
+    if(run.mode==='exam'){
+      if(!run.attemptId)throw Error('Prüfungsreferenz fehlt.');
+      const result=await B.submitExam(run.attemptId,{...run.answers});
+      if(!result?.submitted_at||result.id!==run.attemptId||!Number.isInteger(result.score))throw Error('Keine bestätigte Prüfungsabgabe.');
+      data.exams=[result,...data.exams.filter(r=>r.id!==result.id)];
+      latestResult={...result,mode:'official-exam'};run=null;close();go('ergebnis');return;
+    }
     const result={id:uid(),student:student().id,mode:run.mode,course:run.course,ids:[...run.ids],answers:{...run.answers},score:run.ids.filter(id=>run.answers[id]===question(id).correct).length,total:run.ids.length,at:new Date().toISOString()};
     const nextMastered=[...new Set([...mastered(),...run.ids.filter(id=>run.answers[id]===question(id).correct)])];
     // A completed round is only shown as saved after the server has accepted it.
@@ -323,13 +349,23 @@ function reviewCards(result) {
     return '<details class="result-error"><summary><span class="result-error-index">'+String(i+1).padStart(2,'0')+'</span><span class="result-error-title">'+esc(q.title)+'</span><span class="result-error-chevron" aria-hidden="true">⌄</span></summary><div class="result-error-detail"><div><small>Deine Antwort</small><p class="result-answer-wrong">'+selected+'</p></div><div><small>Richtige Antwort</small><p class="result-answer-correct">'+esc(q.answers[q.correct])+'</p></div><p class="result-error-explanation">'+esc(q.why)+'</p></div></details>';
   }).join('')+'</div>';
 }
+const examReviewLabel=r=>({passed:'Bestanden',failed:'Nicht bestanden',pending:'Bewertung durch Fahrschule offen'})[r.review]||'Bewertung offen';
+function officialExamView(r){
+  const percent=Math.round(r.score/r.total*100);
+  return heading(esc(courseLabel(r.course))+' · Theorieprüfung','Prüfung abgegeben','Dein Ergebnis wurde auf dem Server gespeichert und ist für die Fahrschule sichtbar.')+
+    '<div class="compact-result"><section class="compact-result-summary"><div class="compact-result-head"><div><span class="overline">Theorieprüfung</span><h2>'+esc(examReviewLabel(r))+'</h2><p>Die Punktzahl wurde serverseitig berechnet. Die endgültige Bewertung erfolgt durch die Fahrschule.</p></div><div class="compact-result-percent">'+percent+'<span>%</span></div></div><div class="compact-result-meter"><span style="width:'+percent+'%"></span></div><div class="compact-result-stats"><div><strong>'+r.score+'</strong><small>Richtig</small></div><div><strong>'+(r.total-r.score)+'</strong><small>Falsch / offen</small></div><div><strong>'+r.total+'</strong><small>Fragen gesamt</small></div></div><p class="form-caption">Abgegeben: '+esc(new Date(r.submitted_at).toLocaleString(languageConfig().locale))+' · Referenz '+esc(r.id.slice(0,8).toUpperCase())+'</p><a class="secondary" href="#ergebnisse">Zu deinen Ergebnissen</a></section></div>';
+}
+function officialExamHistory(){
+  return '<section class="result-history-intro"><div><span class="overline">Theorieprüfungen</span><strong>'+data.exams.length+' abgegebene Prüfungen</strong></div><span>Bewertung durch die Fahrschule</span></section>'+(data.examUnavailable?'<p class="form-caption">Prüfungsarchiv momentan nicht erreichbar. Bitte neu laden.</p>':'')+'<div class="result-history-list">'+data.exams.map(r=>'<article class="result-history-item"><div class="result-history-top"><div class="result-history-description"><span class="result-history-type">'+esc(courseLabel(r.course))+' · Theorieprüfung</span><h2>'+r.score+' / '+r.total+' richtig</h2><p>'+esc(new Date(r.submitted_at).toLocaleString(languageConfig().locale))+' · '+esc(examReviewLabel(r))+'</p></div><div class="result-history-percentage">'+Math.round(r.score/r.total*100)+'%</div></div><button type="button" class="text-link" data-action="review-exam" data-id="'+esc(r.id)+'">Prüfung ansehen '+icon('arrow')+'</button></article>').join('')+'</div>';
+}
 function resultView() {
   if(!latestResult)return results();
+  if(latestResult.mode==='official-exam')return officialExamView(latestResult);
   const r=latestResult,total=Math.max(0,Number(r.total)||0),score=Math.max(0,Math.min(total,Number(r.score)||0));
   const missed=wrongQuestionIds(r).length,percent=total?Math.round(score/total*100):0;
   return heading(esc(courseLabel(r.course))+' · Auswertung','Dein Ergebnis','Die wichtigsten Zahlen und deine Fehler auf einen Blick.')+
   '<div class="compact-result"><section class="compact-result-summary" aria-label="Ergebnisübersicht">'+
-  '<div class="compact-result-head"><div><span class="overline">'+(r.mode==='learn'?'Lernrunde':'Prüfungstraining')+'</span><h2>'+(missed?'Runde abgeschlossen':'Alles richtig beantwortet')+'</h2><p>'+(missed?'Sieh dir deine Fehler an und festige die Antworten im Fehlertraining.':'Starke Runde. Wiederhole die Inhalte später zur Festigung.')+'</p></div><div class="compact-result-percent" aria-label="'+percent+' Prozent richtig">'+percent+'<span>%</span></div></div>'+
+  '<div class="compact-result-head"><div><span class="overline">'+(r.mode==='learn'?'Lernrunde':'Früheres Prüfungstraining (Übung)')+'</span><h2>'+(missed?'Runde abgeschlossen':'Alles richtig beantwortet')+'</h2><p>'+(missed?'Sieh dir deine Fehler an und festige die Antworten im Fehlertraining.':'Starke Runde. Wiederhole die Inhalte später zur Festigung.')+'</p></div><div class="compact-result-percent" aria-label="'+percent+' Prozent richtig">'+percent+'<span>%</span></div></div>'+
   '<div class="compact-result-meter" role="progressbar" aria-label="Richtig beantwortet" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+score+'"><span style="width:'+percent+'%"></span></div>'+
   '<div class="compact-result-stats"><div><strong>'+score+'</strong><small>Richtig</small></div><div><strong>'+missed+'</strong><small>Fehler / Offen</small></div><div><strong>'+total+'</strong><small>Fragen gesamt</small></div></div>'+
   '<div class="compact-result-buttons">'+(missed?'<button class="primary" data-action="mistake-training" data-id="'+esc(r.id)+'">Fehlertraining starten '+icon('arrow')+'</button>':'<button class="primary" data-action="start-learn" data-course="'+esc(r.course||'gabelstapler')+'">Neue Lernrunde '+icon('arrow')+'</button>')+
@@ -338,12 +374,12 @@ function resultView() {
 }
 function results() {
   const list=data.results.filter(r=>r.student===student().id).slice().reverse();
-  const header=heading('Lernhistorie','Deine Ergebnisse','Alle Übungsrunden auf einen Blick. Öffne die Fehler direkt hier und wiederhole gezielt die schwierigen Fragen.',accessLine());
+  const header=heading('Prüfungen & Lernen','Deine Ergebnisse','Abgegebene Theorieprüfungen und Lernrunden werden getrennt angezeigt.',accessLine())+officialExamHistory();
   if(!list.length)return header+'<section class="empty-state"><span class="topic-symbol">'+icon('chart')+'</span><h2>Noch keine Übungsrunden</h2><p>Nach deiner ersten abgeschlossenen Runde erscheinen hier die kompakte Auswertung, aufklappbare Fehler und das Fehlertraining.</p><button class="primary" data-action="start-learn">Lernrunde starten '+icon('arrow')+'</button></section>';
   return header+'<div class="result-history-intro"><div><span class="overline">Dein Lernverlauf</span><strong>'+list.length+' abgeschlossene '+(list.length===1?'Runde':'Runden')+'</strong></div><span>Fehler anzeigen und gezielt üben</span></div><div class="result-history-list">'+list.map(r=>{
     const total=Number(r.total)||r.ids?.length||3,score=Number(r.score)||0,percentage=total?Math.round(score/total*100):0;
     const legacy=r.mode==='legacy',missed=legacy?0:wrongQuestionIds(r).length;
-    const name=legacy?'Frühere Übungsrunde':r.mode==='learn'?'Lernrunde':'Prüfungstraining';
+    const name=legacy?'Frühere Übungsrunde':r.mode==='learn'?'Lernrunde':'Früheres Prüfungstraining (Übung)';
     const stamp=Number.isFinite(Date.parse(r.at))?new Date(r.at).toLocaleString(languageConfig().locale,{dateStyle:'medium',timeStyle:'short'}):'';
     return '<article class="result-history-item"><div class="result-history-top"><div class="result-history-description"><span class="result-history-type">'+esc(courseLabel(r.course))+' · '+name+'</span><h2>'+score+' <span>/ '+total+' richtig</span></h2><p>'+esc(stamp)+'</p></div><div class="result-history-percentage" aria-label="'+percentage+' Prozent richtig">'+percentage+'%</div></div><div class="result-history-meter" role="progressbar" aria-label="Richtig beantwortet" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+score+'"><span style="width:'+percentage+'%"></span></div>'+
     (legacy?'<p class="result-history-footnote">Für diese ältere Runde liegt keine detaillierte Fehlerauswertung vor.</p>':
@@ -356,7 +392,7 @@ function results() {
 function admin(){if(B.isStaff(B.me)){location.href='./verwaltung.html';return '';}return heading('Verwaltung','Kein Verwaltungszugang.','Dieser Bereich ist nur für berechtigte Mitarbeiter zugänglich.');}
 function render() { navigation();const content=route==='start'?home():route==='lernen'?learning():route==='pruefung'?examStart():route==='ergebnisse'?results():route==='verwaltung'?admin():route==='uebung'?quizView():resultView();$('#main').innerHTML=`<div class="page-enter">${content}</div>`;I18N.localize(document.body);navigation(); }
 function go(next) { if(location.hash==='#'+next){route=next;render();window.scrollTo({top:0,behavior:'auto'});}else location.hash=next; }
-window.addEventListener('hashchange',()=>{let next=location.hash.slice(1);if(next==='verlauf')next='ergebnisse';if(!Object.hasOwn(routeMap,next))next='start';if(next==='uebung'&&!run)next='pruefung';if(next==='ergebnis'&&!latestResult)next='ergebnisse';route=next;render();window.scrollTo({top:0,behavior:'auto'});$('#main').focus({preventScroll:true});});
+window.addEventListener('hashchange',()=>{let next=location.hash.slice(1);if(next==='verlauf')next='ergebnisse';if(!Object.hasOwn(routeMap,next))next='start';if(next==='uebung'&&!run)next='pruefung';if(next==='ergebnis'&&!latestResult)next='ergebnisse';if(run?.mode==='exam'&&next!=='uebung'){location.hash='uebung';return;}route=next;render();window.scrollTo({top:0,behavior:'auto'});$('#main').focus({preventScroll:true});});
 function profile(){
   const s=student();
   modal('Dein Profil & Zugang',`<div class="profile-summary"><span class="profile-avatar">${esc(initials(s.name))}</span><div><strong>${esc(s.name)}</strong><p>${esc(s.email)}</p></div></div><p>Dein Zugang ist aktiv${s.until?' bis einschließlich '+fmtDate(s.until):'.'}.</p><div class="profile-actions"><button class="secondary" data-action="language">🌐 ${esc(languageConfig().name)}</button><a class="secondary" href="./nachweise.html">${esc(passLabel())}</a><a class="secondary" href="./konto.html#einstellungen">Konto & Datenschutz</a></div><div class="profile-footer">${B.isStaff(B.me)?'<a class="text-link" href="./verwaltung.html">Zur Verwaltung ↗</a>':''}<button class="text-link" data-action="logout">Abmelden</button></div>`);
@@ -366,7 +402,7 @@ function languagePicker() {
 }
 function access() { const s=student();modal('Dein Lernzugang',`<div class="notice ${active(s)?'':'warning'}">${icon(active(s)?'check':'lock')}<span>${active(s)?'Dein Zugang ist aktiv':s.access==='pending'?'Dein Konto wartet auf Freischaltung':s.access==='paused'?'Dein Zugang ist pausiert':'Dein Zugang ist abgelaufen'}. Gültig bis einschließlich <strong>${fmtDate(s.until)}</strong>.</span></div><p>${active(s)?'Du kannst alle freigeschalteten Themen und Übungsrunden nutzen.':'Melde dich bei deiner Fahrschule, wenn du weiterlernen möchtest.'}</p><button class="primary" data-action="close">Verstanden ${icon('check')}</button>`); }
 function topicInfo(id) { const t=topic(id);if(!t)return;modal(t.name,`<p>${t.description}</p><p>In dieser Lernrunde beantwortest du ${QUESTIONS.filter(q=>q.topic===id).length} Übungsfragen. Nach jeder Frage erhältst du eine fachliche Erläuterung.</p><button class="primary" data-action="start-learn" data-topic="${id}">Mit diesem Thema starten ${icon('arrow')}</button><p class="form-caption">Diese Übungsfragen helfen beim Lernen. Die verbindlichen Prüfungsinhalte vermittelt deine Fahrschule.</p>`); }
-function about(){modal('Über Abbate Lernraum',`<p>Deine Anmeldung, deine Zugangsfreigabe und deine Schulungsnachweise werden sicher über das Konto der Fahrschule verwaltet. Nur berechtigte Mitarbeiter können Schulungen und Prüfungsergebnisse bestätigen.</p><p>Das Theorietraining hilft beim Üben und Verstehen. Übungsrunden ersetzen keine offiziell dokumentierte Prüfung oder Unterweisung.</p><p>Für Anmeldung, Freischaltungen und die Synchronisierung deines Lernstands benötigst du eine Internetverbindung.</p><div class="profile-footer"><a class="text-link" href="./datenschutz.html">Datenschutz</a><a class="text-link" href="./konto.html#einstellungen">Konto verwalten</a></div>`);}
+function about(){modal('Über Abbate Lernraum',`<p>Deine Anmeldung, deine Zugangsfreigabe und deine Schulungsnachweise werden sicher über das Konto der Fahrschule verwaltet. Nur berechtigte Mitarbeiter können Schulungen und Prüfungsergebnisse bestätigen.</p><p>Das Theorietraining hilft beim Üben und Verstehen. Lernrunden bleiben Übungen. Abgegebene Theorieprüfungen werden der Fahrschule zur Bewertung übermittelt. Sie ersetzen keine praktische Prüfung oder Unterweisung.</p><p>Für Anmeldung, Freischaltungen und die Synchronisierung deines Lernstands benötigst du eine Internetverbindung.</p><div class="profile-footer"><a class="text-link" href="./datenschutz.html">Datenschutz</a><a class="text-link" href="./konto.html#einstellungen">Konto verwalten</a></div>`);}
 // The same compact search works for every language in the shared registry.
 document.addEventListener('input',event=>{
   if(event.target.id!=='language-search')return;
@@ -392,6 +428,7 @@ document.addEventListener('click',async event=>{
   else if(action==='about')about();
   else if(action==='language')languagePicker();
   else if(action==='set-language'){
+    if(run?.mode==='exam'){toast('Die Prüfungssprache kann während der Prüfung nicht geändert werden.');return;}
     const nextLanguage=el.dataset.language;
     if(nextLanguage===selectedLanguage){close();return;}
     close();toast(I18N.t(178));
@@ -415,22 +452,28 @@ document.addEventListener('click',async event=>{
   else if(action==='start-learn')startRun('learn',el.dataset.topic,el.dataset.course);
   else if(action==='start-exam')startRun('exam',undefined,el.dataset.course);
   else if(action==='continue-run'){close();go('uebung');}
-  else if(action==='replace-run'){run=null;startRun(el.dataset.mode,el.dataset.topic,el.dataset.course);}
-  else if(action==='answer'&&run){const q=question(run.ids[run.index]);if(!run.checked.includes(q.id)){run.answers[q.id]=Number(el.dataset.index);const y=window.scrollY;render();window.scrollTo({top:y,behavior:'auto'});document.querySelector(`[data-action="answer"][data-index="${el.dataset.index}"]`)?.focus({preventScroll:true});}}
-  else if(action==='check-answer'&&run){const q=question(run.ids[run.index]);if(run.answers[q.id]===undefined)return;run.checked.push(q.id);if(run.answers[q.id]===q.correct)rememberCorrect(q.id);save();const y=window.scrollY;render();window.scrollTo({top:y,behavior:'auto'});$('.feedback')?.scrollIntoView({block:'nearest',behavior:'smooth'});}
+  else if(action==='replace-run'){if(await discardRun())startRun(el.dataset.mode,el.dataset.topic,el.dataset.course);}
+  else if(action==='answer'&&run&&!completingRun){const q=question(run.ids[run.index]);if(!run.checked.includes(q.id)){run.answers[q.id]=Number(el.dataset.index);const y=window.scrollY;render();window.scrollTo({top:y,behavior:'auto'});document.querySelector(`[data-action="answer"][data-index="${el.dataset.index}"]`)?.focus({preventScroll:true});}}
+  else if(action==='check-answer'&&run&&run.mode==='learn'){const q=question(run.ids[run.index]);if(run.answers[q.id]===undefined)return;run.checked.push(q.id);if(run.answers[q.id]===q.correct)rememberCorrect(q.id);save();const y=window.scrollY;render();window.scrollTo({top:y,behavior:'auto'});$('.feedback')?.scrollIntoView({block:'nearest',behavior:'smooth'});}
   else if(action==='previous'&&run){run.index=Math.max(0,run.index-1);render();}
-  else if(action==='next'&&run){if(!active(student())){run=null;go('start');access();return;}if(run.index<run.ids.length-1){run.index++;render();window.scrollTo({top:0,behavior:'auto'});}else if(run.mode==='learn'){completeRun();}else{const missing=run.ids.filter(id=>run.answers[id]===undefined).length;modal('Bereit für deine Auswertung?',`<p>${missing?`${missing} Frage${missing===1?' ist':'n sind'} noch unbeantwortet. In dieser Übungsrunde ${missing===1?'zählt sie':'zählen sie'} als falsch.`:'Du hast alle Fragen beantwortet. Nach dem Abschluss siehst du deine Auswertung und alle Erklärungen.'}</p><button class="primary" data-action="finish">Runde abgeben ${icon('check')}</button><div class="modal-actions"><button class="text-link" data-action="close">Antworten noch einmal ansehen</button></div>`);}}
+  else if(action==='next'&&run){if(!active(student())){run=null;go('start');access();return;}if(run.index<run.ids.length-1){run.index++;render();window.scrollTo({top:0,behavior:'auto'});}else if(run.mode==='learn'){completeRun();}else{const missing=run.ids.filter(id=>run.answers[id]===undefined).length;modal('Bereit für deine Auswertung?',`<p>${missing?`${missing} Frage${missing===1?' ist':'n sind'} noch unbeantwortet. Bei dieser Prüfung ${missing===1?'zählt sie':'zählen sie'} als falsch.`:'Du hast alle Fragen beantwortet. Nach der verbindlichen Abgabe wird dein Ergebnis gespeichert und der Fahrschule übermittelt.'}</p><button class="primary" data-action="finish">Prüfung verbindlich abgeben ${icon('check')}</button><div class="modal-actions"><button class="text-link" data-action="close">Antworten noch einmal ansehen</button></div>`);}}
   else if(action==='finish')completeRun();
   else if(action==='exit-run'){pendingRoute='start';askExit();}
-  else if(action==='confirm-exit'){run=null;close();go(pendingRoute||'start');pendingRoute=null;}
+  else if(action==='confirm-exit'){if(await discardRun()){close();go(pendingRoute||'start');pendingRoute=null;}}
   else if(action==='mistake-training'){const r=data.results.find(r=>r.id===el.dataset.id&&r.student===student().id);startMistakeTraining(r);}
+  else if(action==='review-exam'){const r=data.exams.find(r=>r.id===el.dataset.id);if(r){latestResult={...r,mode:'official-exam'};go('ergebnis');}}
   else if(action==='review-result'){latestResult=data.results.find(r=>r.id===el.dataset.id);go('ergebnis');}
   else if(action==='install')install();
   else if(action==='install-tab')install(el.dataset.platform);
   else if(action==='native-install'&&deferredInstall){const prompt=deferredInstall;deferredInstall=null;prompt.prompt().then(()=>prompt.userChoice).then(choice=>{close();toast(choice.outcome==='accepted'?'Installation angefordert. Starte anschließend über das App-Symbol.':'Du kannst den Lernbereich weiterhin über den Link öffnen.');}).catch(()=>toast('Nutze zum Hinzufügen das Menü deines Browsers.'));}
 
 });
-function askExit() { modal('Die Runde wirklich verlassen?',`<p>Deine noch nicht abgeschlossene Runde wird beendet. Bereits richtig beantwortete Lernfragen bleiben in deinem Lernstand erhalten.</p><button class="primary" data-action="confirm-exit">Runde verlassen</button><div class="modal-actions"><button class="text-link" data-action="close">Doch weiterlernen</button></div>`); }
+async function discardRun(){
+  if(completingRun)return false;
+  if(run?.attemptId){try{await B.cancelExam(run.attemptId);}catch{toast('Prüfung konnte noch nicht abgebrochen werden. Bitte Verbindung prüfen.');return false;}}
+  run=null;return true;
+}
+function askExit() { modal(run?.mode==='exam'?'Prüfung wirklich abbrechen?':'Die Runde wirklich verlassen?',`<p>${run?.mode==='exam'?'Die Prüfung wird ohne Ergebnis abgebrochen. Du kannst anschließend eine neue Prüfung starten.':'Deine noch nicht abgeschlossene Runde wird beendet. Bereits richtig beantwortete Lernfragen bleiben in deinem Lernstand erhalten.'}</p><button class="primary" data-action="confirm-exit">Runde verlassen</button><div class="modal-actions"><button class="text-link" data-action="close">Doch weiterlernen</button></div>`); }
 $('#modal').addEventListener('click',event=>{if(event.target===$('#modal')){const r=$('#modal').getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)close();}});
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredInstall=event;});
 window.addEventListener('appinstalled',()=>{deferredInstall=null;close();render();toast('Die App wurde hinzugefügt.');});
@@ -469,6 +512,7 @@ async function boot(){
   data.selected=B.me.id;
   try{
     const practice=practicePayload(await B.loadPractice());data.results=practice.results;data.mastered={[B.me.id]:practice.mastered};
+    try{data.exams=await B.listExams();}catch{data.examUnavailable=true;}
     await I18N.load(selectedLanguage);
     await ensureQuestionLocale(selectedLanguage);
     render();document.documentElement.removeAttribute('data-loading');
