@@ -378,7 +378,7 @@
     const d=root.querySelector('#exam-overview');if(!d)return;
     const rows=d.querySelector('#exam-results'),stats=d.querySelector('#exam-stats'),count=d.querySelector('#exam-count');
     if(examError){rows.innerHTML='<p class="admin-alert">Prüfungsergebnisse konnten nicht geladen werden. Bitte Verwaltung aktualisieren.</p>';return;}
-    const name=r=>state.students.find(p=>p.id===r.participant_id)?.name||'Teilnehmer nicht verfügbar';
+    const name=r=>r.guest_name||state.students.find(p=>p.id===r.participant_id)?.name||'Teilnehmer nicht verfügbar';
     const query=d.querySelector('#exam-search').value.trim().toLowerCase(),course=d.querySelector('#exam-course').value,review=d.querySelector('#exam-review-filter').value;
     const filtered=examRows.filter(r=>(!query||(name(r)+' '+r.id).toLowerCase().includes(query))&&(!course||r.course===course)&&(!review||r.review===review));
     stats.innerHTML=[['Abgegeben',examRows.length],['Bewertung offen',examRows.filter(r=>r.review==='pending').length],['Bestanden',examRows.filter(r=>r.review==='passed').length],['Nicht bestanden',examRows.filter(r=>r.review==='failed').length]].map(([label,n])=>'<div><small>'+label+'</small><strong>'+n+'</strong></div>').join('');

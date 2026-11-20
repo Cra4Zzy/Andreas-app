@@ -450,7 +450,7 @@ document.addEventListener('click',async event=>{
   else if(action==='logout'){await B.client.auth.signOut({scope:'local'});location.replace('./konto.html');}
   else if(action==='topic')topicInfo(el.dataset.topic);
   else if(action==='start-learn')startRun('learn',el.dataset.topic,el.dataset.course);
-  else if(action==='start-exam')startRun('exam',undefined,el.dataset.course);
+  else if(action==='start-exam')location.href='./pruefung.html';
   else if(action==='continue-run'){close();go('uebung');}
   else if(action==='replace-run'){if(await discardRun())startRun(el.dataset.mode,el.dataset.topic,el.dataset.course);}
   else if(action==='answer'&&run&&!completingRun){const q=question(run.ids[run.index]);if(!run.checked.includes(q.id)){run.answers[q.id]=Number(el.dataset.index);const y=window.scrollY;render();window.scrollTo({top:y,behavior:'auto'});document.querySelector(`[data-action="answer"][data-index="${el.dataset.index}"]`)?.focus({preventScroll:true});}}
@@ -490,7 +490,7 @@ async function checkAccess(){
   const work=(async()=>{
     try{
       const me=await B.identity();
-      if(!me){location.replace('./konto.html');return false;}
+      if(!me){location.replace('./pruefung.html');return false;}
       if(!await B.termsAccepted()){location.replace('./konto.html#bedingungen');return false;}
       if(!active(me)){location.replace('./nachweise.html');return false;}
       data.students=[me];return true;

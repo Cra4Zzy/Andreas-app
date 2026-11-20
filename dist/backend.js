@@ -164,7 +164,7 @@
    const r=await client.rpc('abbate_merge_practice',{p_payload:payload});
    fail(r.error);return r.data;
  }
- const examFields='id,participant_id,course,language,started_at,submitted_at,score,total,review,reviewed_at,bank_version';
+ const examFields='id,participant_id,guest_name,course,language,started_at,submitted_at,score,total,review,reviewed_at,bank_version';
  async function listExams(){
    if(!me?.id)throw Error('Bitte erneut anmelden.');
    const query=()=>client.from('abbate_exam_attempts').select(examFields).eq('school_id',me.school).not('submitted_at','is',null).order('submitted_at',{ascending:false}).order('id');
