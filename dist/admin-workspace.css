@@ -398,3 +398,19 @@ body[data-view=admin] .abbate-payment-person-actions button{min-height:40px;padd
  .abbate-payment-person-list{max-height:480px}
 }
 @media(max-width:380px){.abbate-payment-group-title small{font-size:11px}.abbate-payment-person-actions{grid-template-columns:1fr}}
+
+
+/* Payment archive uses the same large modal as exams and certificates. */
+body[data-view=admin] #payment-overview-dialog .abbate-payment-overview{margin:0;padding:0;box-shadow:none;border:0;background:transparent}
+body[data-view=admin] #payment-overview-dialog .admin-cert-overview-body{background:#eef2eb}
+body[data-view=admin] #payment-overview-dialog .abbate-payment-overview-heading{margin-bottom:15px}
+body[data-view=admin] #payment-overview-dialog .abbate-payment-accordions{gap:10px}
+body[data-view=admin] #payment-overview-dialog .abbate-payment-person{border:1px solid #c3d2c8}
+body[data-view=admin] #payment-overview-dialog .abbate-payment-overview-search input{max-width:100%}
+body[data-view=admin] .abbate-account-company{font-weight:800!important;color:#2b6956!important;font-size:15px!important}
+body[data-view=admin] .abbate-admin-company{margin:0;padding:13px 16px}
+body[data-view=admin] .abbate-admin-company details>summary{cursor:pointer;font-weight:750}
+body[data-view=admin] .abbate-admin-company form{display:grid;gap:9px;max-width:510px;padding-top:14px}
+body[data-view=admin] .abbate-admin-company input{width:100%;box-sizing:border-box}
+body[data-view=admin] .abbate-person-company{font-weight:800;color:#286551}
+@media(max-width:700px){body[data-view=admin] #payment-overview-dialog .abbate-payment-overview{padding:0}body[data-view=admin] .abbate-admin-company{padding:12px}}
