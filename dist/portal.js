@@ -4,6 +4,8 @@
   const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const day=value=>new Intl.DateTimeFormat(localStorage.getItem('abbate-language-v1')||'de',{dateStyle:'long'}).format(new Date(value+'T12:00:00'));
   let state,selected=null,search='',filter='all',registrationSuccessEmail=null;
+  let paymentQuery='';
+  const paymentExpanded={reported:true,confirmed:false,open:false};
   let certStatus={signatureReady:false,mailReady:false}, certRecords=new Map(),examRows=[],examError=false,examPage=0;
   async function certCall(body){
     const {data,error}=await B.client.functions.invoke('abbate-certificates',{body});
@@ -132,6 +134,70 @@
     if(!proof){root.innerHTML=paymentPanel(person)+`<section class="portal-empty"><span class="portal-eyebrow">${safe(person.name)}</span><h1>${person.access==='pending'?'Deine Freischaltung steht noch aus.':person.access==='paused'?'Dein Zugang ist pausiert.':'Dein Zugang ist abgelaufen.'}</h1><p>${person.access==='pending'?'Dein Konto ist registriert. Deine Freischaltung wird von der Fahrschule verwaltet. Sobald dein Zugang aktiviert ist, kannst du mit dem Lernen beginnen.':'Bitte wende dich an deine Fahrschule. Deine bisherigen Einträge bleiben bei einer Pause gespeichert.'}</p><a class="secondary" href="./konto.html#einstellungen">Konto verwalten oder löschen</a><button class="portal-text" data-logout>Abmelden</button></section>`;return;}
     const records=proof.records;
     root.innerHTML=paymentPanel(person)+`<section class="portal-identity"><div class="portal-avatar" aria-hidden="true">${safe(person.name.split(' ').map(x=>x[0]).slice(0,2).join(''))}</div><div><span class="portal-eyebrow">Dein persönlicher Schulungspass</span><h1>${safe(person.name)}</h1><p>Durchgeführte Schulungen, Unterweisungen und Prüfungen.</p></div></section><section class="portal-overview"><div><small>Dokumentierter Verlauf</small><strong>${records.length} <span>${records.length===1?'Eintrag':'Einträge'}</span></strong></div><div><small>Zuletzt durchgeführt</small><strong class="portal-date">${records[0]?day(records[0].completedAt):'Noch kein Eintrag'}</strong></div></section><section class="portal-history"><div class="portal-section-title"><div><span class="portal-eyebrow">Von deiner Fahrschule erfasst</span><h2>Dokumentierte Schulungen und Prüfungen</h2></div><span>Neueste zuerst</span></div><div class="portal-records">${records.map(r=>recordCard(r)).join('')||'<section class="portal-panel"><h3>Noch keine Einträge.</h3><p>Hier erscheinen durchgeführte Schulungen und Prüfungen, sobald die Fahrschule sie erfasst hat.</p></section>'}</div></section><footer class="portal-reader-footer"><p>Die Angaben werden von der Fahrschule gepflegt. Übungsrunden aus der Lern-App erzeugen keine bestätigten Schulungs- oder Prüfungseinträge.</p><a class="portal-text" href="./konto.html#einstellungen">Konto & Datenschutz</a><button class="portal-text" data-logout>Abmelden</button></footer>`;
+  }
+
+  // Account-level overview: no extra database requests, uses the already paginated staff state.
+  // Status and access remain separate and are never inferred from one another.
+  function paymentParticipants(status){
+    const q=paymentQuery.trim().toLocaleLowerCase('de-DE');
+    const list=state.students.filter(p=>p.role==='learner'&&(p.payment||'open')===status
+      &&(!q||(p.name+' '+p.email).toLocaleLowerCase('de-DE').includes(q)));
+    const when=p=>status==='confirmed'?p.paymentConfirmedAt:status==='reported'?p.paymentReportedAt:null;
+    list.sort((a,b)=>status==='open'
+      ?a.name.localeCompare(b.name,'de',{sensitivity:'base'})
+      :((Date.parse(when(b)||'')||0)-(Date.parse(when(a)||'')||0)
+        ||a.name.localeCompare(b.name,'de',{sensitivity:'base'})));
+    return list;
+  }
+  function paymentPeopleMarkup(status){
+    const list=paymentParticipants(status);
+    if(!list.length)return '<p class="abbate-payment-empty">'
+      +(paymentQuery?'Keine Treffer für diese Suche.':status==='reported'?'Aktuell hat niemand eine Zahlung gemeldet.':status==='confirmed'?'Noch keine Zahlungen bestätigt.':'Keine offenen Zahlungen.')
+      +'</p>';
+    const format=value=>value&&Number.isFinite(Date.parse(value))
+      ?new Intl.DateTimeFormat('de-DE',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Berlin'}).format(new Date(value)):'';
+    return list.map(p=>{
+      const stamp=status==='confirmed'?p.paymentConfirmedAt:p.paymentReportedAt;
+      const date=stamp?format(stamp):'';
+      const caption=status==='reported'?'Gemeldet':status==='confirmed'?'Bestätigt':'';
+      return '<article class="abbate-payment-person"><div class="abbate-payment-person-info"><strong>'+safe(p.name)+'</strong><small>'+safe(p.email)+'</small>'
+        +(date?'<span class="abbate-payment-time">'+caption+': '+safe(date)+' Uhr</span>':'')
+        +'</div><div class="abbate-payment-person-actions"><button type="button" class="secondary" data-payment-open="'+safe(p.id)+'">Teilnehmer öffnen</button>'
+        +(status==='reported'?'<button type="button" class="primary" data-payment-action="confirm" data-payment-person="'+safe(p.id)+'">Zahlung bestätigen</button>':'')
+        +'</div></article>';
+    }).join('');
+  }
+  function paymentOverview(){
+    const groups=[
+      {key:'reported',title:'Gemeldete Zahlungen',hint:'Auf Zahlungseingang prüfen',count:state.students.filter(p=>p.role==='learner'&&p.payment==='reported').length},
+      {key:'confirmed',title:'Bestätigte Zahlungen',hint:'Von Andreas geprüfte Eingänge',count:state.students.filter(p=>p.role==='learner'&&p.payment==='confirmed').length},
+      {key:'open',title:'Offene Zahlungen',hint:'Noch keine Zahlung gemeldet',count:state.students.filter(p=>p.role==='learner'&&(p.payment||'open')==='open').length}
+    ];
+    return '<section id="payment-overview" class="abbate-payment-overview" aria-labelledby="payment-overview-title">'
+      +'<div class="abbate-payment-overview-heading"><div><span class="portal-eyebrow">Teilnehmerzahlungen</span><h2 id="payment-overview-title">Zahlungen im Überblick</h2><p>Namen und Zahlungsstatus direkt prüfen. Der Lernzugang wird unabhängig verwaltet.</p></div><span class="abbate-payment-overview-total">'+groups.reduce((sum,g)=>sum+g.count,0)+' Teilnehmer</span></div>'
+      +'<label class="abbate-payment-overview-search" for="payment-overview-search">Teilnehmer suchen<input id="payment-overview-search" type="search" placeholder="Name oder E-Mail eingeben" autocomplete="off" value="'+safe(paymentQuery)+'"></label>'
+      +'<div class="abbate-payment-accordions">'
+      +groups.map(g=>'<details class="abbate-payment-group abbate-payment-group--'+g.key+'" data-payment-group="'+g.key+'"'+(paymentExpanded[g.key]?' open':'')+'>'
+        +'<summary><span class="abbate-payment-group-marker" aria-hidden="true"></span><span class="abbate-payment-group-title"><strong>'+g.title+'</strong><small>'+g.hint+'</small></span><span class="abbate-payment-group-count">'+g.count+'</span><span class="abbate-payment-group-chevron" aria-hidden="true"></span></summary>'
+        +'<div class="abbate-payment-group-content"><p class="abbate-payment-result-count" data-payment-count="'+g.key+'" role="status">'+paymentParticipants(g.key).length+' von '+g.count+' Teilnehmern</p><div data-payment-list="'+g.key+'" class="abbate-payment-person-list">'+paymentPeopleMarkup(g.key)+'</div></div></details>').join('')
+      +'</div></section>';
+  }
+  function refreshPaymentOverview(){
+    for(const key of ['reported','confirmed','open']){
+      const list=root.querySelector('[data-payment-list="'+key+'"]');
+      const count=root.querySelector('[data-payment-count="'+key+'"]');
+      if(list)list.innerHTML=paymentPeopleMarkup(key);
+      if(count)count.textContent=paymentParticipants(key).length+' von '+state.students.filter(p=>p.role==='learner'&&(p.payment||'open')===key).length+' Teilnehmern';
+    }
+  }
+  function rememberPaymentOverview(){
+    const previous=root.querySelector('#payment-overview');
+    if(!previous)return;
+    paymentQuery=previous.querySelector('#payment-overview-search')?.value||'';
+    for(const key of ['reported','confirmed','open']){
+      const group=previous.querySelector('[data-payment-group="'+key+'"]');
+      if(group)paymentExpanded[key]=group.open;
+    }
   }
   function people(){return state.students.filter(p=>p.id!==state.me?.id&&(p.name+' '+p.email).toLowerCase().includes(search.toLowerCase())&&(filter==='all'||(filter==='expired'?p.access==='active'&&!M.access(p):filter.startsWith('payment:')?(p.payment||'open')===filter.slice(8):p.access===filter)));}
   function peopleList(){return people().map(p=>`<button class="portal-person ${selected===p.id?'selected':''}" data-person="${safe(p.id)}" aria-pressed="${selected===p.id}"><span class="portal-person-name">${safe(p.name)}<small>${safe(p.email)}</small></span><span><small>${p.role==='admin'?'Administrator':p.role==='trainer'?'Ausbilder':'Teilnehmer'}</small>${badge(p)}${p.role==='learner'?paymentBadge(p):''}</span></button>`).join('')||'<p class="portal-hint">Keine passenden Konten.</p>';}
@@ -418,8 +484,9 @@
     }catch{target.textContent='Antworten konnten nicht geladen werden.';}finally{button.disabled=false;}
   }
   function admin(){
+    rememberPaymentOverview();
     certificateDraft=null;certificatePreviewReady=false;previewSequence++;
-    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Abbate Lernraum</span><h1>Teilnehmerverwaltung</h1><p class="admin-sr-only">Schulungen und Prüfungsergebnisse</p></div><div class="admin-toolbar"><button type="button" class="secondary" data-refresh aria-label="Konten aktualisieren">Aktualisieren</button><button type="button" class="secondary admin-cert-overview-trigger" data-exam-overview-open aria-haspopup="dialog">Prüfungsergebnisse (${examError?'–':examRows.length})</button>${state.me.role==='admin'?'<button type="button" class="secondary admin-cert-overview-trigger" data-cert-overview-open aria-haspopup="dialog">Zertifikate &amp; Abschlüsse</button>':''}<details class="admin-tools"><summary>Einstellungen</summary><div class="admin-tools-content">${signaturePanel()}<details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Der QR-Code führt zur Anmeldeseite und kann auf allen Schülerkarten verwendet werden.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code" style="image-rendering:pixelated"></canvas><p class="portal-hint">Der QR-Code enthält keine personenbezogenen Daten.</p><a class="portal-text" href="${AbbateCardQR.target}" target="_blank" rel="noopener noreferrer">Anmeldeseite öffnen ↗</a><button class="secondary" id="download-qr" type="button" disabled>PNG (Druckqualität) herunterladen</button><button class="secondary" id="download-qr-svg" type="button" disabled>SVG (Vektorformat) herunterladen</button></details><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div></details></div></section><section class="portal-stats" aria-label="Kontenübersicht"><div><span>Konten</span><strong>${state.students.filter(p=>p.id!==state.me.id).length}</strong></div><div><span>Wartend</span><strong>${state.students.filter(p=>p.role==='learner'&&p.access==='pending').length}</strong></div><div><span>Aktiv</span><strong>${state.students.filter(p=>p.role==='learner'&&M.access(p)).length}</strong></div><div><span>Inaktiv</span><strong>${state.students.filter(p=>p.role==='learner'&&(p.access==='paused'||(p.access==='active'&&!M.access(p)))).length}</strong></div></section><section class="abbate-payment-stats" aria-label="Zahlungsübersicht"><div><small>Zahlung offen</small><strong>${state.students.filter(p=>p.role==='learner'&&(p.payment||'open')==='open').length}</strong></div><div><small>Gemeldet · prüfen</small><strong>${state.students.filter(p=>p.role==='learner'&&p.payment==='reported').length}</strong></div><div><small>Bestätigt</small><strong>${state.students.filter(p=>p.role==='learner'&&p.payment==='confirmed').length}</strong></div></section>${annualOverview()}<div class="portal-admin-layout"><aside class="portal-sidebar" id="account-picker"><button type="button" id="account-picker-toggle" class="portal-picker-toggle" aria-expanded="false" aria-controls="account-picker-panel">${pickerLabel()}</button><div id="account-picker-panel" class="portal-picker-panel"><h2 class="admin-list-heading">Teilnehmer</h2><label class="admin-sr-only" for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name oder E-Mail" value="${safe(search)}"><label class="admin-sr-only" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option><option value="payment:open">Zahlung offen</option><option value="payment:reported">Zahlung gemeldet</option><option value="payment:confirmed">Zahlung bestätigt</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></div></aside><div id="account-detail" class="portal-detail">${detail()}</div></div>${certificateOverview()}${examOverview()}`;
+    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Abbate Lernraum</span><h1>Teilnehmerverwaltung</h1><p class="admin-sr-only">Schulungen und Prüfungsergebnisse</p></div><div class="admin-toolbar"><button type="button" class="secondary" data-refresh aria-label="Konten aktualisieren">Aktualisieren</button><button type="button" class="secondary admin-cert-overview-trigger" data-exam-overview-open aria-haspopup="dialog">Prüfungsergebnisse (${examError?'–':examRows.length})</button>${state.me.role==='admin'?'<button type="button" class="secondary admin-cert-overview-trigger" data-cert-overview-open aria-haspopup="dialog">Zertifikate &amp; Abschlüsse</button>':''}<details class="admin-tools"><summary>Einstellungen</summary><div class="admin-tools-content">${signaturePanel()}<details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Der QR-Code führt zur Anmeldeseite und kann auf allen Schülerkarten verwendet werden.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code" style="image-rendering:pixelated"></canvas><p class="portal-hint">Der QR-Code enthält keine personenbezogenen Daten.</p><a class="portal-text" href="${AbbateCardQR.target}" target="_blank" rel="noopener noreferrer">Anmeldeseite öffnen ↗</a><button class="secondary" id="download-qr" type="button" disabled>PNG (Druckqualität) herunterladen</button><button class="secondary" id="download-qr-svg" type="button" disabled>SVG (Vektorformat) herunterladen</button></details><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div></details></div></section><section class="portal-stats" aria-label="Kontenübersicht"><div><span>Konten</span><strong>${state.students.filter(p=>p.id!==state.me.id).length}</strong></div><div><span>Wartend</span><strong>${state.students.filter(p=>p.role==='learner'&&p.access==='pending').length}</strong></div><div><span>Aktiv</span><strong>${state.students.filter(p=>p.role==='learner'&&M.access(p)).length}</strong></div><div><span>Inaktiv</span><strong>${state.students.filter(p=>p.role==='learner'&&(p.access==='paused'||(p.access==='active'&&!M.access(p)))).length}</strong></div></section>${state.me.role==='admin'?`<section class="abbate-payment-stats" aria-label="Zahlungsübersicht"><button type="button" class="abbate-payment-stat" data-payment-show="open"><small>Zahlung offen</small><strong>${state.students.filter(p=>p.role==='learner'&&(p.payment||'open')==='open').length}</strong></button><button type="button" class="abbate-payment-stat" data-payment-show="reported"><small>Gemeldet · prüfen</small><strong>${state.students.filter(p=>p.role==='learner'&&p.payment==='reported').length}</strong></button><button type="button" class="abbate-payment-stat" data-payment-show="confirmed"><small>Bestätigt</small><strong>${state.students.filter(p=>p.role==='learner'&&p.payment==='confirmed').length}</strong></button></section>`+paymentOverview():''}${annualOverview()}<div class="portal-admin-layout"><aside class="portal-sidebar" id="account-picker"><button type="button" id="account-picker-toggle" class="portal-picker-toggle" aria-expanded="false" aria-controls="account-picker-panel">${pickerLabel()}</button><div id="account-picker-panel" class="portal-picker-panel"><h2 class="admin-list-heading">Teilnehmer</h2><label class="admin-sr-only" for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name oder E-Mail" value="${safe(search)}"><label class="admin-sr-only" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option><option value="payment:open">Zahlung offen</option><option value="payment:reported">Zahlung gemeldet</option><option value="payment:confirmed">Zahlung bestätigt</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></div></aside><div id="account-detail" class="portal-detail" tabindex="-1">${detail()}</div></div>${certificateOverview()}${examOverview()}`;
     document.querySelector('#account-filter').value=filter;
     const canvas=document.querySelector('#portal-qr');
     AbbateCardQR.render(canvas).then(()=>{
@@ -593,7 +660,7 @@
       event.preventDefault();setPickerOpen(false,true);
     }
   });
-  root.addEventListener('input',event=>{if(event.target.id==='exam-search'){examPage=0;renderExamOverview();return;}if(['cert-overview-search','completion-overview-search'].includes(event.target.id)){renderCertificateOverview();return;}if(view==='admin'&&event.target.id==='account-search'){search=event.target.value;document.querySelector('#account-list').innerHTML=peopleList();}});
+  root.addEventListener('input',event=>{if(view==='admin'&&state?.me?.role==='admin'&&event.target.id==='payment-overview-search'){paymentQuery=event.target.value;refreshPaymentOverview();return;}if(event.target.id==='exam-search'){examPage=0;renderExamOverview();return;}if(['cert-overview-search','completion-overview-search'].includes(event.target.id)){renderCertificateOverview();return;}if(view==='admin'&&event.target.id==='account-search'){search=event.target.value;document.querySelector('#account-list').innerHTML=peopleList();}});
   root.addEventListener('change',async event=>{
     if(view!=='admin'||!B.isStaff(state.me))return;
     if(['exam-course','exam-review-filter'].includes(event.target.id)){examPage=0;renderExamOverview();return;}
@@ -649,6 +716,39 @@
         if(view==='admin')admin();else reader();
         notice(({report:'Zahlung gemeldet. Die Fahrschule prüft den Eingang.',confirm:'Zahlung bestätigt und gespeichert.',reopen:'Zahlungsstatus zurückgesetzt.'})[action]);
       }catch(error){notice(B.message(error));paymentButton.disabled=false;}
+      return;
+    }
+    const overviewStat=event.target.closest('[data-payment-show]');
+    if(overviewStat){
+      if(view!=='admin'||state?.me?.role!=='admin')return;
+      const key=overviewStat.dataset.paymentShow;
+      if(!['reported','confirmed','open'].includes(key))return;
+      const query=root.querySelector('#payment-overview-search');
+      if(query&&query.value){query.value='';paymentQuery='';refreshPaymentOverview();}
+      const group=root.querySelector('[data-payment-group="'+key+'"]');
+      if(group){
+        group.open=true;
+        paymentExpanded[key]=true;
+        group.scrollIntoView?.({behavior:'smooth',block:'start'});
+      }
+      return;
+    }
+    const paymentPerson=event.target.closest('[data-payment-open]');
+    if(paymentPerson){
+      if(view!=='admin'||state?.me?.role!=='admin')return;
+      const id=paymentPerson.dataset.paymentOpen;
+      if(!state.students.some(p=>p.id===id&&p.role==='learner'))return;
+      selected=id;search='';filter='all';
+      const searchInput=root.querySelector('#account-search'),accessFilter=root.querySelector('#account-filter');
+      if(searchInput)searchInput.value='';
+      if(accessFilter)accessFilter.value='all';
+      root.querySelector('#account-list').innerHTML=peopleList();
+      root.querySelector('#account-picker-toggle').innerHTML=pickerLabel();
+      renderDetail();
+      if(window.matchMedia('(max-width:700px)').matches)setPickerOpen(false);
+      const target=root.querySelector('#account-detail');
+      target?.scrollIntoView?.({behavior:'smooth',block:'start'});
+      target?.focus?.({preventScroll:true});
       return;
     }
     if(event.target.closest('[data-refresh]')){await render();return;}
