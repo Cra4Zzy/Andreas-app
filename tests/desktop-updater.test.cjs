@@ -19,7 +19,7 @@ test('stable builds require a real key, immutable channel and opt-in feature',()
   assert.match(cargo,/desktop-auto-update = \["dep:tauri-plugin-updater"\]/);
   assert.match(cargo,/^serde_json = "1"$/m,'Tauri generated config requires serde_json at compile time');
   assert.match(source,/env!\("ABBATE_UPDATER_PUBLIC_KEY"\)/);
-  assert.match(source,/desktop-update-feed\/latest\.json/);
+  assert.match(source,/app\.gabelstaplerfahrschule-andreas\.de\/dist\/desktop\/latest\.json/);
   // Tauri updater .endpoints returns Result<UpdaterBuilder, Error>.
   // The builder must be unwrapped before .build(), or native release builds fail with E0599.
   assert.match(source,/\.endpoints\(vec!\[endpoint\.parse\(\)\?\]\)\?\s*\.build\(\)\?/);
@@ -49,8 +49,8 @@ test('release manifest references versioned assets and their original signatures
     }
     const manifest=buildManifest({version:'0.2.0',assetDirectory:dir});
     assert.equal(manifest.version,'0.2.0');
-    assert.match(manifest.platforms['windows-x86_64'].url,/desktop-v0\.2\.0\/Abbate-Lernraum-Windows-Setup\.exe$/);
-    assert.match(manifest.platforms['darwin-universal'].url,/desktop-v0\.2\.0\/Abbate-Lernraum-macOS-Universal\.app\.tar\.gz$/);
+    assert.match(manifest.platforms['windows-x86_64'].url,/app\.gabelstaplerfahrschule-andreas\.de\/dist\/desktop\/releases\/desktop-v0\.2\.0\/Abbate-Lernraum-Windows-Setup\.exe$/);
+    assert.match(manifest.platforms['darwin-universal'].url,/app\.gabelstaplerfahrschule-andreas\.de\/dist\/desktop\/releases\/desktop-v0\.2\.0\/Abbate-Lernraum-macOS-Universal\.app\.tar\.gz$/);
     assert.equal(manifest.platforms['windows-x86_64'].signature,'A'.repeat(96));
     assert.throws(()=>buildManifest({version:'0.2.0-beta.1',assetDirectory:dir}),/SemVer/);
     fs.unlinkSync(path.join(dir,'Abbate-Lernraum-Windows-Setup.exe.sig'));
@@ -75,7 +75,7 @@ test('release builder injects the public updater key and matching feed without s
   assert.equal((workflow.match(/--config src-tauri\/tauri\.stable\.generated\.conf\.json/g)||[]).length,2);
   assert.doesNotMatch(workflow,/--config src-tauri\/tauri\.stable\.conf\.json --ci/);
   assert.doesNotMatch(script,/process\.env\.TAURI_SIGNING_PRIVATE_KEY/,'Never read the signing private key in config generator');
-  assert.match(source,/desktop-update-feed\/latest\.json/);
+  assert.match(source,/app\.gabelstaplerfahrschule-andreas\.de\/dist\/desktop\/latest\.json/);
 });
 
 test('macOS desktop release explicitly bundles app and dmg for updater archive signing',()=>{
