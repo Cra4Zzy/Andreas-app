@@ -113,3 +113,25 @@
 /* Kaiser Webdesign credit on account, training records and staff views. */
 .portal-legal-footer .app-credit{font-size:12.5px;color:#62766d}
 .portal-legal-footer .app-credit a{font-weight:700;color:#215e52;text-decoration:underline;text-underline-offset:3px}
+
+
+/* Payment verification — explicit status instead of confusing it with the learning-access period. */
+.abbate-payment-panel{margin:0 0 18px;padding:20px 22px;border:1px solid #cbd8ce;border-radius:14px;background:#fffefa;box-shadow:0 3px 18px #173f410b;color:#183438}
+.abbate-payment-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.abbate-payment-heading h2{font-size:clamp(20px,2vw,25px);line-height:1.2;margin:2px 0 0;color:#173f41}
+.abbate-payment-panel>p{margin:11px 0;color:#435a55;font-size:15px}
+.abbate-payment-panel>.portal-hint{font-size:13px;line-height:1.5;margin-bottom:0}
+.abbate-payment-date{display:block;color:#4b635b;font-weight:650;margin-top:6px}
+.abbate-payment-panel .portal-actions{margin-top:14px;display:flex;flex-wrap:wrap;gap:9px}
+.abbate-payment-badge{display:inline-flex;justify-content:center;align-items:center;white-space:nowrap;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:800;letter-spacing:.01em;line-height:1.3}
+.abbate-payment-open{background:#edf0ed;color:#41544c}
+.abbate-payment-reported{background:#fff0ba;color:#6a4b08}
+.abbate-payment-confirmed{background:#d7efde;color:#175239}
+.portal-person .abbate-payment-badge{white-space:normal;text-align:center;font-size:11px}
+.abbate-payment-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0 0 18px}
+.abbate-payment-stats>div{padding:13px 16px;border-radius:11px;border:1px solid #cbd8ce;background:#fffefa;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.abbate-payment-stats small{font-size:13px;font-weight:650;color:#415b52}
+.abbate-payment-stats strong{font-size:24px;color:#173f41}
+.abbate-payment-stats>div:nth-child(2) strong{color:#8d5c05}
+.abbate-payment-stats>div:nth-child(3) strong{color:#227246}
+@media(max-width:650px){.abbate-payment-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.abbate-payment-stats>div{padding:11px 9px;display:grid;gap:4px}.abbate-payment-stats small{font-size:11px}.abbate-payment-stats strong{font-size:22px}.abbate-payment-panel{padding:16px}.abbate-payment-panel .portal-actions button{width:100%}}

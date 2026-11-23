@@ -335,3 +335,10 @@ body[data-view=admin] button:focus-visible,body[data-view=admin] summary:focus-v
 @media(max-width:700px){body[data-view=admin] .admin-completion-links .primary,body[data-view=admin] .admin-completion-links .secondary{font-size:13px;padding:9px 11px;white-space:normal}}
 
 #exam-overview .exam-filters{grid-template-columns:minmax(160px,2fr) 1fr 1fr}#exam-overview .exam-result-row{flex-wrap:wrap}#exam-overview .exam-answer-details{width:100%;flex-basis:100%;display:grid;gap:8px}#exam-overview .exam-answer-details[hidden]{display:none}#exam-overview .exam-answer-details .portal-record{padding:12px;border:1px solid #dce0d6;border-radius:12px}#exam-overview .exam-answer-details p{margin:4px 0}#exam-overview .admin-cert-row-actions label{font-size:12px}#exam-overview .admin-cert-row-actions select{min-height:38px} @media(max-width:700px){#exam-overview .exam-filters{grid-template-columns:1fr}}
+
+
+/* Operational payment overview: payment and 30-day learning access stay independent. */
+body[data-view=admin] .abbate-payment-stats>div{border-color:var(--ad-line);background:var(--ad-surface)}
+body[data-view=admin] .abbate-payment-panel{background:var(--ad-surface);border:1px solid var(--ad-line);margin:0}
+body[data-view=admin] .abbate-payment-panel .portal-actions button{min-height:44px}
+body[data-view=admin] .portal-person .abbate-payment-badge{margin-left:3px}
