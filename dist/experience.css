@@ -228,7 +228,7 @@ main{max-width:1500px;padding:clamp(27px,3.6vw,51px) clamp(22px,4.2vw,68px) 56px
 .desktop-nav .nav-progress svg{width:18px;height:18px;flex:none}
 .desktop-nav .nav-progress.active{background:#254d45;color:#fff;box-shadow:none}
 .header-progress{display:none}
-.learning-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0 27px}
+.learning-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0 27px}
 .learning-overview>div{min-width:0;background:#fffefa;border:1px solid #dce5de;border-radius:15px;padding:16px 20px;display:flex;flex-direction:column;gap:4px}
 .learning-overview small{font-size:13px;color:#536960;font-weight:700}
 .learning-overview strong{font-family:var(--heading);font-size:clamp(21px,3.2vw,32px);color:#23463e;line-height:1.2}

@@ -95,7 +95,7 @@ const COURSES=[{"id":"gabelstapler","name":"Gabelstapler","desc":"Fahrbetrieb, F
 let activeCourseId='gabelstapler';
 const courseQuestions=id=>QUESTIONS.filter(q=>(q.course||'gabelstapler')===id);
 const courseLabel=id=>I18N.text(COURSES.find(c=>c.id===id)?.name||'Gabelstapler');
-let data={selected:null,students:[],results:[],mastered:{},answered:{},exams:[],examUnavailable:false};
+let data={selected:null,students:[],results:[],mastered:{},answered:{},exams:[]};
 let run=null, latestResult=null, search='', deferredInstall=null, toastTimer=null, pendingRoute=null;
 const student = () => data.students.find(s=>s.id===data.selected)||{id:'guest',name:'Gast',email:'',until:offsetDate(-1),access:'pending'};
 const question = id => QUESTIONS.find(q=>q.id===id)||LEGACY_GRADED_QUESTIONS.find(q=>q.id===id);
@@ -386,9 +386,6 @@ function officialExamView(r){
   return heading(esc(courseLabel(r.course))+' · Theorieprüfung','Prüfung abgegeben','Dein Ergebnis wurde auf dem Server gespeichert und ist für die Fahrschule sichtbar.')+
     '<div class="compact-result"><section class="compact-result-summary"><div class="compact-result-head"><div><span class="overline">Theorieprüfung</span><h2>'+esc(examReviewLabel(r))+'</h2><p>Die Punktzahl wurde serverseitig berechnet. Die endgültige Bewertung erfolgt durch die Fahrschule.</p></div><div class="compact-result-percent">'+percent+'<span>%</span></div></div><div class="compact-result-meter"><span style="width:'+percent+'%"></span></div><div class="compact-result-stats"><div><strong>'+r.score+'</strong><small>Richtig</small></div><div><strong>'+(r.total-r.score)+'</strong><small>Falsch / offen</small></div><div><strong>'+r.total+'</strong><small>Fragen gesamt</small></div></div><p class="form-caption">Abgegeben: '+esc(new Date(r.submitted_at).toLocaleString(languageConfig().locale))+' · Referenz '+esc(r.id.slice(0,8).toUpperCase())+'</p><a class="primary" href="#lernen">Zurück zum Lernbereich</a></section></div>';
 }
-function officialExamHistory(){
-  return '<section class="result-history-intro"><div><span class="overline">Theorieprüfungen</span><strong>'+data.exams.length+' abgegebene Prüfungen</strong></div><span>Bewertung durch die Fahrschule</span></section>'+(data.examUnavailable?'<p class="form-caption">Prüfungsarchiv momentan nicht erreichbar. Bitte neu laden.</p>':'')+'<div class="result-history-list">'+data.exams.map(r=>'<article class="result-history-item"><div class="result-history-top"><div class="result-history-description"><span class="result-history-type">'+esc(courseLabel(r.course))+' · Theorieprüfung</span><h2>'+r.score+' / '+r.total+' richtig</h2><p>'+esc(new Date(r.submitted_at).toLocaleString(languageConfig().locale))+' · '+esc(examReviewLabel(r))+'</p></div><div class="result-history-percentage">'+Math.round(r.score/r.total*100)+'%</div></div><button type="button" class="text-link" data-action="review-exam" data-id="'+esc(r.id)+'">Prüfung ansehen '+icon('arrow')+'</button></article>').join('')+'</div>';
-}
 function resultView() {
   if(!latestResult)return results();
   if(latestResult.mode==='official-exam')return officialExamView(latestResult);
@@ -404,8 +401,8 @@ function resultView() {
   '<section class="compact-result-review" aria-label="Fehlerübersicht"><div class="compact-result-review-heading"><div><span class="overline">Deine Nachbereitung</span><h2>Fehler ansehen <span>('+missed+')</span></h2></div><small>Zum Öffnen antippen</small></div>'+reviewCards(r)+'</section></div>';
 }
 function learningOverview(list){
-  const answered=answeredQuestions(),rounds=list.length,exams=data.exams.length;
-  const metrics=[['Fragen beantwortet',answered.size+' / '+QUESTIONS.length],['Lernrunden',rounds],['Theorieprüfungen',exams]];
+  const answered=answeredQuestions(),rounds=list.length;
+  const metrics=[['Fragen beantwortet',answered.size+' / '+QUESTIONS.length],['Lernrunden',rounds]];
   const categories=COURSES.map(course=>{
     const {done,total}=courseProgress(course.id,answered),pct=Math.round(done/Math.max(1,total)*100);
     return '<article class="course-progress-row"><div class="course-progress-top"><strong>'+esc(courseLabel(course.id))+'</strong><span>'+done+' von '+total+' beantwortet</span></div><div class="course-learning-progress-track" role="progressbar" aria-label="'+esc(courseLabel(course.id))+' Fragen beantwortet" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+done+'"><span style="width:'+pct+'%"></span></div></article>';
@@ -415,7 +412,7 @@ function learningOverview(list){
 }
 function results() {
   const list=data.results.filter(r=>r.student===student().id).slice().reverse();
-  const header=heading('Prüfungen & Lernen','Deine Ergebnisse','Dein persönlicher Lernstand mit allen bisherigen Lernrunden und Theorieprüfungen.',accessLine())+learningOverview(list)+officialExamHistory();
+  const header=heading('Lernfortschritt','Mein Lernstand','Deine beantworteten Lernfragen und bisherigen Lernrunden im Überblick.',accessLine())+learningOverview(list);
   if(!list.length)return header+'<section class="empty-state"><span class="topic-symbol">'+icon('chart')+'</span><h2>Noch keine Übungsrunden</h2><p>Nach deiner ersten abgeschlossenen Runde erscheinen hier die kompakte Auswertung, aufklappbare Fehler und das Fehlertraining.</p><button class="primary" data-action="start-learn">Lernrunde starten '+icon('arrow')+'</button></section>';
   return header+'<div class="result-history-intro"><div><span class="overline">Dein Lernverlauf</span><strong>'+list.length+' abgeschlossene '+(list.length===1?'Runde':'Runden')+'</strong></div><span>Fehler anzeigen und gezielt üben</span></div><div class="result-history-list">'+list.map(r=>{
     const total=Number(r.total)||r.ids?.length||3,score=Number(r.score)||0,percentage=total?Math.round(score/total*100):0;
@@ -504,7 +501,6 @@ document.addEventListener('click',async event=>{
   else if(action==='exit-run'){pendingRoute='start';askExit();}
   else if(action==='confirm-exit'){if(await discardRun()){close();go(pendingRoute||'start');pendingRoute=null;}}
   else if(action==='mistake-training'){const r=data.results.find(r=>r.id===el.dataset.id&&r.student===student().id);startMistakeTraining(r);}
-  else if(action==='review-exam'){const r=data.exams.find(r=>r.id===el.dataset.id);if(r){latestResult={...r,mode:'official-exam'};go('ergebnis');}}
   else if(action==='review-result'){latestResult=data.results.find(r=>r.id===el.dataset.id);go('ergebnis');}
   else if(action==='install')install();
   else if(action==='install-tab')install(el.dataset.platform);
@@ -570,7 +566,6 @@ async function boot(){
   data.selected=B.me.id;
   try{
     const practice=practicePayload(await B.loadPractice());data.results=practice.results;data.mastered={[B.me.id]:practice.mastered};data.answered={[B.me.id]:practice.answered};
-    try{data.exams=await B.listExams();}catch{data.examUnavailable=true;}
     await restoreExam();
     await I18N.load(selectedLanguage);
     await ensureQuestionLocale(selectedLanguage);
