@@ -4,7 +4,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
 
-const ENDPOINT='https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-update-feed/latest.json';
+const ENDPOINT='https://app.gabelstaplerfahrschule-andreas.de/dist/desktop/latest.json';
 const SOURCE=path.join(__dirname,'..','src-tauri','tauri.stable.conf.json');
 const OUTPUT=path.join(__dirname,'..','src-tauri','tauri.stable.generated.conf.json');
 
