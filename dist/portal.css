@@ -129,9 +129,13 @@
 .abbate-payment-confirmed{background:#d7efde;color:#175239}
 .portal-person .abbate-payment-badge{white-space:normal;text-align:center;font-size:11px}
 .abbate-payment-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0 0 18px}
-.abbate-payment-stats>div{padding:13px 16px;border-radius:11px;border:1px solid #cbd8ce;background:#fffefa;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.abbate-payment-stats>button{padding:13px 16px;border-radius:11px;border:1px solid #cbd8ce;background:#fffefa;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .abbate-payment-stats small{font-size:13px;font-weight:650;color:#415b52}
 .abbate-payment-stats strong{font-size:24px;color:#173f41}
-.abbate-payment-stats>div:nth-child(2) strong{color:#8d5c05}
-.abbate-payment-stats>div:nth-child(3) strong{color:#227246}
-@media(max-width:650px){.abbate-payment-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.abbate-payment-stats>div{padding:11px 9px;display:grid;gap:4px}.abbate-payment-stats small{font-size:11px}.abbate-payment-stats strong{font-size:22px}.abbate-payment-panel{padding:16px}.abbate-payment-panel .portal-actions button{width:100%}}
+.abbate-payment-stats>button:nth-child(2) strong{color:#8d5c05}
+.abbate-payment-stats>button:nth-child(3) strong{color:#227246}
+@media(max-width:650px){.abbate-payment-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.abbate-payment-stats>button{padding:11px 9px;display:grid;gap:4px}.abbate-payment-stats small{font-size:11px}.abbate-payment-stats strong{font-size:22px}.abbate-payment-panel{padding:16px}.abbate-payment-panel .portal-actions button{width:100%}}
+
+.abbate-payment-stats>button{font:inherit;cursor:pointer;text-align:left;transition:background .16s,border-color .16s,transform .16s}
+.abbate-payment-stats>button:hover{background:#edf4ed;border-color:#78998a}
+.abbate-payment-stats>button:focus-visible{outline:3px solid #32765d;outline-offset:2px}
