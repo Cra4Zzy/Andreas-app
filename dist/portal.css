@@ -139,3 +139,12 @@
 .abbate-payment-stats>button{font:inherit;cursor:pointer;text-align:left;transition:background .16s,border-color .16s,transform .16s}
 .abbate-payment-stats>button:hover{background:#edf4ed;border-color:#78998a}
 .abbate-payment-stats>button:focus-visible{outline:3px solid #32765d;outline-offset:2px}
+
+
+/* Optional company information, clearly between participant name and email. */
+.portal-person-name .abbate-person-company{font-weight:750;color:#235f51;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.abbate-picker-company{color:#37675a;font-size:12px;font-weight:700;display:block}
+.abbate-company-name{color:#2a6654}
+.abbate-company-editor{margin-bottom:20px}
+.abbate-company-editor form{display:grid;gap:10px;max-width:530px}
+.abbate-company-editor input{max-width:100%;width:100%;box-sizing:border-box}
