@@ -22,7 +22,7 @@
  });
  const fail=error=>{if(error)throw error;};
  const person=(membership,profile)=>({id:membership.user_id,school:membership.school_id,
-   role:membership.role,name:profile?.display_name||'Teilnehmer',email:profile?.email||'',
+   role:membership.role,name:profile?.display_name||'Teilnehmer',email:profile?.email||'',company:profile?.company||'',
    access:membership.access_status,until:membership.access_until,registeredAt:profile?.registered_at,
    payment:membership.payment_status||'open',paymentReportedAt:membership.payment_reported_at||null,
    paymentConfirmedAt:membership.payment_confirmed_at||null});
@@ -134,6 +134,13 @@
    fail(r.error);
    return r.data;
  }
+ async function setCompany(id,value){
+   if(!me?.id||!me?.school)throw Error('Please sign in again');
+   if(id!==me.id && me.role!=='admin')throw Error('Administrator access required');
+   if(typeof value!=='string'||value.trim().length>120)throw Error('Bitte einen Firmennamen mit maximal 120 Zeichen angeben.');
+   const r=await client.rpc('abbate_set_participant_company',{p_target:id,p_company:value.trim()});
+   fail(r.error);return r.data;
+ }
  async function setPayment(id,action){
    if(!me||!['report','confirm','reopen'].includes(action))throw Error('Ungültige Zahlungsaktion.');
    if(action==='report' && (id!==me.id||me.role!=='learner'))throw Error('Nur Teilnehmer dürfen ihre eigene Zahlung melden.');
@@ -206,6 +213,7 @@
    if(/only the participant may report/i.test(text))return 'Nur der Teilnehmer kann seine eigene Zahlung melden.';
    if(/account already has this role/i.test(text))return 'Dieses Konto besitzt die ausgewählte Rolle bereits.';
    if(/administrators cannot change their own role/i.test(text))return 'Die eigene Administratorrolle kann hier nicht geändert werden.';
+   if(/company name too long/i.test(text))return 'Der Firmenname darf maximal 120 Zeichen enthalten.';
    if(/account not found in this school|learner not found/i.test(text))return 'Das Konto wurde in der Fahrschule nicht gefunden. Bitte die Liste aktualisieren.';
    if(/administrator access required/i.test(text))return 'Für diese Änderung ist ein aktives Administratorkonto erforderlich. Bitte die Anmeldung prüfen.';
    if(/row-level|permission|42501|Staff access|Administrator access/i.test(text))return 'Für diese Aktion fehlt die Berechtigung.';
@@ -213,7 +221,7 @@
    if(/sign in again/i.test(text))return 'Bitte melde dich zur Bestätigung erneut an.';
    return 'Die Anfrage konnte nicht abgeschlossen werden. Bitte neu laden oder die Fahrschule kontaktieren.';
  }
- globalThis.ABBATE_BACKEND={client,identity,state,setRole,setAccess,setPayment,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,listExams,openExam,startExam,submitExam,cancelExam,reviewExam,examDetail,message,
+ globalThis.ABBATE_BACKEND={client,identity,state,setRole,setAccess,setPayment,setCompany,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,listExams,openExam,startExam,submitExam,cancelExam,reviewExam,examDetail,message,
    isStaff:p=>!!p&&['admin','trainer'].includes(p.role)&&p.access==='active'&&(!p.until||p.until>=globalThis.ABBATE_ACCOUNTS.today()),
    get me(){return me;}};
 })();

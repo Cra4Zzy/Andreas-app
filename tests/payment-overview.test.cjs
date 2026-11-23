@@ -58,23 +58,23 @@ test('search by name or email does not alter status counts and escapes HTML',()=
   assert.doesNotMatch(html,/<script>/);
 });
 test('overview summary clicks open matching lists and selected participant is in account detail',()=>{
-  assert.match(source,/data-payment-show="reported"/);
-  assert.match(source,/data-payment-show="confirmed"/);
-  assert.match(source,/data-payment-show="open"/);
-  assert.match(source,/const overviewStat=event\.target\.closest\('\[data-payment-show\]'\)/);
-  assert.match(source,/group\.open=true/);
+  assert.match(source,/data-payment-overview-open/);
+  assert.match(source,/id="payment-overview-dialog"/);
+  assert.match(source,/payment-overview-dismiss/);
+  assert.match(source,/showModal\(\)/);
   assert.match(source,/const paymentPerson=event\.target\.closest\('\[data-payment-open\]'\)/);
   assert.match(source,/selected=id;search='';filter='all'/);
   assert.match(source,/renderDetail\(\)/);
   assert.match(source,/await B\.setPayment\(participant,action\)/);
   assert.match(source,/rememberPaymentOverview\(\)/);
+  assert.match(source,/dialog\.close\(\)/);
 });
 test('admin overview has mobile styles and versioned assets, no new database grant',()=>{
   assert.match(css,/\.abbate-payment-overview\{/);
   assert.match(css,/\.abbate-payment-person-actions/);
   assert.match(css,/@media\(max-width:700px\)/);
-  assert.match(portalCss,/\.abbate-payment-stats>button/);
-  assert.match(page,/portal\.js\?v=22&amp;payments=1&amp;overview=1/);
-  assert.match(page,/admin-workspace\.css\?v=21/);
-  assert.match(page,/portal\.css\?v=9&amp;payments=1&amp;overview=1/);
+  assert.match(portalCss,/\.abbate-payment-badge/);
+  assert.match(page,/portal\.js\?v=23&amp;payments=1&amp;overview=1/);
+  assert.match(page,/admin-workspace\.css\?v=22/);
+  assert.match(page,/portal\.css\?v=10&amp;payments=1&amp;overview=1/);
 });
