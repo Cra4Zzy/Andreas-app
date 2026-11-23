@@ -3,14 +3,14 @@
 #[cfg(feature = "desktop-auto-update")]
 use tauri_plugin_updater::UpdaterExt;
 
-// Desktop updates use a signed, versioned GitHub release feed. The update
+// Desktop updates use a signed, versioned feed on ALL-INKL. The update
 // signing public key is embedded at BUILD time by the release workflow.
 // Preview installers do not enable this feature and remain unchanged.
 #[cfg(feature = "desktop-auto-update")]
 async fn install_available_update(
     app: tauri::AppHandle,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let endpoint = "https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-update-feed/latest.json";
+    let endpoint = "https://app.gabelstaplerfahrschule-andreas.de/dist/desktop/latest.json";
     let updater = app
         .updater_builder()
         .endpoints(vec![endpoint.parse()?])?
