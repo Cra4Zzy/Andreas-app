@@ -3,7 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict'),fs=require(
 test('learner progress shows only answered questions, learning rounds, category progress and learning history',()=>{
  const app=fs.readFileSync('dist/app.js','utf8');
  const learnerPage=app.slice(app.indexOf('function learningOverview(list){'),app.indexOf('function topicInfo(',app.indexOf('function learningOverview(list){')));
- assert.match(learnerPage,/Fragen beantwortet/);
+ assert.match(learnerPage,/Richtig beantwortete Fragen/);
  assert.match(learnerPage,/Lernrunden/);
  assert.match(learnerPage,/Dein Fortschritt nach Fachbereich/);
  assert.match(learnerPage,/Dein Lernverlauf/);

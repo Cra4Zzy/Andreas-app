@@ -112,9 +112,21 @@ function answeredQuestions(){
   }
   return seen;
 }
-function courseProgress(courseId,answered=answeredQuestions()){
+function correctlyAnsweredQuestions(){
+  const seen=new Set(mastered());
+  // Retain previously confirmed correct answers in saved learning rounds.
+  for(const round of data.results){
+    if(round.student!==student().id||!Array.isArray(round.ids))continue;
+    for(const id of round.ids){
+      const q=QUESTIONS.find(item=>item.id===id);
+      if(q&&round.answers?.[id]===q.correct)seen.add(id);
+    }
+  }
+  return seen;
+}
+function courseProgress(courseId,correct=correctlyAnsweredQuestions()){
  const questions=courseQuestions(courseId);
- return {done:questions.filter(q=>answered.has(q.id)).length,total:questions.length};
+ return {done:questions.filter(q=>correct.has(q.id)).length,total:questions.length};
 }
 function rememberAnswered(id){
  if(!QUESTIONS.some(q=>q.id===id))return;
@@ -174,7 +186,7 @@ function topicRows() {
     '<div class="topic-row course-home-row '+(course.active?'course-home-active':'course-home-pending')+'">'+
      '<span class="course-home-number">'+String(i+1).padStart(2,'0')+'</span>'+
      '<span class="topic-symbol '+course.color+'">'+icon(course.icon)+'</span>'+
-     '<span class="course-home-copy"><strong class="topic-title">'+esc(course.name)+'</strong><small>'+courseProgress(course.id).done+' von '+courseProgress(course.id).total+' Fragen beantwortet</small></span>'+
+     '<span class="course-home-copy"><strong class="topic-title">'+esc(course.name)+'</strong><small>'+courseProgress(course.id).done+' von '+courseProgress(course.id).total+' richtig beantwortet</small></span>'+
      (course.active
       ?'<button type="button" class="course-home-link" data-action="start-learn" data-course="'+esc(course.id)+'" aria-label="'+esc(course.name)+' üben">'+icon('arrow')+'</button>'
       :'<span class="course-home-soon">Bald</span>')+
@@ -183,11 +195,11 @@ function topicRows() {
 }
 function installStrip() { return isAppMode()?'':`<aside class="install-strip"><img src="./icon-192.png?v=9" alt="" width="47" height="47"><div><strong>Mobile Nutzung</strong><p>Der Lernraum kann auf iOS und Android zum Startbildschirm hinzugefügt werden.</p></div><button class="secondary" data-action="install">Installationsanleitung ${icon('arrow')}</button></aside>`; }
 function home() {
-  const name=esc(student().name.split(' ')[0]), learned=answeredQuestions().size, total=QUESTIONS.length, ok=active(student());
+  const name=esc(student().name.split(' ')[0]), learned=correctlyAnsweredQuestions().size, total=QUESTIONS.length, ok=active(student());
   return heading('Lernübersicht',`Willkommen, ${name}.`,'',accessLine())+languageStatus()+`
   <section class="home-hero"><div class="hero-text"><div class="course-label"><span></span>Gabelstapler · Dein Theorietraining</div><h2>${esc(I18N.t(20))}</h2><p>Übe die theoretischen Grundlagen für den sicheren Umgang mit Gabelstaplern.</p><div class="hero-actions"><button class="primary" data-action="${ok?'start-learn':'access'}" data-course="gabelstapler">${ok?(learned?'Weiterlernen':'Lernrunde starten'):'Zugang ansehen'} ${icon(ok?'arrow':'lock')}</button><a class="text-link" href="#pruefung">Zur Theorieprüfung ${icon('arrow')}</a></div><div class="hero-proof">${icon('clock')}Übungsrunden ohne Zeitlimit.</div><div class="hero-certification">${icon('check')}<span>IHK-zertifizierter Prüfungsbetrieb</span></div></div><div class="hero-photo"><img src="./assets/abbate-stapler-kundenfoto-hq.avif" alt="Originaler gelber Jungheinrich-Gabelstapler der Fahrschule Andreas Abbate" width="1244" height="1265" decoding="async" fetchpriority="high"></div></section>
   <section class="learning-route" aria-label="Dein Lernweg"><a class="route-step" href="#lernen"><span class="route-number">01</span><span><strong>Verstehen</strong><small>Themen in Ruhe durchgehen</small></span>${icon('arrow')}</a><button class="route-step" data-action="start-learn" data-course="gabelstapler"><span class="route-number">02</span><span><strong>Wissen festigen</strong><small>Mit direkter Rückmeldung üben</small></span>${icon('arrow')}</button><a class="route-step" href="#pruefung"><span class="route-number">03</span><span><strong>Bereit werden</strong><small>Den Prüfungsablauf kennenlernen</small></span>${icon('arrow')}</a></section>
-  <div class="home-lower"><section><div class="section-topline"><h2>Ausbildungsbereiche</h2><a class="text-link" href="#lernen">Alle Bereiche ${icon('arrow')}</a></div><div class="topic-list">${topicRows()}</div></section><aside class="progress-note"><div class="note-label">${icon('chart')}Lernfortschritt</div><h3>${learned?'Dein Lernstand':'Noch keine Fragen beantwortet'}</h3><p>${learned?`Du hast bereits ${learned} von ${total} unterschiedlichen Lernfragen beantwortet.`:'Beginne eine Lernrunde. Zu jeder Antwort erhältst du eine Erläuterung.'}</p><div class="progress-meter" role="progressbar" aria-label="Unterschiedliche beantwortete Lernfragen" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${learned}"><span style="width:${learned/total*100}%"></span></div><div class="progress-count">${learned} von ${total} Fragen beantwortet</div><a class="text-link" href="#ergebnisse">Deine bisherigen Runden ${icon('arrow')}</a></aside></div>${installStrip()}`;
+  <div class="home-lower"><section><div class="section-topline"><h2>Ausbildungsbereiche</h2><a class="text-link" href="#lernen">Alle Bereiche ${icon('arrow')}</a></div><div class="topic-list">${topicRows()}</div></section><aside class="progress-note"><div class="note-label">${icon('chart')}Lernfortschritt</div><h3>${learned?'Dein Lernstand':'Noch keine Fragen richtig beantwortet'}</h3><p>${learned?`Du hast bereits ${learned} von ${total} Lernfragen richtig beantwortet.`:'Beginne eine Lernrunde. Zu jeder Antwort erhältst du eine Erläuterung.'}</p><div class="progress-meter" role="progressbar" aria-label="Richtig beantwortete Lernfragen" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${learned}"><span style="width:${learned/total*100}%"></span></div><div class="progress-count">${learned} von ${total} Fragen richtig beantwortet</div><a class="text-link" href="#ergebnisse">Deine bisherigen Runden ${icon('arrow')}</a></aside></div>${installStrip()}`;
 }
 
 function learning() {
@@ -197,7 +209,7 @@ function learning() {
  '<div class="qualification-symbol '+course.color+'">'+icon(course.icon)+'</div>'+
  '<h2>'+esc(course.name)+'</h2>'+
  '<p>'+esc(course.desc)+'</p>'+ 
- '<div class="course-learning-progress"><span>'+courseProgress(course.id).done+' von '+courseProgress(course.id).total+' Fragen beantwortet</span><div class="course-learning-progress-track" role="progressbar" aria-label="'+esc(course.name)+' beantwortete Fragen" aria-valuemin="0" aria-valuemax="'+courseProgress(course.id).total+'" aria-valuenow="'+courseProgress(course.id).done+'"><span style="width:'+Math.round(courseProgress(course.id).done/Math.max(1,courseProgress(course.id).total)*100)+'%"></span></div></div>'+
+ '<div class="course-learning-progress"><span>'+courseProgress(course.id).done+' von '+courseProgress(course.id).total+' Fragen richtig beantwortet</span><div class="course-learning-progress-track" role="progressbar" aria-label="'+esc(course.name)+' richtig beantwortete Fragen" aria-valuemin="0" aria-valuemax="'+courseProgress(course.id).total+'" aria-valuenow="'+courseProgress(course.id).done+'"><span style="width:'+Math.round(courseProgress(course.id).done/Math.max(1,courseProgress(course.id).total)*100)+'%"></span></div></div>'+
  '<div class="qualification-footer">'+(course.active
   ?'<button class="primary qualification-cta" data-action="start-learn" data-course="'+esc(course.id)+'">'+Math.min(ROUND_QUESTION_LIMIT,courseQuestions(course.id).length)+' Fragen üben '+icon('arrow')+'</button><button class="text-link" data-action="start-exam" data-course="'+esc(course.id)+'">Theorieprüfung '+icon('arrow')+'</button>'
   :'<span class="qualification-awaiting">Lernmaterial noch nicht verfügbar</span>')+'</div>'+
@@ -401,18 +413,18 @@ function resultView() {
   '<section class="compact-result-review" aria-label="Fehlerübersicht"><div class="compact-result-review-heading"><div><span class="overline">Deine Nachbereitung</span><h2>Fehler ansehen <span>('+missed+')</span></h2></div><small>Zum Öffnen antippen</small></div>'+reviewCards(r)+'</section></div>';
 }
 function learningOverview(list){
-  const answered=answeredQuestions(),rounds=list.length;
-  const metrics=[['Fragen beantwortet',answered.size+' / '+QUESTIONS.length],['Lernrunden',rounds]];
+  const correct=correctlyAnsweredQuestions(),rounds=list.length;
+  const metrics=[['Richtig beantwortete Fragen',correct.size+' / '+QUESTIONS.length],['Lernrunden',rounds]];
   const categories=COURSES.map(course=>{
-    const {done,total}=courseProgress(course.id,answered),pct=Math.round(done/Math.max(1,total)*100);
-    return '<article class="course-progress-row"><div class="course-progress-top"><strong>'+esc(courseLabel(course.id))+'</strong><span>'+done+' von '+total+' beantwortet</span></div><div class="course-learning-progress-track" role="progressbar" aria-label="'+esc(courseLabel(course.id))+' Fragen beantwortet" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+done+'"><span style="width:'+pct+'%"></span></div></article>';
+    const {done,total}=courseProgress(course.id,correct),pct=Math.round(done/Math.max(1,total)*100);
+    return '<article class="course-progress-row"><div class="course-progress-top"><strong>'+esc(courseLabel(course.id))+'</strong><span>'+done+' von '+total+' richtig</span></div><div class="course-learning-progress-track" role="progressbar" aria-label="'+esc(courseLabel(course.id))+' richtig beantwortete Fragen" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+done+'"><span style="width:'+pct+'%"></span></div></article>';
   }).join('');
   return '<section class="learning-overview" aria-label="Mein Lernstand">'+metrics.map(([label,value])=>'<div><small>'+esc(label)+'</small><strong>'+esc(value)+'</strong></div>').join('')+'</section>'+
-  '<section class="course-progress-overview" aria-label="Lernfortschritt nach Ausbildungsbereich"><div class="course-progress-intro"><h2>Dein Fortschritt nach Fachbereich</h2><p>Jede beantwortete Lernfrage zählt einmal – egal, ob die Antwort richtig oder falsch war. Wiederholungen zählen nicht doppelt.</p></div>'+categories+'</section>';
+  '<section class="course-progress-overview" aria-label="Lernfortschritt nach Ausbildungsbereich"><div class="course-progress-intro"><h2>Dein Fortschritt nach Fachbereich</h2></div>'+categories+'</section>';
 }
 function results() {
   const list=data.results.filter(r=>r.student===student().id).slice().reverse();
-  const header=heading('Lernfortschritt','Mein Lernstand','Deine beantworteten Lernfragen und bisherigen Lernrunden im Überblick.',accessLine())+learningOverview(list);
+  const header=heading('Lernfortschritt','Mein Lernstand','Deine richtig beantworteten Lernfragen und bisherigen Lernrunden im Überblick.',accessLine())+learningOverview(list);
   if(!list.length)return header+'<section class="empty-state"><span class="topic-symbol">'+icon('chart')+'</span><h2>Noch keine Übungsrunden</h2><p>Nach deiner ersten abgeschlossenen Runde erscheinen hier die kompakte Auswertung, aufklappbare Fehler und das Fehlertraining.</p><button class="primary" data-action="start-learn">Lernrunde starten '+icon('arrow')+'</button></section>';
   return header+'<div class="result-history-intro"><div><span class="overline">Dein Lernverlauf</span><strong>'+list.length+' abgeschlossene '+(list.length===1?'Runde':'Runden')+'</strong></div><span>Fehler anzeigen und gezielt üben</span></div><div class="result-history-list">'+list.map(r=>{
     const total=Number(r.total)||r.ids?.length||3,score=Number(r.score)||0,percentage=total?Math.round(score/total*100):0;
