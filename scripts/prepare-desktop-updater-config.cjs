@@ -14,7 +14,7 @@ function prepare(config, publicKey) {
     throw new Error('ABBATE_UPDATER_PUBLIC_KEY is missing or invalid. Set the public .pub file in GitHub Actions Variables.');
   if(config?.bundle?.createUpdaterArtifacts!==true)
     throw new Error('Signed desktop release must enable bundle.createUpdaterArtifacts');
-  if(config.version!=='0.2.0'&&!/^\d+\.\d+\.\d+$/.test(config.version))
+  if(!/^\d+\.\d+\.\d+$/.test(config.version))
     throw new Error('Invalid desktop release version');
   return {...config,plugins:{...config.plugins,updater:{
     pubkey:key,
