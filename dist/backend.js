@@ -23,7 +23,9 @@
  const fail=error=>{if(error)throw error;};
  const person=(membership,profile)=>({id:membership.user_id,school:membership.school_id,
    role:membership.role,name:profile?.display_name||'Teilnehmer',email:profile?.email||'',
-   access:membership.access_status,until:membership.access_until,registeredAt:profile?.registered_at});
+   access:membership.access_status,until:membership.access_until,registeredAt:profile?.registered_at,
+   payment:membership.payment_status||'open',paymentReportedAt:membership.payment_reported_at||null,
+   paymentConfirmedAt:membership.payment_confirmed_at||null});
  let me=null;
  // Administrators and trainers must reauthenticate after 30 minutes without user input.
  // This is an additional browser safeguard; RLS remains the server authorization layer.
@@ -132,6 +134,14 @@
    fail(r.error);
    return r.data;
  }
+ async function setPayment(id,action){
+   if(!me||!['report','confirm','reopen'].includes(action))throw Error('Ungültige Zahlungsaktion.');
+   if(action==='report' && (id!==me.id||me.role!=='learner'))throw Error('Nur Teilnehmer dürfen ihre eigene Zahlung melden.');
+   if(action!=='report' && me.role!=='admin')throw Error('Administrator access required');
+   const r=await client.rpc('abbate_manage_payment',{p_school:me.school,p_participant:id,p_action:action});
+   fail(r.error);
+   return r.data;
+ }
  async function termsAccepted(){
    const r=await client.rpc('abbate_terms_accepted');
    fail(r.error);return r.data===true;
@@ -190,6 +200,10 @@
    if(/password.*(short|least|weak)|weak_password/i.test(text))return 'Bitte ein sicheres Passwort mit mindestens 12 Zeichen verwenden.';
    if(/access is already active/i.test(text))return 'Der Zugang ist bereits aktiviert. Bitte aktualisiere die Kontenübersicht.';
    if(/paused access is still valid/i.test(text))return 'Der pausierte Zugang ist noch gültig. Verwende „Zugang fortsetzen“.';
+   if(/payment already reported or confirmed/i.test(text))return 'Die Zahlung wurde bereits gemeldet oder bestätigt. Bitte aktualisieren.';
+   if(/payment already confirmed/i.test(text))return 'Diese Zahlung wurde bereits bestätigt.';
+   if(/payment status already open/i.test(text))return 'Der Zahlungsstatus ist bereits offen.';
+   if(/only the participant may report/i.test(text))return 'Nur der Teilnehmer kann seine eigene Zahlung melden.';
    if(/account already has this role/i.test(text))return 'Dieses Konto besitzt die ausgewählte Rolle bereits.';
    if(/administrators cannot change their own role/i.test(text))return 'Die eigene Administratorrolle kann hier nicht geändert werden.';
    if(/account not found in this school|learner not found/i.test(text))return 'Das Konto wurde in der Fahrschule nicht gefunden. Bitte die Liste aktualisieren.';
@@ -199,7 +213,7 @@
    if(/sign in again/i.test(text))return 'Bitte melde dich zur Bestätigung erneut an.';
    return 'Die Anfrage konnte nicht abgeschlossen werden. Bitte neu laden oder die Fahrschule kontaktieren.';
  }
- globalThis.ABBATE_BACKEND={client,identity,state,setRole,setAccess,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,listExams,openExam,startExam,submitExam,cancelExam,reviewExam,examDetail,message,
+ globalThis.ABBATE_BACKEND={client,identity,state,setRole,setAccess,setPayment,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,listExams,openExam,startExam,submitExam,cancelExam,reviewExam,examDetail,message,
    isStaff:p=>!!p&&['admin','trainer'].includes(p.role)&&p.access==='active'&&(!p.until||p.until>=globalThis.ABBATE_ACCOUNTS.today()),
    get me(){return me;}};
 })();
