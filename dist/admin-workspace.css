@@ -342,3 +342,59 @@ body[data-view=admin] .abbate-payment-stats>div{border-color:var(--ad-line);back
 body[data-view=admin] .abbate-payment-panel{background:var(--ad-surface);border:1px solid var(--ad-line);margin:0}
 body[data-view=admin] .abbate-payment-panel .portal-actions button{min-height:44px}
 body[data-view=admin] .portal-person .abbate-payment-badge{margin-left:3px}
+
+/* Named payment overview, scoped to the protected staff workspace. */
+body[data-view=admin] .abbate-payment-stats>button{border:1px solid var(--ad-line);background:var(--ad-surface)}
+body[data-view=admin] .abbate-payment-stats>button:hover{background:#e4eee8;border-color:#5a806d}
+.abbate-payment-overview{scroll-margin-top:24px;margin:0 0 20px;border:1px solid #b6c8bc;border-radius:16px;background:#fffefa;padding:20px;box-shadow:0 5px 20px #163f410b}
+.abbate-payment-overview-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:0 0 16px}
+.abbate-payment-overview-heading h2{font-size:clamp(24px,3vw,30px);line-height:1.18;letter-spacing:-.035em;margin:5px 0 7px;color:#173f41}
+.abbate-payment-overview-heading p{font-size:14px;line-height:1.5;color:#53695e;margin:0;max-width:640px}
+.abbate-payment-overview-total{align-self:flex-start;border:1px solid #cbd8cc;background:#eff4ec;border-radius:9px;white-space:nowrap;color:#244e40;padding:8px 12px;font-size:13px;font-weight:800}
+.abbate-payment-overview-search{display:grid;gap:6px;margin:0 0 15px;color:#34554a;font-weight:750;font-size:13px}
+body[data-view=admin] .abbate-payment-overview-search input{min-height:46px;border:1px solid #91a99b;background:#fdfefa;font-size:15px;width:100%;max-width:540px;padding:10px 13px}
+.abbate-payment-accordions{display:grid;gap:9px}
+.abbate-payment-group{border:1px solid #b9cbc0;border-radius:12px;background:#fbfcf9;overflow:hidden;scroll-margin-top:25px}
+.abbate-payment-group--reported{border-color:#ddc98a}
+.abbate-payment-group--reported>summary{background:#faf1cf}
+.abbate-payment-group--confirmed>summary{background:#e4f1e5}
+.abbate-payment-group--open>summary{background:#ecf0ed}
+.abbate-payment-group>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;min-height:72px;padding:12px 16px;color:#183f3e}
+.abbate-payment-group>summary::-webkit-details-marker{display:none}
+.abbate-payment-group>summary:hover{filter:brightness(.985)}
+.abbate-payment-group[open]>summary{border-bottom:1px solid #c9d6c9}
+.abbate-payment-group-marker{flex:none;width:11px;height:11px;border-radius:50%;background:#7f9389;box-shadow:0 0 0 5px #ffffff8c}
+.abbate-payment-group--reported .abbate-payment-group-marker{background:#aa790e}
+.abbate-payment-group--confirmed .abbate-payment-group-marker{background:#2b8b53}
+.abbate-payment-group-title{display:grid;gap:1px;flex:1;min-width:0}
+.abbate-payment-group-title strong{font-size:17px;line-height:1.25;letter-spacing:-.01em}
+.abbate-payment-group-title small{font-size:12px;color:#52665c;line-height:1.25}
+.abbate-payment-group-count{background:#fffefa;border:1px solid #c2d0c7;border-radius:9px;padding:5px 11px;min-width:40px;text-align:center;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.abbate-payment-group-chevron{flex:none;width:9px;height:9px;border-right:2px solid #45685a;border-bottom:2px solid #45685a;transform:rotate(45deg);transition:transform .15s}
+.abbate-payment-group[open] .abbate-payment-group-chevron{transform:rotate(225deg)}
+.abbate-payment-group-content{padding:10px 14px 14px}
+.abbate-payment-result-count{margin:3px 0 12px;color:#547066;font-size:12px;font-weight:700}
+.abbate-payment-person-list{max-height:460px;overflow-y:auto;overscroll-behavior:contain;display:grid;gap:7px}
+.abbate-payment-person{padding:12px 13px;background:#fff;border:1px solid #d2ded4;border-radius:9px;display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.abbate-payment-person-info{display:grid;gap:1px;min-width:0;flex:1}
+.abbate-payment-person-info strong{font-size:16px;color:#1c3e3b;line-height:1.4;overflow-wrap:anywhere}
+.abbate-payment-person-info small{font-size:13px;color:#52675d;overflow-wrap:anywhere}
+.abbate-payment-time{font-size:12px;color:#466456;margin-top:3px}
+.abbate-payment-person-actions{display:flex;flex-wrap:wrap;gap:7px;align-items:center;justify-content:flex-end}
+body[data-view=admin] .abbate-payment-person-actions button{min-height:40px;padding:8px 11px;border-radius:8px;font-size:13px;font-weight:750;white-space:nowrap}
+.abbate-payment-empty{padding:20px 10px;text-align:center;color:#556b61;font-size:14px;margin:0}
+@media(max-width:700px){
+ .abbate-payment-overview{padding:14px;margin-bottom:15px;border-radius:12px}
+ .abbate-payment-overview-heading{flex-wrap:wrap;gap:9px}
+ .abbate-payment-overview-total{font-size:12px;padding:6px 9px}
+ .abbate-payment-group>summary{padding:10px;gap:9px;min-height:66px}
+ .abbate-payment-group-title strong{font-size:15px}
+ .abbate-payment-group-count{font-size:16px;min-width:34px;padding:4px 7px}
+ .abbate-payment-group-content{padding:9px}
+ .abbate-payment-person{display:grid;gap:11px;padding:12px}
+ .abbate-payment-person-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));justify-content:stretch}
+ .abbate-payment-person-actions button{white-space:normal!important;width:100%}
+ .abbate-payment-person-actions button:only-child{grid-column:1/-1}
+ .abbate-payment-person-list{max-height:480px}
+}
+@media(max-width:380px){.abbate-payment-group-title small{font-size:11px}.abbate-payment-person-actions{grid-template-columns:1fr}}
