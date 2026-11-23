@@ -723,6 +723,8 @@
       if(view!=='admin'||state?.me?.role!=='admin')return;
       const key=overviewStat.dataset.paymentShow;
       if(!['reported','confirmed','open'].includes(key))return;
+      const query=root.querySelector('#payment-overview-search');
+      if(query&&query.value){query.value='';paymentQuery='';refreshPaymentOverview();}
       const group=root.querySelector('[data-payment-group="'+key+'"]');
       if(group){
         group.open=true;
