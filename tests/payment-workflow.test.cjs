@@ -17,7 +17,7 @@ test('payment reporting is server-side, audited, and independent from 30-day acc
 });
 test('learner sees payment status even when learning access is locked',()=>{
   assert.match(backend,/payment:membership.payment_status\|\|'open'/);
-  assert.match(backend,/setPayment,termsAccepted/);
+  assert.match(backend,/setPayment,setCompany,termsAccepted/);
   assert.match(portal,/if\(!proof\)\{root.innerHTML=paymentPanel\(person\)/);
   assert.match(portal,/root.innerHTML=paymentPanel\(person\)\+`<section class="portal-identity"/);
   assert.match(portal,/data-payment-action="report"/);
@@ -28,7 +28,7 @@ test('admin can confirm or reopen, filter by payment state and see totals',()=>{
   assert.match(portal,/data-payment-action="reopen"/);
   assert.match(portal,/payment:reported/);
   assert.match(portal,/payment:confirmed/);
-  assert.match(portal,/abbate-payment-stats/);
+  assert.match(portal,/data-payment-overview-open/);
   assert.match(portal,/B\.setPayment\(participant,action\)/);
   assert.match(portal,/state\.me\?\.role!=='admin'/);
 });
@@ -36,7 +36,7 @@ test('new interface files are referenced with cache-busting params',()=>{
   for(const page of ['dist/konto.html','dist/nachweise.html','dist/verwaltung.html']){
     const html=read(page);
     assert.match(html,/backend\.js\?v=\d+&amp;payments=1/);
-    assert.match(html,/portal\.js\?v=22&amp;payments=1/);
-    assert.match(html,/portal\.css\?v=9&amp;payments=1/);
+    assert.match(html,/portal\.js\?v=23&amp;payments=1/);
+    assert.match(html,/portal\.css\?v=10&amp;payments=1/);
   }
 });
