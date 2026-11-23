@@ -95,18 +95,39 @@ const COURSES=[{"id":"gabelstapler","name":"Gabelstapler","desc":"Fahrbetrieb, F
 let activeCourseId='gabelstapler';
 const courseQuestions=id=>QUESTIONS.filter(q=>(q.course||'gabelstapler')===id);
 const courseLabel=id=>I18N.text(COURSES.find(c=>c.id===id)?.name||'Gabelstapler');
-let data={selected:null,students:[],results:[],mastered:{},exams:[],examUnavailable:false};
+let data={selected:null,students:[],results:[],mastered:{},answered:{},exams:[],examUnavailable:false};
 let run=null, latestResult=null, search='', deferredInstall=null, toastTimer=null, pendingRoute=null;
 const student = () => data.students.find(s=>s.id===data.selected)||{id:'guest',name:'Gast',email:'',until:offsetDate(-1),access:'pending'};
 const question = id => QUESTIONS.find(q=>q.id===id)||LEGACY_GRADED_QUESTIONS.find(q=>q.id===id);
 const topic = id => TOPICS.find(t=>t.id===id);
-const mastered = () => (data.mastered[student().id]||[]).filter(id=>question(id));
+const mastered = () => (data.mastered[student().id]||[]).filter(id=>QUESTIONS.some(q=>q.id===id));
+function answeredQuestions(){
+  const valid=new Set(QUESTIONS.map(q=>q.id));
+  const seen=new Set((data.answered[student().id]||[]).filter(id=>valid.has(id)));
+  // Previous client versions stored the correct-question list and latest 100 rounds.
+  for(const id of mastered())seen.add(id);
+  for(const r of data.results){
+    if(r.student!==student().id||!Array.isArray(r.ids))continue;
+    for(const id of r.ids)if(valid.has(id)&&Object.hasOwn(r.answers||{},id)&&Number.isInteger(r.answers[id])&&r.answers[id]>=0&&r.answers[id]<3)seen.add(id);
+  }
+  return seen;
+}
+function courseProgress(courseId,answered=answeredQuestions()){
+ const questions=courseQuestions(courseId);
+ return {done:questions.filter(q=>answered.has(q.id)).length,total:questions.length};
+}
+function rememberAnswered(id){
+ if(!QUESTIONS.some(q=>q.id===id))return;
+ const user=student().id;
+ const existing=data.answered[user]||[];
+ if(!existing.includes(id))data.answered[user]=[...existing,id];
+}
 let saveTimer,saveQueue=Promise.resolve(),saveRevision=0,savedRevision=0;
 function save(){
   const revision=++saveRevision;
   clearTimeout(saveTimer);
   saveTimer=setTimeout(()=>{
-    const payload={results:data.results.slice(-100),mastered:[...mastered()]};
+    const payload={results:data.results.slice(-100),mastered:[...mastered()],answered:[...answeredQuestions()]};
     saveQueue=saveQueue.catch(()=>{}).then(()=>B.savePractice(payload)).then(()=>{
       savedRevision=Math.max(savedRevision,revision);
     }).catch(()=>toast('Dein Lernstand ist noch nicht gespeichert. Bitte Verbindung prüfen; bei Wiederverbindung wird erneut gespeichert.'));
@@ -153,7 +174,7 @@ function topicRows() {
     '<div class="topic-row course-home-row '+(course.active?'course-home-active':'course-home-pending')+'">'+
      '<span class="course-home-number">'+String(i+1).padStart(2,'0')+'</span>'+
      '<span class="topic-symbol '+course.color+'">'+icon(course.icon)+'</span>'+
-     '<span class="course-home-copy"><strong class="topic-title">'+esc(course.name)+'</strong><small>'+esc(course.sub)+'</small></span>'+
+     '<span class="course-home-copy"><strong class="topic-title">'+esc(course.name)+'</strong><small>'+courseProgress(course.id).done+' von '+courseProgress(course.id).total+' Fragen beantwortet</small></span>'+
      (course.active
       ?'<button type="button" class="course-home-link" data-action="start-learn" data-course="'+esc(course.id)+'" aria-label="'+esc(course.name)+' üben">'+icon('arrow')+'</button>'
       :'<span class="course-home-soon">Bald</span>')+
@@ -162,11 +183,11 @@ function topicRows() {
 }
 function installStrip() { return isAppMode()?'':`<aside class="install-strip"><img src="./icon-192.png?v=9" alt="" width="47" height="47"><div><strong>Mobile Nutzung</strong><p>Der Lernraum kann auf iOS und Android zum Startbildschirm hinzugefügt werden.</p></div><button class="secondary" data-action="install">Installationsanleitung ${icon('arrow')}</button></aside>`; }
 function home() {
-  const name=esc(student().name.split(' ')[0]), learned=mastered().length, total=QUESTIONS.length, ok=active(student());
+  const name=esc(student().name.split(' ')[0]), learned=answeredQuestions().size, total=QUESTIONS.length, ok=active(student());
   return heading('Lernübersicht',`Willkommen, ${name}.`,'',accessLine())+languageStatus()+`
   <section class="home-hero"><div class="hero-text"><div class="course-label"><span></span>Gabelstapler · Dein Theorietraining</div><h2>${esc(I18N.t(20))}</h2><p>Übe die theoretischen Grundlagen für den sicheren Umgang mit Gabelstaplern.</p><div class="hero-actions"><button class="primary" data-action="${ok?'start-learn':'access'}" data-course="gabelstapler">${ok?(learned?'Weiterlernen':'Lernrunde starten'):'Zugang ansehen'} ${icon(ok?'arrow':'lock')}</button><a class="text-link" href="#pruefung">Zur Theorieprüfung ${icon('arrow')}</a></div><div class="hero-proof">${icon('clock')}Übungsrunden ohne Zeitlimit.</div><div class="hero-certification">${icon('check')}<span>IHK-zertifizierter Prüfungsbetrieb</span></div></div><div class="hero-photo"><img src="./assets/abbate-stapler-kundenfoto-hq.avif" alt="Originaler gelber Jungheinrich-Gabelstapler der Fahrschule Andreas Abbate" width="1244" height="1265" decoding="async" fetchpriority="high"></div></section>
   <section class="learning-route" aria-label="Dein Lernweg"><a class="route-step" href="#lernen"><span class="route-number">01</span><span><strong>Verstehen</strong><small>Themen in Ruhe durchgehen</small></span>${icon('arrow')}</a><button class="route-step" data-action="start-learn" data-course="gabelstapler"><span class="route-number">02</span><span><strong>Wissen festigen</strong><small>Mit direkter Rückmeldung üben</small></span>${icon('arrow')}</button><a class="route-step" href="#pruefung"><span class="route-number">03</span><span><strong>Bereit werden</strong><small>Den Prüfungsablauf kennenlernen</small></span>${icon('arrow')}</a></section>
-  <div class="home-lower"><section><div class="section-topline"><h2>Ausbildungsbereiche</h2><a class="text-link" href="#lernen">Alle Bereiche ${icon('arrow')}</a></div><div class="topic-list">${topicRows()}</div></section><aside class="progress-note"><div class="note-label">${icon('chart')}Lernfortschritt</div><h3>${learned?'Dein Lernstand':'Noch keine Fragen abgeschlossen'}</h3><p>${learned?`Du hast bereits ${learned} von ${total} Fragen richtig beantwortet.`:'Beginne eine Lernrunde. Zu jeder Antwort erhältst du eine Erläuterung.'}</p><div class="progress-meter" role="progressbar" aria-label="Richtig beantwortete Übungsfragen" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${learned}"><span style="width:${learned/total*100}%"></span></div><div class="progress-count">${learned} von ${total} Fragen richtig beantwortet</div><a class="text-link" href="#ergebnisse">Deine bisherigen Runden ${icon('arrow')}</a></aside></div>${installStrip()}`;
+  <div class="home-lower"><section><div class="section-topline"><h2>Ausbildungsbereiche</h2><a class="text-link" href="#lernen">Alle Bereiche ${icon('arrow')}</a></div><div class="topic-list">${topicRows()}</div></section><aside class="progress-note"><div class="note-label">${icon('chart')}Lernfortschritt</div><h3>${learned?'Dein Lernstand':'Noch keine Fragen beantwortet'}</h3><p>${learned?`Du hast bereits ${learned} von ${total} unterschiedlichen Lernfragen beantwortet.`:'Beginne eine Lernrunde. Zu jeder Antwort erhältst du eine Erläuterung.'}</p><div class="progress-meter" role="progressbar" aria-label="Unterschiedliche beantwortete Lernfragen" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${learned}"><span style="width:${learned/total*100}%"></span></div><div class="progress-count">${learned} von ${total} Fragen beantwortet</div><a class="text-link" href="#ergebnisse">Deine bisherigen Runden ${icon('arrow')}</a></aside></div>${installStrip()}`;
 }
 
 function learning() {
@@ -175,7 +196,8 @@ function learning() {
  '<div class="qualification-top"><span class="qualification-index">0'+(i+1)+' / '+String(COURSES.length).padStart(2,'0')+'</span><span class="qualification-badge '+(course.active?'live':'upcoming')+'">'+(courseQuestions(course.id).length+' Fragen im Pool')+'</span></div>'+
  '<div class="qualification-symbol '+course.color+'">'+icon(course.icon)+'</div>'+
  '<h2>'+esc(course.name)+'</h2>'+
- '<p>'+esc(course.desc)+'</p>'+
+ '<p>'+esc(course.desc)+'</p>'+ 
+ '<div class="course-learning-progress"><span>'+courseProgress(course.id).done+' von '+courseProgress(course.id).total+' Fragen beantwortet</span><div class="course-learning-progress-track" role="progressbar" aria-label="'+esc(course.name)+' beantwortete Fragen" aria-valuemin="0" aria-valuemax="'+courseProgress(course.id).total+'" aria-valuenow="'+courseProgress(course.id).done+'"><span style="width:'+Math.round(courseProgress(course.id).done/Math.max(1,courseProgress(course.id).total)*100)+'%"></span></div></div>'+
  '<div class="qualification-footer">'+(course.active
   ?'<button class="primary qualification-cta" data-action="start-learn" data-course="'+esc(course.id)+'">'+Math.min(ROUND_QUESTION_LIMIT,courseQuestions(course.id).length)+' Fragen üben '+icon('arrow')+'</button><button class="text-link" data-action="start-exam" data-course="'+esc(course.id)+'">Theorieprüfung '+icon('arrow')+'</button>'
   :'<span class="qualification-awaiting">Lernmaterial noch nicht verfügbar</span>')+'</div>'+
@@ -321,9 +343,11 @@ async function completeRun() {
     }
     const result={id:uid(),student:student().id,mode:run.mode,course:run.course,ids:[...run.ids],answers:{...run.answers},score:run.ids.filter(id=>run.answers[id]===question(id).correct).length,total:run.ids.length,at:new Date().toISOString()};
     const nextMastered=[...new Set([...mastered(),...run.ids.filter(id=>run.answers[id]===question(id).correct)])];
+    const nextAnswered=[...new Set([...answeredQuestions(),...run.ids.filter(id=>Number.isInteger(run.answers[id])&&run.answers[id]>=0&&run.answers[id]<3)])];
     // A completed round is only shown as saved after the server has accepted it.
-    await B.savePractice({results:[result],mastered:nextMastered});
+    await B.savePractice({results:[result],mastered:nextMastered,answered:nextAnswered});
     data.mastered[student().id]=nextMastered;
+    data.answered[student().id]=nextAnswered;
     data.results.push(result);
     latestResult=result;run=null;close();go('ergebnis');
   }catch{
@@ -380,9 +404,14 @@ function resultView() {
   '<section class="compact-result-review" aria-label="Fehlerübersicht"><div class="compact-result-review-heading"><div><span class="overline">Deine Nachbereitung</span><h2>Fehler ansehen <span>('+missed+')</span></h2></div><small>Zum Öffnen antippen</small></div>'+reviewCards(r)+'</section></div>';
 }
 function learningOverview(list){
-  const rounds=list.length,exams=data.exams.length,correct=new Set(mastered()).size;
-  const metrics=[['Gelernte Fragen',correct+' / '+QUESTIONS.length],['Lernrunden',rounds],['Theorieprüfungen',exams]];
-  return '<section class="learning-overview" aria-label="Mein Lernstand">'+metrics.map(([label,value])=>'<div><small>'+esc(label)+'</small><strong>'+esc(value)+'</strong></div>').join('')+'</section>';
+  const answered=answeredQuestions(),rounds=list.length,exams=data.exams.length;
+  const metrics=[['Fragen beantwortet',answered.size+' / '+QUESTIONS.length],['Lernrunden',rounds],['Theorieprüfungen',exams]];
+  const categories=COURSES.map(course=>{
+    const {done,total}=courseProgress(course.id,answered),pct=Math.round(done/Math.max(1,total)*100);
+    return '<article class="course-progress-row"><div class="course-progress-top"><strong>'+esc(courseLabel(course.id))+'</strong><span>'+done+' von '+total+' beantwortet</span></div><div class="course-learning-progress-track" role="progressbar" aria-label="'+esc(courseLabel(course.id))+' Fragen beantwortet" aria-valuemin="0" aria-valuemax="'+total+'" aria-valuenow="'+done+'"><span style="width:'+pct+'%"></span></div></article>';
+  }).join('');
+  return '<section class="learning-overview" aria-label="Mein Lernstand">'+metrics.map(([label,value])=>'<div><small>'+esc(label)+'</small><strong>'+esc(value)+'</strong></div>').join('')+'</section>'+
+  '<section class="course-progress-overview" aria-label="Lernfortschritt nach Ausbildungsbereich"><div class="course-progress-intro"><h2>Dein Fortschritt nach Fachbereich</h2><p>Jede beantwortete Lernfrage zählt einmal – egal, ob die Antwort richtig oder falsch war. Wiederholungen zählen nicht doppelt.</p></div>'+categories+'</section>';
 }
 function results() {
   const list=data.results.filter(r=>r.student===student().id).slice().reverse();
@@ -468,7 +497,7 @@ document.addEventListener('click',async event=>{
   else if(action==='continue-run'){close();go('uebung');}
   else if(action==='replace-run'){if(await discardRun())startRun(el.dataset.mode,el.dataset.topic,el.dataset.course);}
   else if(action==='answer'&&run&&!completingRun){const q=question(run.ids[run.index]);if(!run.checked.includes(q.id)){run.answers[q.id]=Number(el.dataset.index);stashExam();const y=window.scrollY;render();window.scrollTo({top:y,behavior:'auto'});document.querySelector(`[data-action="answer"][data-index="${el.dataset.index}"]`)?.focus({preventScroll:true});}}
-  else if(action==='check-answer'&&run&&run.mode==='learn'){const q=question(run.ids[run.index]);if(run.answers[q.id]===undefined)return;run.checked.push(q.id);if(run.answers[q.id]===q.correct)rememberCorrect(q.id);save();const y=window.scrollY;render();window.scrollTo({top:y,behavior:'auto'});$('.feedback')?.scrollIntoView({block:'nearest',behavior:'smooth'});}
+  else if(action==='check-answer'&&run&&run.mode==='learn'){const q=question(run.ids[run.index]);if(run.answers[q.id]===undefined)return;run.checked.push(q.id);if(run.answers[q.id]===q.correct)rememberCorrect(q.id);rememberAnswered(q.id);save();const y=window.scrollY;render();window.scrollTo({top:y,behavior:'auto'});$('.feedback')?.scrollIntoView({block:'nearest',behavior:'smooth'});}
   else if(action==='previous'&&run){run.index=Math.max(0,run.index-1);stashExam();render();}
   else if(action==='next'&&run){if(!active(student())){run=null;go('start');access();return;}if(run.index<run.ids.length-1){run.index++;stashExam();render();window.scrollTo({top:0,behavior:'auto'});}else if(run.mode==='learn'){completeRun();}else{const missing=run.ids.filter(id=>run.answers[id]===undefined).length;modal('Bereit für deine Auswertung?',`<p>${missing?`${missing} Frage${missing===1?' ist':'n sind'} noch unbeantwortet. Bei dieser Prüfung ${missing===1?'zählt sie':'zählen sie'} als falsch.`:'Du hast alle Fragen beantwortet. Nach der verbindlichen Abgabe wird dein Ergebnis gespeichert und der Fahrschule übermittelt.'}</p><button class="primary" data-action="finish">Prüfung verbindlich abgeben ${icon('check')}</button><div class="modal-actions"><button class="text-link" data-action="close">Antworten noch einmal ansehen</button></div>`);}}
   else if(action==='finish')completeRun();
@@ -496,7 +525,7 @@ route=location.hash.slice(1)||'start';if(route==='verlauf')route='ergebnisse';if
 function practicePayload(input){
   const ids=QUESTIONS.map(q=>q.id),source=Array.isArray(input?.results)?input.results:[];
   const results=source.filter(r=>r&&typeof r.id==='string'&&r.id.length<=80&&['learn','exam'].includes(r.mode)&&Array.isArray(r.ids)&&Number.isInteger(r.score)&&Number.isInteger(r.total)&&r.score>=0&&r.total<=ids.length&&r.score<=r.total&&Number.isFinite(Date.parse(r.at))).map(r=>({id:r.id,student:B.me.id,mode:r.mode,course:COURSES.some(c=>c.id===r.course)?r.course:'gabelstapler',ids:r.ids.filter(id=>ids.includes(id)),answers:Object.fromEntries(Object.entries(r.answers||{}).filter(([id,a])=>ids.includes(id)&&Number.isInteger(a)&&a>=0&&a<3)),score:r.score,total:r.total,at:new Date(r.at).toISOString()}));
-  return {results:results.slice(-100),mastered:Array.isArray(input?.mastered)?input.mastered.filter(id=>ids.includes(id)):[]};
+  return {results:results.slice(-100),mastered:Array.isArray(input?.mastered)?input.mastered.filter(id=>ids.includes(id)):[],answered:Array.isArray(input?.answered)?input.answered.filter(id=>ids.includes(id)):[]};
 }
 let accessRequest=null;
 async function checkAccess(){
@@ -540,7 +569,7 @@ async function boot(){
   if(!await checkAccess())return;
   data.selected=B.me.id;
   try{
-    const practice=practicePayload(await B.loadPractice());data.results=practice.results;data.mastered={[B.me.id]:practice.mastered};
+    const practice=practicePayload(await B.loadPractice());data.results=practice.results;data.mastered={[B.me.id]:practice.mastered};data.answered={[B.me.id]:practice.answered};
     try{data.exams=await B.listExams();}catch{data.examUnavailable=true;}
     await restoreExam();
     await I18N.load(selectedLanguage);
