@@ -155,6 +155,7 @@ jobs:
     needs: [preflight,build]
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    environment: abbate-pilot
     permissions:
       contents: write
       actions: read
@@ -199,6 +200,83 @@ jobs:
             release/Abbate-Lernraum-macOS-Universal.app.tar.gz.sig \
             --target "$GITHUB_SHA" --title "Abbate Lernraum Desktop $RELEASE_VERSION" \
             --notes "Tauri-Updatepakete mit kostenlosem Signaturschlüssel; keine Betriebssystem-Signaturen, daher können SmartScreen/Gatekeeper warnen."
+      # Existing 0.2.0 installations still check the GitHub feed. Keep that
+      # legacy feed available until all clients have received the bridge release.
+      # Binary downloads and future feed requests must work without GitHub access.
+      - name: Upload versioned signed desktop assets to public ALL-INKL storage
+        shell: bash
+        env:
+          FTP_HOST: ${{ secrets.ABBATE_FTPS_HOST }}
+          FTP_USER: ${{ secrets.ABBATE_FTPS_USER }}
+          LFTP_PASSWORD: ${{ secrets.ABBATE_FTPS_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$FTP_HOST" && test -n "$FTP_USER" && test -n "$LFTP_PASSWORD"
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+          lftp <<LFTP_SCRIPT
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate yes
+          set ftp:passive-mode true
+          set cmd:fail-exit true
+          set net:max-retries 3
+          set net:timeout 25
+          open --env-password --user "$FTP_USER" "ftp://$FTP_HOST"
+          # FTP '/' is the app directory, as configured in ALL-INKL KAS.
+          # No remote files are deleted.
+          mirror --reverse --verbose=1 --transfer-all --no-perms --parallel=2 release/ "dist/desktop/releases/desktop-v$RELEASE_VERSION/"
+          bye
+          LFTP_SCRIPT
+
+      - name: Verify signed desktop assets are publicly downloadable
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://app.gabelstaplerfahrschule-andreas.de/dist/desktop/releases/desktop-v$RELEASE_VERSION"
+          for file in \
+            Abbate-Lernraum-Windows-Setup.exe \
+            Abbate-Lernraum-Windows-Setup.exe.sig \
+            Abbate-Lernraum-macOS-Universal.dmg \
+            Abbate-Lernraum-macOS-Universal.app.tar.gz \
+            Abbate-Lernraum-macOS-Universal.app.tar.gz.sig; do
+            curl -fsSL --retry 3 --retry-delay 2 --max-time 120 \
+              "$base/$file" -o "$RUNNER_TEMP/$file"
+            cmp -s "release/$file" "$RUNNER_TEMP/$file" || {
+              echo "::error::Public binary differs from signed artifact: $file"
+              exit 1
+            }
+          done
+
+      - name: Publish independent update manifest atomically and verify it
+        shell: bash
+        env:
+          FTP_HOST: ${{ secrets.ABBATE_FTPS_HOST }}
+          FTP_USER: ${{ secrets.ABBATE_FTPS_USER }}
+          LFTP_PASSWORD: ${{ secrets.ABBATE_FTPS_PASSWORD }}
+        run: |
+          set -euo pipefail
+          lftp <<LFTP_SCRIPT
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ssl:verify-certificate yes
+          set ftp:passive-mode true
+          set cmd:fail-exit true
+          open --env-password --user "$FTP_USER" "ftp://$FTP_HOST"
+          mkdir -p dist/desktop
+          put release/latest.json -o dist/desktop/latest.json.next
+          mv dist/desktop/latest.json.next dist/desktop/latest.json
+          bye
+          LFTP_SCRIPT
+          curl -fsSL --retry 3 --retry-delay 2 \
+            -H 'Cache-Control: no-cache' \
+            "https://app.gabelstaplerfahrschule-andreas.de/dist/desktop/latest.json?t=$GITHUB_SHA" \
+            -o "$RUNNER_TEMP/abbate-allinkl-latest.json"
+          cmp -s release/latest.json "$RUNNER_TEMP/abbate-allinkl-latest.json" || {
+            echo "::error::Public ALL-INKL updater manifest not current"
+            exit 1
+          }
+
       - name: Publish update manifest last (atomic channel switch)
         shell: bash
         run: |
@@ -224,7 +302,7 @@ jobs:
           const fs=require('fs');
           const p='downloads.json';
           const j=JSON.parse(fs.readFileSync(p,'utf8'));
-          const base='https://github.com/'+process.env.GH_REPO+'/releases/download/desktop-v'+process.env.RELEASE_VERSION+'/';
+          const base='https://app.gabelstaplerfahrschule-andreas.de/dist/desktop/releases/desktop-v'+process.env.RELEASE_VERSION+'/';
           j.windows=base+'Abbate-Lernraum-Windows-Setup.exe';
           j.macos=base+'Abbate-Lernraum-macOS-Universal.dmg';
           fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');

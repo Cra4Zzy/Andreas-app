@@ -4,7 +4,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
 
-const ENDPOINT='https://github.com/Cra4Zzy/Andreas-app/releases/download/desktop-update-feed/latest.json';
+const ENDPOINT='https://app.gabelstaplerfahrschule-andreas.de/dist/desktop/latest.json';
 const SOURCE=path.join(__dirname,'..','src-tauri','tauri.stable.conf.json');
 const OUTPUT=path.join(__dirname,'..','src-tauri','tauri.stable.generated.conf.json');
 
@@ -14,7 +14,7 @@ function prepare(config, publicKey) {
     throw new Error('ABBATE_UPDATER_PUBLIC_KEY is missing or invalid. Set the public .pub file in GitHub Actions Variables.');
   if(config?.bundle?.createUpdaterArtifacts!==true)
     throw new Error('Signed desktop release must enable bundle.createUpdaterArtifacts');
-  if(config.version!=='0.2.0'&&!/^\d+\.\d+\.\d+$/.test(config.version))
+  if(!/^\d+\.\d+\.\d+$/.test(config.version))
     throw new Error('Invalid desktop release version');
   return {...config,plugins:{...config.plugins,updater:{
     pubkey:key,
