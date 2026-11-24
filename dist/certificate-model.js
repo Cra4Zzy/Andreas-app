@@ -31,8 +31,10 @@
     if(!['none','email'].includes(values.notification))throw Error('Bitte eine Versandoption auswählen.');
     const field=course.kind==='instruction'?fields.find(c=>c.id===values.field):null;
     if(course.kind==='instruction'&&!field)throw Error('Bitte den unterwiesenen Fachbereich auswählen.');
-    const email=String(person.email||'').trim();
-    if(values.notification==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Für den E-Mail-Versand fehlt eine gültige Teilnehmeradresse.');
+    const accountEmail=String(person.email||'').trim();
+    const email=values.notification==='email'&&values.recipientEmail!==undefined?String(values.recipientEmail).trim():accountEmail;
+    const alternateRecipient=values.notification==='email'&&email.toLowerCase()!==accountEmail.toLowerCase();
+    if(values.notification==='email'&&(email.length>254||!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)))throw Error('Bitte eine gültige Empfänger-E-Mail-Adresse eingeben.');
     if(template){
       const clean=(v,max,label)=>{const s=String(v||'').trim();if(!s||s.length>max||/[\x00-\x1f\x7f]/.test(s))throw Error(label+' bitte vollständig angeben.');return s;};
       const details={};
@@ -46,9 +48,9 @@
       if(details.department&&(details.department.length>100||/[\x00-\x1f\x7f]/.test(details.department)))throw Error('Bitte gültigen Einsatzbereich eingeben.');
       const theory=values.theoryConfirmed==='yes',practice=values.practiceConfirmed==='yes';
       if(template.id!=='cargo'&&(!theory||!practice))throw Error('Bitte Theorie und praktische Durchführung ausdrücklich bestätigen.');
-      return Object.freeze({student:person.id,name:person.name,email,course:course.id,label:template.label,standard:template.standard,completedAt:values.completedAt,notification:values.notification,field:null,title:template.title,kind:'training',outcome:template.outcome,template:template.id,details:Object.freeze(details),theory,practice});
+      return Object.freeze({student:person.id,name:person.name,email,alternateRecipient,course:course.id,label:template.label,standard:template.standard,completedAt:values.completedAt,notification:values.notification,field:null,title:template.title,kind:'training',outcome:template.outcome,template:template.id,details:Object.freeze(details),theory,practice});
     }
-    return Object.freeze({student:person.id,name:person.name,email,course:course.id,label:course.label,standard:course.standard,completedAt:values.completedAt,notification:values.notification,field:field?.label||null,title:field?annualPrefix+field.label+annualSuffix:course.label+' · Theorieprüfung',kind:course.kind||'exam',outcome:course.kind==='instruction'?'attended':'passed'});
+    return Object.freeze({student:person.id,name:person.name,email,alternateRecipient,course:course.id,label:course.label,standard:course.standard,completedAt:values.completedAt,notification:values.notification,field:field?.label||null,title:field?annualPrefix+field.label+annualSuffix:course.label+' · Theorieprüfung',kind:course.kind||'exam',outcome:course.kind==='instruction'?'attended':'passed'});
   }
   function nextDue(date){
     if(!dateOK(date))throw Error('Ungültiges Unterweisungsdatum.');

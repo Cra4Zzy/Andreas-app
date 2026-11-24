@@ -1,0 +1,12 @@
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const C=require('../dist/certificate-model.js');
+const person={id:'test-person',name:'Test Person',role:'learner',email:'learner@example.com'};
+const base={course:'gabelstapler',completedAt:'2026-11-20',notification:'email'};
+const prepare=(values,p=person)=>C.prepare(p,{...base,...values},'2026-11-24');
+test('participant address remains the default',()=>{const d=prepare({});assert.equal(d.email,person.email);assert.equal(d.alternateRecipient,false);});
+test('explicit company recipient applies to this draft only',()=>{const d=prepare({recipientEmail:' office@example.org '});assert.equal(d.email,'office@example.org');assert.equal(d.alternateRecipient,true);assert.equal(person.email,'learner@example.com');});
+test('company recipient can be used even if no account address exists',()=>{const d=prepare({recipientEmail:'office@example.org'},{...person,email:''});assert.equal(d.alternateRecipient,true);});
+test('invalid and multiple recipients are rejected',()=>{for(const recipientEmail of ['','bad','a@example.org,b@example.org','a@example.org\r\nBcc:b@example.org','<a@example.org>'])assert.throws(()=>prepare({recipientEmail}));});
+test('no-mail mode ignores recipient edits',()=>{const d=prepare({notification:'none',recipientEmail:'bad'});assert.equal(d.alternateRecipient,false);assert.equal(d.email,person.email);});
