@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs');
 const p=fs.readFileSync('dist/portal.js','utf8'),css=fs.readFileSync('dist/admin-workspace.css','utf8'),page=fs.readFileSync('dist/verwaltung.html','utf8');
 test('responsive admin workspace separates certificate, access, routine records and history',()=>{
- assert.match(page,/<link\b[^>]*\bhref="\.\/admin-workspace\.css\?v=[1-9]\d*"[^>]*>/);
+ assert.match(page,/<link\b[^>]*\bhref="\.\/admin-workspace\.css\?v=[1-9]\d*(?:&amp;[a-z]+=\d+)*"[^>]*>/);
  assert.match(p,/<section class="cert-panel admin-section"/);
  assert.match(p,/class="portal-access-panel admin-section"/);
  assert.match(p,/class="portal-panel portal-entry admin-section"/);
