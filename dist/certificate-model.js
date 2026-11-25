@@ -1,7 +1,6 @@
 'use strict';
 (function(root){
-  // Only a staff-confirmed, actually passed THEORY examination is represented here.
-  // No credential generation or mail transport is enabled by this preview.
+  // Client-side preparation only; the server authorizes and issues actual certificates.
   const courses=Object.freeze([
     {id:'gabelstapler',label:'Fahr- und Steuerpersonal / Gabelstaplerfahrer',standard:'Theoretische Ausbildungsinhalte nach DGUV Grundsatz 308-001'},
     {id:'hebebuehnen',label:'Hebebühnen',standard:'Fachlicher Bezug: DGUV Grundsatz 308-008 (Hubarbeitsbühnen)'},
@@ -52,6 +51,16 @@
     }
     return Object.freeze({student:person.id,name:person.name,email,alternateRecipient,course:course.id,label:course.label,standard:course.standard,completedAt:values.completedAt,notification:values.notification,field:field?.label||null,title:field?annualPrefix+field.label+annualSuffix:course.label+' · Theorieprüfung',kind:course.kind||'exam',outcome:course.kind==='instruction'?'attended':'passed'});
   }
+  // A separate completion is recorded for each selected examination.
+  function prepareSelection(person,values,asOf=today()){
+    const base=prepare(person,values,asOf);
+    if(base.kind!=='exam'||base.template||values.examSelection!=='yes')return [base];
+    const drafts=[];
+    if(values.examTheory==='yes')drafts.push(base);
+    if(values.examPractice==='yes')drafts.push(Object.freeze({...base,examType:'practice',title:base.label+' · Praxisprüfung',standard:base.course==='gabelstapler'?'Fachlicher Bezug: DGUV Grundsatz 308-001':base.standard}));
+    if(!drafts.length)throw Error('Bitte mindestens eine bestandene Prüfung auswählen.');
+    return drafts;
+  }
   function nextDue(date){
     if(!dateOK(date))throw Error('Ungültiges Unterweisungsdatum.');
     const [y,m,d]=date.split('-').map(Number),last=new Date(Date.UTC(y+1,m,0)).getUTCDate();
@@ -67,5 +76,5 @@
     }
     return [...latest.values()].map(r=>({...r,due:nextDue(r.completedAt)})).map(r=>({...r,days:(Date.parse(r.due+'T00:00:00Z')-Date.parse(asOf+'T00:00:00Z'))/86400000})).filter(r=>r.days<=windowDays).sort((a,b)=>a.due.localeCompare(b.due));
   }
-  const api=Object.freeze({courses,fields,annualField,today,prepare,nextDue,reminders,templates,specialRecord});if(typeof module!=='undefined'&&module.exports)module.exports=api;root.ABBATE_CERTIFICATES=api;
+  const api=Object.freeze({courses,fields,annualField,today,prepare,prepareSelection,nextDue,reminders,templates,specialRecord});if(typeof module!=='undefined'&&module.exports)module.exports=api;root.ABBATE_CERTIFICATES=api;
 })(globalThis);

@@ -279,7 +279,7 @@
   function certificateText(content){
     const line=y=>content.items.filter(i=>typeof i.str==='string'&&i.transform&&Math.abs(i.transform[5]-y)<1).map(i=>i.str).join(' ').replace(/\s+/g,' ').trim();
     const result={school:line(485),subtitle:line(403),intro:line(356),name:line(310),statement:line(281),subject:line(253),standard:line(231),date:line(208),note:line(169),signedDate:line(111),footer:line(42)};
-    if(!['TEILNAHMENACHWEIS','ERFOLGREICH BESTANDENE THEORIEPRÜFUNG'].includes(result.subtitle)||Object.values(result).some(v=>!v)||result.school!=='FAHRSCHULE ANDREAS ABBATE'||!result.footer.includes('Noch nicht ausgestellt'))return null;
+    if(!['TEILNAHMENACHWEIS','ERFOLGREICH BESTANDENE THEORIEPRÜFUNG','ERFOLGREICH BESTANDENE PRAXISPRÜFUNG'].includes(result.subtitle)||Object.values(result).some(v=>!v)||result.school!=='FAHRSCHULE ANDREAS ABBATE'||!result.footer.includes('Noch nicht ausgestellt'))return null;
     return result;
   }
   function cropCertificateArt(source,canvas,x,y,w,h){
@@ -287,9 +287,9 @@
     canvas.width=Math.max(1,Math.round(w*sx));canvas.height=Math.max(1,Math.round(h*sy));
     canvas.getContext('2d',{alpha:false}).drawImage(source,x*sx,(595-y-h)*sy,w*sx,h*sy,0,0,canvas.width,canvas.height);
   }
-  function openCertificateViewer(target){
+  function openCertificateViewer(target,trigger){
     if(!certificatePreviewReady||!target?.isConnected)return;
-    const source=target.querySelector('.admin-preview-stage canvas'),dialog=target.querySelector('.admin-certificate-viewer');
+    const source=trigger?.querySelector('canvas')||target.querySelector('.admin-preview-stage canvas'),dialog=target.querySelector('.admin-certificate-viewer');
     const canvas=dialog?.querySelector('.admin-viewer-original canvas'),page=dialog?.querySelector('.admin-viewer-page');
     if(!source||source.hidden||!canvas||!page||dialog.open||typeof dialog.showModal!=='function')return;
     canvas.width=source.width;canvas.height=source.height;
@@ -317,7 +317,7 @@
   }
   function certificatePanel(p){
     const C=globalThis.ABBATE_CERTIFICATES;if(!C)return '';
-    return `<section class="cert-panel admin-section" aria-labelledby="cert-heading"><button type="button" class="admin-section-heading cert-section-toggle" data-admin-disclosure="certificate-section-content" aria-expanded="false" aria-controls="certificate-section-content"><span class="admin-section-icon admin-gold" aria-hidden="true">✓</span><span><strong id="cert-heading">Prüfung &amp; Zertifikat</strong><small>Prüfung, Ausbildung oder Unterweisung</small></span><span class="admin-chevron" aria-hidden="true"></span></button><div id="certificate-section-content" class="admin-section-body portal-disclosure-content">${state.me.role==='admin'&&!certStatus.signatureReady?'<p class="admin-alert">Unterschrift fehlt. Bitte in den Einstellungen hinterlegen.</p>':''}<form id="certificate-form" class="portal-record-form"><label class="portal-wide">Zertifikat / Ausbildungsbereich<select name="course" required><option value="">Bitte auswählen …</option>${C.courses.map(c=>`<option value="${safe(c.id)}">${safe(c.label)}</option>`).join('')}${certStatus.templatesV2?'<option value="brandschutzhelfer">Brandschutzhelfer</option>':''}</select></label><label class="portal-wide" data-proof-type hidden>Art des Nachweises<select name="proofType" disabled><option value="theory">Bestandene Theorieprüfung</option><option value="cargo">Teilnahmebescheinigung</option><option value="rope">Ausbildungsnachweis (Theorie &amp; Praxis)</option><option value="fire">Ausbildungsbescheinigung (Theorie &amp; Praxis)</option></select></label><div class="portal-wide portal-record-form" data-special-details hidden><label data-special="cargo rope">Geburtsdatum<input type="date" name="birthDate" disabled></label><label data-special="rope">Geburtsort<input name="birthPlace" maxlength="80" disabled></label><label data-special="rope fire">Unternehmen<input name="company" maxlength="100" disabled></label><label data-special="rope fire">Schulungsort<input name="location" maxlength="80" disabled></label><label data-special="fire">Abteilung / Bereich (optional)<input name="department" maxlength="100" disabled></label><label class="portal-consent portal-wide" data-special="rope fire"><input type="checkbox" name="theoryConfirmed" value="yes" disabled> Theorie erfolgreich absolviert / bei Abseilen Prüfung bestanden</label><label class="portal-consent portal-wide" data-special="rope fire"><input type="checkbox" name="practiceConfirmed" value="yes" disabled> Praxis erfolgreich absolviert / bei Abseilen praktische Prüfung bestanden</label><p class="portal-hint portal-wide" data-special="fire">Ausbildungsbescheinigung; die betriebliche Bestellung erfolgt durch den Arbeitgeber.</p></div><label class="portal-wide" data-annual-field hidden>Unterwiesener Fachbereich<select name="field" disabled><option value="">Bitte auswählen …</option>${C.fields.map(c=>`<option value="${safe(c.id)}">${safe(c.label)}</option>`).join('')}</select></label><label>Prüfungs- / Schulungsdatum<input name="completedAt" type="date" value="${C.today()}" max="${C.today()}" required></label><label>Versand<select name="notification"><option value="none">Keine E-Mail</option><option value="email" ${certStatus.mailReady?'':'disabled'}>Zertifikat per E-Mail</option></select></label><label class="portal-wide" data-certificate-recipient hidden>Empfänger-E-Mail (Teilnehmer oder Firma)<input type="email" name="recipientEmail" value="${safe(p.email||'')}" maxlength="254" autocomplete="off" disabled><small class="portal-hint">Gilt nur für diesen Versand. Bitte prüfen, ob der Empfänger das Zertifikat erhalten darf.</small></label><div class="portal-wide"><button class="primary admin-preview-button" name="intent" value="preview" type="submit">PDF-Vorschau prüfen</button></div><div id="certificate-preview" class="portal-wide" aria-live="polite"></div><p role="alert" class="portal-error portal-wide"></p></form></div></section>`;
+    return `<section class="cert-panel admin-section" aria-labelledby="cert-heading"><button type="button" class="admin-section-heading cert-section-toggle" data-admin-disclosure="certificate-section-content" aria-expanded="false" aria-controls="certificate-section-content"><span class="admin-section-icon admin-gold" aria-hidden="true">✓</span><span><strong id="cert-heading">Prüfung &amp; Zertifikat</strong><small>Prüfung, Ausbildung oder Unterweisung</small></span><span class="admin-chevron" aria-hidden="true"></span></button><div id="certificate-section-content" class="admin-section-body portal-disclosure-content">${state.me.role==='admin'&&!certStatus.signatureReady?'<p class="admin-alert">Unterschrift fehlt. Bitte in den Einstellungen hinterlegen.</p>':''}<form id="certificate-form" class="portal-record-form"><label class="portal-wide">Zertifikat / Ausbildungsbereich<select name="course" required><option value="">Bitte auswählen …</option>${C.courses.map(c=>`<option value="${safe(c.id)}">${safe(c.label)}</option>`).join('')}${certStatus.templatesV2?'<option value="brandschutzhelfer">Brandschutzhelfer</option>':''}</select></label><label class="portal-wide" data-proof-type hidden>Art des Nachweises<select name="proofType" disabled><option value="theory">Bestandene Theorieprüfung</option><option value="cargo">Teilnahmebescheinigung</option><option value="rope">Ausbildungsnachweis (Theorie &amp; Praxis)</option><option value="fire">Ausbildungsbescheinigung (Theorie &amp; Praxis)</option></select></label><fieldset class="portal-wide cert-exam-choice" data-exam-selection hidden><legend>Bestandene Prüfungen</legend><input type="hidden" name="examSelection" value="yes" disabled><label class="portal-consent"><input type="checkbox" name="examTheory" value="yes" checked disabled> Theorieprüfung bestanden</label><label class="portal-consent"><input type="checkbox" name="examPractice" value="yes" disabled> Praxisprüfung bestanden</label><p class="portal-hint">Beide ausgewählt? Es entstehen zwei getrennte Zertifikate.</p></fieldset><div class="portal-wide portal-record-form" data-special-details hidden><label data-special="cargo rope">Geburtsdatum<input type="date" name="birthDate" disabled></label><label data-special="rope">Geburtsort<input name="birthPlace" maxlength="80" disabled></label><label data-special="rope fire">Unternehmen<input name="company" maxlength="100" disabled></label><label data-special="rope fire">Schulungsort<input name="location" maxlength="80" disabled></label><label data-special="fire">Abteilung / Bereich (optional)<input name="department" maxlength="100" disabled></label><label class="portal-consent portal-wide" data-special="rope fire"><input type="checkbox" name="theoryConfirmed" value="yes" disabled> Theorie erfolgreich absolviert / bei Abseilen Prüfung bestanden</label><label class="portal-consent portal-wide" data-special="rope fire"><input type="checkbox" name="practiceConfirmed" value="yes" disabled> Praxis erfolgreich absolviert / bei Abseilen praktische Prüfung bestanden</label><p class="portal-hint portal-wide" data-special="fire">Ausbildungsbescheinigung; die betriebliche Bestellung erfolgt durch den Arbeitgeber.</p></div><label class="portal-wide" data-annual-field hidden>Unterwiesener Fachbereich<select name="field" disabled><option value="">Bitte auswählen …</option>${C.fields.map(c=>`<option value="${safe(c.id)}">${safe(c.label)}</option>`).join('')}</select></label><label>Prüfungs- / Schulungsdatum<input name="completedAt" type="date" value="${C.today()}" max="${C.today()}" required></label><label>Versand<select name="notification"><option value="none">Keine E-Mail</option><option value="email" ${certStatus.mailReady?'':'disabled'}>Zertifikat per E-Mail</option></select></label><label class="portal-wide" data-certificate-recipient hidden>Empfänger-E-Mail (Teilnehmer oder Firma)<input type="email" name="recipientEmail" value="${safe(p.email||'')}" maxlength="254" autocomplete="off" disabled><small class="portal-hint">Gilt nur für diesen Versand. Bitte prüfen, ob der Empfänger das Zertifikat erhalten darf.</small></label><div class="portal-wide"><button class="primary admin-preview-button" name="intent" value="preview" type="submit">PDF-Vorschau prüfen</button></div><div id="certificate-preview" class="portal-wide" aria-live="polite"></div><p role="alert" class="portal-error portal-wide"></p></form></div></section>`;
   }
   function syncSpecialCertificate(form){
     const course=form.elements.course.value,type=form.elements.proofType;
@@ -326,6 +326,10 @@
     for(const opt of type.options){opt.hidden=opt.value!=='theory'&&opt.value!==special||special==='fire'&&opt.value==='theory';opt.disabled=opt.hidden;}
     if(!special)type.value='theory';else if(special==='fire')type.value='fire';else if(type.value!=='theory'&&type.value!==special)type.value='theory';
     const selectedType=special?type.value:'theory';
+    const choice=form.querySelector('[data-exam-selection]');
+    const showExams=!!certStatus.practiceV1&&state.me.role==='admin'&&selectedType==='theory'&&!!course&&course!=='jaehrliche-unterweisung'&&course!=='brandschutzhelfer';
+    choice.hidden=!showExams;
+    for(const input of choice.querySelectorAll('input'))input.disabled=!showExams;
     form.querySelector('[data-special-details]').hidden=selectedType==='theory';
     for(const row of form.querySelectorAll('[data-special]')){
       const enabled=row.dataset.special.split(' ').includes(selectedType);row.hidden=!enabled;
@@ -341,7 +345,7 @@
       const status=stage.querySelector('.admin-preview-message');
       stage.dataset.previewState='stale';status.hidden=false;status.textContent='Angaben geändert. Bitte PDF-Vorschau erneut prüfen.';
       const canvas=stage.querySelector('canvas');if(canvas)canvas.hidden=true;
-      const thumbnail=target.querySelector('[data-cert-viewer-open]');if(thumbnail)thumbnail.hidden=true;
+      for(const thumbnail of target.querySelectorAll('[data-cert-viewer-open]'))thumbnail.hidden=true;
       const viewer=target.querySelector('.admin-certificate-viewer');if(viewer?.open)viewer.close();
     }
     const confirmed=target.querySelector('[name="certificateConfirmed"]');if(confirmed)confirmed.checked=false;
@@ -352,20 +356,34 @@
     const sequence=++previewSequence;certificatePreviewReady=false;
     const marker=JSON.stringify(draft);certificateDraft=marker;
     target.setAttribute('data-abbate-update-block','');
-    target.innerHTML=`<div class="cert-review"><div class="admin-preview-status"><strong>PDF-Vorschau</strong><span>Noch nicht ausgestellt</span></div><div id="certificate-preview-stage" class="admin-preview-stage" data-preview-state="loading"><p class="admin-preview-message" role="status">PDF wird geladen …</p><button type="button" class="admin-preview-thumbnail" data-cert-viewer-open aria-haspopup="dialog" aria-label="PDF-Vorschau vergrößern" hidden><canvas class="admin-pdf-canvas" role="img" aria-label="Zertifikatsvorschau mit Unterschrift" hidden></canvas><span class="admin-preview-tap"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>Antippen zum Vergrößern</span></button></div><dialog class="admin-certificate-viewer" aria-label="Große PDF-Vorschau"><header class="admin-viewer-header"><div><strong>PDF-Vorschau</strong><small>Noch nicht ausgestellt</small></div><div class="admin-viewer-tools"><button type="button" class="admin-viewer-mode" data-cert-viewer-mode hidden>Original-PDF</button><button type="button" class="admin-viewer-close" data-cert-viewer-close aria-label="Vorschau schließen" autofocus><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></header><div class="admin-viewer-page" data-mode="original"><div class="admin-viewer-original"><canvas class="admin-pdf-canvas" role="img" aria-label="Originale Zertifikatsvorschau"></canvas></div><article class="admin-viewer-paper" aria-label="Mobile Leseansicht der PDF-Vorschau"><div class="admin-paper-frame"><div class="admin-paper-brand"><canvas data-pdf-logo role="img" aria-label="Fahrschullogo"></canvas><p data-pdf-text="school"></p></div><div class="admin-paper-title"><h2>Zertifikat</h2><p data-pdf-text="subtitle"></p></div><div class="admin-paper-content"><p data-pdf-text="intro"></p><h3 data-pdf-text="name"></h3><p data-pdf-text="statement"></p><strong data-pdf-text="subject"></strong><p class="admin-paper-standard" data-pdf-text="standard"></p><p data-pdf-text="date"></p><p class="admin-paper-note" data-pdf-text="note"></p></div><div class="admin-paper-signoff"><div><span data-pdf-text="signedDate"></span><strong data-pdf-date-label></strong></div><div><canvas data-pdf-signature role="img" aria-label="Unterschrift aus der PDF-Vorschau"></canvas><strong>Andreas Abbate</strong><small data-pdf-signer-role></small></div></div><div class="admin-paper-footer"><span data-pdf-text="footer"></span><small>Mobile Leseansicht · Original-PDF unverändert</small></div></div></article></div></dialog><div class="cert-review-summary"><strong>${draft.notification==='email'?'Empfänger: '+safe(draft.email):'Ohne E-Mail-Versand'}</strong></div><label class="portal-consent"><input type="checkbox" name="certificateConfirmed" value="yes"> <span>${draft.template?'Ich bestätige die tatsächlich durchgeführte Schulung, die angegebenen Personendaten und alle bescheinigten Inhalte.':draft.kind==='instruction'?'Ich bestätige die tatsächlich durchgeführte jährliche Unterweisung und die Teilnahme.':'Ich bestätige die bestandene Theorieprüfung.'}</span></label><div class="admin-certificate-actions">${state.me.role==='admin'?'<button class="primary" name="intent" value="issue" type="submit" disabled>Zertifikat ausstellen'+(draft.notification==='email'?' und versenden':'')+'</button>':''}${draft.template?'':'<button class="secondary" name="intent" value="save" type="submit">Nur Nachweis speichern</button>'}</div></div>`;
+    target.innerHTML=`<div class="cert-review"><div class="admin-preview-status"><strong>PDF-Vorschau</strong><span>Noch nicht ausgestellt</span></div><div id="certificate-preview-stage" class="admin-preview-stage" data-preview-state="loading"><p class="admin-preview-message" role="status">PDF wird geladen …</p><button type="button" class="admin-preview-thumbnail" data-cert-viewer-open aria-haspopup="dialog" aria-label="PDF-Vorschau vergrößern" hidden><canvas class="admin-pdf-canvas" role="img" aria-label="Zertifikatsvorschau mit Unterschrift" hidden></canvas><span class="admin-preview-tap"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg>Antippen zum Vergrößern</span></button></div><dialog class="admin-certificate-viewer" aria-label="Große PDF-Vorschau"><header class="admin-viewer-header"><div><strong>PDF-Vorschau</strong><small>Noch nicht ausgestellt</small></div><div class="admin-viewer-tools"><button type="button" class="admin-viewer-mode" data-cert-viewer-mode hidden>Original-PDF</button><button type="button" class="admin-viewer-close" data-cert-viewer-close aria-label="Vorschau schließen" autofocus><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></header><div class="admin-viewer-page" data-mode="original"><div class="admin-viewer-original"><canvas class="admin-pdf-canvas" role="img" aria-label="Originale Zertifikatsvorschau"></canvas></div><article class="admin-viewer-paper" aria-label="Mobile Leseansicht der PDF-Vorschau"><div class="admin-paper-frame"><div class="admin-paper-brand"><canvas data-pdf-logo role="img" aria-label="Fahrschullogo"></canvas><p data-pdf-text="school"></p></div><div class="admin-paper-title"><h2>Zertifikat</h2><p data-pdf-text="subtitle"></p></div><div class="admin-paper-content"><p data-pdf-text="intro"></p><h3 data-pdf-text="name"></h3><p data-pdf-text="statement"></p><strong data-pdf-text="subject"></strong><p class="admin-paper-standard" data-pdf-text="standard"></p><p data-pdf-text="date"></p><p class="admin-paper-note" data-pdf-text="note"></p></div><div class="admin-paper-signoff"><div><span data-pdf-text="signedDate"></span><strong data-pdf-date-label></strong></div><div><canvas data-pdf-signature role="img" aria-label="Unterschrift aus der PDF-Vorschau"></canvas><strong>Andreas Abbate</strong><small data-pdf-signer-role></small></div></div><div class="admin-paper-footer"><span data-pdf-text="footer"></span><small>Mobile Leseansicht · Original-PDF unverändert</small></div></div></article></div></dialog><div class="cert-review-summary"><strong>${draft.notification==='email'?'Empfänger: '+safe(draft.email):'Ohne E-Mail-Versand'}</strong></div><label class="portal-consent"><input type="checkbox" name="certificateConfirmed" value="yes"> <span>${draft.template?'Ich bestätige die tatsächlich durchgeführte Schulung, die angegebenen Personendaten und alle bescheinigten Inhalte.':draft.kind==='instruction'?'Ich bestätige die tatsächlich durchgeführte jährliche Unterweisung und die Teilnahme.':draft.additional?.length?'Ich bestätige die tatsächlich bestandene Theorie- und Praxisprüfung.':draft.examType==='practice'?'Ich bestätige die tatsächlich bestandene Praxisprüfung.':'Ich bestätige die bestandene Theorieprüfung.'}</span></label><div class="admin-certificate-actions">${state.me.role==='admin'?'<button class="primary" name="intent" value="issue" type="submit" disabled>Zertifikat ausstellen'+(draft.notification==='email'?' und versenden':'')+'</button>':''}${draft.template?'':'<button class="secondary" name="intent" value="save" type="submit">Nur Nachweis speichern</button>'}</div></div>`;
     const stage=target.querySelector('.admin-preview-stage'),message=stage.querySelector('.admin-preview-message'),canvas=stage.querySelector('canvas'),issue=target.querySelector('[value="issue"]');
     const current=()=>target.isConnected&&certificateDraft===marker&&sequence===previewSequence&&stage.isConnected;
     if(state.me.role!=='admin'||!certStatus.signatureReady){
       stage.dataset.previewState='unavailable';message.textContent=state.me.role!=='admin'?'Zertifikate werden durch einen Administrator ausgestellt.':'Für die PDF-Vorschau fehlt die hinterlegte Unterschrift.';return;
     }
     try{
-      const data=await certCall({action:'preview',school:state.me.school,participantId:draft.student,label:draft.label,field:draft.field,completedAt:draft.completedAt,...(draft.template?{template:draft.template,details:draft.details,theory:draft.theory,practice:draft.practice}:{})});
+      const data=await certCall({action:'preview',school:state.me.school,participantId:draft.student,label:draft.label,field:draft.field,completedAt:draft.completedAt,...(draft.template?{template:draft.template,details:draft.details,theory:draft.theory,practice:draft.practice}:{}),...(draft.examType?{examType:draft.examType}:{})});
       if(!current())return;
       if(data?.draft!==true||!data.pdf)throw Error('Keine signierte PDF-Vorschau erhalten.');
       const bytes=Uint8Array.from(atob(data.pdf),x=>x.charCodeAt(0));
       message.textContent='PDF wird angezeigt …';
       await renderCertificateCanvas(canvas,bytes);
       if(!current())return;
+      for(const extra of draft.additional||[]){
+        const second=await certCall({action:'preview',school:state.me.school,participantId:extra.student,label:extra.label,field:extra.field,completedAt:extra.completedAt,examType:extra.examType});
+        if(!current())return;
+        if(second?.draft!==true||!second.pdf)throw Error('Keine Praxis-PDF-Vorschau erhalten.');
+        const button=target.querySelector('[data-cert-viewer-open]').cloneNode(true);
+        const secondCanvas=button.querySelector('canvas');
+        button.setAttribute('aria-label','Praxis-Zertifikat vergrößern');
+        button.querySelector('.admin-preview-tap').textContent='Praxisprüfung · Vergrößern';
+        stage.append(button);
+        await renderCertificateCanvas(secondCanvas,Uint8Array.from(atob(second.pdf),x=>x.charCodeAt(0)));
+        if(!current())return;
+        secondCanvas.hidden=false;button.hidden=false;
+        target.querySelector('.admin-preview-tap').textContent='Theorieprüfung · Vergrößern';
+      }
       stage.dataset.previewState='ready';canvas.hidden=false;message.hidden=true;
       target.querySelector('[data-cert-viewer-open]').hidden=false;
       certificatePreviewReady=true;
@@ -374,6 +392,7 @@
       if(!current())return;
       certificatePreviewReady=false;
       stage.dataset.previewState='error';message.hidden=false;canvas.hidden=true;
+      for(const thumbnail of target.querySelectorAll('[data-cert-viewer-open]'))thumbnail.hidden=true;
       message.textContent='PDF-Vorschau konnte nicht geladen werden. Bitte oben erneut prüfen. '+String(e?.message||'').slice(0,180);
       if(issue)issue.disabled=true;
       console.warn('Abbate PDF preview:',e?.name||'error');
@@ -666,7 +685,9 @@
       else if(form.id==='certificate-form'){
         const C=globalThis.ABBATE_CERTIFICATES;
         const person=state.students.find(p=>p.id===selected);
-        const draft=C.prepare(person,values);
+        const drafts=C.prepareSelection(person,values);
+        const draft=drafts.length===1?drafts[0]:{...drafts[0],additional:drafts.slice(1)};
+        if(drafts.some(d=>d.examType==='practice')&&(state.me.role!=='admin'||!certStatus.practiceV1))throw Error('Praxisnachweise erfordern Administratorrechte.');
         if(!['save','issue'].includes(submit?.value)){await showCertificate(form,draft);return;}
         if(certificateDraft!==JSON.stringify(draft)||values.certificateConfirmed!=='yes')throw Error('Bitte die aktuelle Vorschau und den tatsächlichen Abschluss ausdrücklich bestätigen.');
         const issuing=submit.value==='issue';
@@ -674,7 +695,26 @@
         if(issuing&&(state.me.role!=='admin'||!certStatus.signatureReady||!certificatePreviewReady))throw Error('Ausstellung noch nicht freigegeben.');
         if(issuing&&draft.notification==='email'&&!certStatus.mailReady)throw Error('E-Mail-Versand nicht eingerichtet.');
         if(issuing&&!confirm('Zertifikat für '+draft.name+' ausstellen'+(draft.notification==='email'?' und an '+draft.email+' senden':'')+'?'))return;
-        const existing=M.recordsFor(state,selected).find(r=>r.kind===draft.kind&&r.outcome===draft.outcome&&r.title===draft.title&&r.completedAt===draft.completedAt);
+        if(drafts.length>1){
+          const completed=[],problems=[];
+          for(const item of drafts){
+            try{
+              const existing=M.recordsFor(state,selected).find(r=>!r.revokedAt&&r.kind===item.kind&&r.outcome===item.outcome&&r.title===item.title&&r.completedAt===item.completedAt);
+              M.addCompletion({students:state.students,completions:[],audit:[]},item,uuid());
+              const id=existing?.id||await B.addCompletion(item);
+              if(issuing){const result=await certCall({action:'issue',completionId:id,confirmed:true});completed.push({id,mailStatus:result.mailStatus});}
+              else completed.push({id});
+            }catch(e){problems.push(item.title+': '+e.message);}
+          }
+          let msg=issuing?completed.length+' von 2 Zertifikaten ausgestellt.':completed.length+' von 2 Nachweisen gespeichert.';
+          if(issuing&&draft.notification==='email'&&completed.length===2){
+            try{const sent=await certCall({action:'mail_batch',completionIds:completed.map(x=>x.id),confirmed:true,email:draft.email,alternateRecipient:draft.alternateRecipient===true});msg+=' '+mailLabel(sent.mailStatus);}
+            catch(e){problems.push('Gemeinsamer Versand: '+e.message);}
+          }else if(issuing&&draft.notification==='email')msg+=' Kein gemeinsamer Versand; bitte fehlenden Nachweis prüfen.';
+          if(problems.length)msg+=' '+problems.join(' ');
+          await load();admin();notice(msg);certificateDraft=null;return;
+        }
+        const existing=M.recordsFor(state,selected).find(r=>!r.revokedAt&&r.kind===draft.kind&&r.outcome===draft.outcome&&r.title===draft.title&&r.completedAt===draft.completedAt);
         if(existing&&!issuing)throw Error('Dieser Nachweis ist bereits im Schulungspass gespeichert.');
         if(draft.template&&existing&&certRecords.has(existing.id))throw Error('Dieses Zertifikat ist bereits ausgestellt. Bitte das bestehende PDF öffnen; für eine Korrektur muss der alte Nachweis widerrufen werden.');
         M.addCompletion({students:state.students,completions:[],audit:[]},draft,uuid());
@@ -711,8 +751,9 @@
     if(['exam-course','exam-review-filter'].includes(event.target.id)){examPage=0;renderExamOverview();return;}
     if(event.target.matches('[data-exam-review]')){const el=event.target,r=examRows.find(r=>r.id===el.dataset.examReview);if(!r)return;const next=el.value;if(!confirm('Bewertung wirklich auf „'+({passed:'Bestanden',failed:'Nicht bestanden',pending:'Offen'})[next]+'“ setzen?')){el.value=r.review;return;}el.disabled=true;try{const updated=await B.reviewExam(r.id,next);examRows=examRows.map(x=>x.id===r.id?updated:x);renderExamOverview();}catch{el.value=r.review;root.querySelector('#exam-error').textContent='Bewertung konnte nicht gespeichert werden.';}finally{el.disabled=false;}return;}
     if(['cert-overview-filter','completion-overview-kind','completion-overview-outcome','completion-overview-from','completion-overview-to'].includes(event.target.id)){renderCertificateOverview();return;}
-    if(event.target.closest('#certificate-form')&&['course','field','completedAt','notification','recipientEmail','proofType','birthDate','birthPlace','company','location','department','theoryConfirmed','practiceConfirmed'].includes(event.target.name)){
+    if(event.target.closest('#certificate-form')&&['course','field','completedAt','notification','recipientEmail','proofType','birthDate','birthPlace','company','location','department','theoryConfirmed','practiceConfirmed','examTheory','examPractice'].includes(event.target.name)){
       const current=event.target.closest('#certificate-form');
+      if(event.target.name==='course'){current.elements.examTheory.checked=true;current.elements.examPractice.checked=false;}
       syncSpecialCertificate(current);
       const mail=current.elements.notification.value==='email';
       current.querySelector('[data-certificate-recipient]').hidden=!mail;
@@ -723,7 +764,7 @@
       current.elements.field.disabled=!annual;current.elements.field.required=annual;
       if(!annual)current.elements.field.value='';
       const values=Object.fromEntries(new FormData(current));
-      try{if(certificateDraft===JSON.stringify(globalThis.ABBATE_CERTIFICATES.prepare(state.students.find(p=>p.id===selected),values)))return;}catch{}
+      try{const ds=globalThis.ABBATE_CERTIFICATES.prepareSelection(state.students.find(p=>p.id===selected),values);if(certificateDraft===JSON.stringify(ds.length===1?ds[0]:{...ds[0],additional:ds.slice(1)}))return;}catch{}
       invalidateCertificatePreview(current);
       return;
     }
@@ -756,7 +797,7 @@
     const viewerClose=event.target.closest('[data-cert-viewer-close]');
     if(viewerClose){const dialog=viewerClose.closest('dialog'),trigger=dialog?.closest('#certificate-preview')?.querySelector('[data-cert-viewer-open]');dialog?.close();trigger?.focus({preventScroll:true});return;}
     const viewerOpen=event.target.closest('[data-cert-viewer-open]');
-    if(viewerOpen){if(view==='admin'&&B.isStaff(state?.me))openCertificateViewer(viewerOpen.closest('#certificate-preview'));return;}
+    if(viewerOpen){if(view==='admin'&&B.isStaff(state?.me))openCertificateViewer(viewerOpen.closest('#certificate-preview'),viewerOpen);return;}
     const paymentButton=event.target.closest('[data-payment-action]');
     if(paymentButton){
       const action=paymentButton.dataset.paymentAction,participant=paymentButton.dataset.paymentPerson;
