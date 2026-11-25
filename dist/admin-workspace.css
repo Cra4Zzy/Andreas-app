@@ -420,3 +420,5 @@ body[data-view=admin] .portal-stats>button{cursor:pointer;text-align:left;font:i
 body[data-view=admin] .portal-stats>button:hover{box-shadow:0 3px 12px #16271d18}
 body[data-view=admin] .portal-stats>button[aria-pressed=true]{outline:2px solid #327655;outline-offset:1px}
 body[data-view=admin] .portal-stats>button:focus-visible{outline:3px solid #327655;outline-offset:3px}
+
+.cert-exam-choice{min-width:0;border:1px solid var(--ad-line);border-radius:12px;padding:12px 14px;margin:0}.cert-exam-choice[hidden]{display:none}.cert-exam-choice legend{font-weight:700;padding:0 5px}.cert-exam-choice label{display:flex;align-items:center;gap:8px;margin:6px 0}.cert-exam-choice .portal-hint{margin:6px 0 0}

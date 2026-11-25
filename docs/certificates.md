@@ -9,3 +9,7 @@ Vor Live-Ausstellung: genehmigte Unterschrift und finale Fachtexte übernehmen; 
 ## Individuelle Schulungsnachweise
 
 Drei zusätzliche Vorlagen, unabhängig vom Lernfragenpool: VDI 2700ff Teilnahme, Abseilen Theorie/Praxis, Brandschutzhelfer Ausbildung ohne Arbeitgeberbestellung. Nur Administration mit bestätigten tatsächlich durchgeführten Inhalten; keine automatische Ausstellung. Zusatzdaten werden im ausgestellten privaten PDF gespeichert, nicht in der Teilnehmerprofil- oder Kurstabelle. Bei fehlgeschlagener Ausstellung kann derselbe Schulungseintrag über die Vorlage und das Datum erneut verwendet werden. Bestehende Theorie- und Unterweisungsnachweise bleiben unverändert. Die Vorlagen werden erst sichtbar, wenn der Zertifikatsdienst templatesV2 meldet. Die 12 Monate beim Abseilen sind Ausbildervorgabe, die wiederkehrende praktische Unterweisung ist davon getrennt. Fachtexte durch Ausbilder freigeben.
+
+## Separate praktische Prüfungsnachweise
+
+Die Administration kann Theorie, Praxis oder beide tatsächlich bestandenen Prüfungen auswählen. Es entstehen getrennte Abschlussdatensätze und PDF-Zertifikate. Bei gemeinsamem Versand werden beide PDFs angehängt. Sondervorlagen und Unterweisungen bleiben getrennt. Das Datum gilt für beide ausgewählten Prüfungen; bei unterschiedlichen Prüfungstagen bitte separat ausstellen. Kein eigenständiger Fahrausweis. Erst mit dem Servermerkmal `practiceV1` wird die Auswahl aktiviert. Vor Aktivierung die serverseitige PDF-Erstellung und den SMTP-Versand prüfen.

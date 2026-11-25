@@ -25,7 +25,7 @@ jobs:
       - run: npm ci
       - run: node --check dist/portal.js
       - run: npm test
-      - run: npm install --no-save --package-lock=false --ignore-scripts pdf-lib@1.17.1
+      - run: npm install --no-save --package-lock=false --ignore-scripts pdf-lib@1.17.1 nodemailer@10.6.0
       - run: node staging/annual-instruction/verify-pdf.cjs
       - uses: actions/upload-artifact@v4
         with:
