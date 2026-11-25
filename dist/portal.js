@@ -206,7 +206,36 @@
       if(group)paymentExpanded[key]=group.open;
     }
   }
-  function people(){return state.students.filter(p=>p.id!==state.me?.id&&(p.name+' '+p.email+' '+(p.company||'')).toLowerCase().includes(search.toLowerCase())&&(filter==='all'||(filter==='expired'?p.access==='active'&&!M.access(p):filter.startsWith('payment:')?(p.payment||'open')===filter.slice(8):p.access===filter)));}
+  function matchesAccountStatus(p,key){
+    if(p.id===state.me?.id)return false;
+    if(key==='all')return true;
+    if(p.role!=='learner')return false;
+    if(key==='active')return M.access(p);
+    if(key==='inactive')return p.access==='paused'||(p.access==='active'&&!M.access(p));
+    if(key==='expired')return p.access==='active'&&!M.access(p);
+    if(key.startsWith('payment:'))return (p.payment||'open')===key.slice(8);
+    return p.access===key;
+  }
+  function people(){return state.students.filter(p=>matchesAccountStatus(p,filter)&&(p.name+' '+p.email+' '+(p.company||'')).toLowerCase().includes(search.toLowerCase()));}
+  function accountStats(){
+    return [['all','Konten'],['pending','Wartend'],['active','Aktiv'],['inactive','Inaktiv']].map(([key,label])=>`<button type="button" data-account-stat="${key}" aria-pressed="${filter===key}" aria-controls="account-list"><span>${label}</span><strong>${state.students.filter(p=>matchesAccountStatus(p,key)).length}</strong></button>`).join('');
+  }
+  function syncAccountStats(){
+    root.querySelectorAll('[data-account-stat]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.accountStat===filter)));
+  }
+  function selectAccountStat(key){
+    filter=key;search='';
+    const input=root.querySelector('#account-search'),status=root.querySelector('#account-filter');
+    if(input)input.value='';if(status)status.value=filter;
+    const matching=people();
+    if(!matching.some(p=>p.id===selected))selected=matching[0]?.id||null;
+    root.querySelector('#account-list').innerHTML=peopleList();
+    root.querySelector('#account-picker-toggle').innerHTML=pickerLabel();
+    syncAccountStats();
+    renderDetail();
+    setPickerOpen(true);
+    root.querySelector('#account-picker')?.scrollIntoView?.({block:'nearest',behavior:'smooth'});
+  }
   function peopleList(){return people().map(p=>`<button class="portal-person ${selected===p.id?'selected':''}" data-person="${safe(p.id)}" aria-pressed="${selected===p.id}"><span class="portal-person-name">${safe(p.name)}${p.company?'<small class="abbate-person-company">'+safe(p.company)+'</small>':''}<small>${safe(p.email)}</small></span><span><small>${p.role==='admin'?'Administrator':p.role==='trainer'?'Ausbilder':'Teilnehmer'}</small>${badge(p)}${p.role==='learner'?paymentBadge(p):''}</span></button>`).join('')||'<p class="portal-hint">Keine passenden Konten.</p>';}
   function pickerLabel(){
     const person=state.students.find(p=>p.id===selected);
@@ -493,7 +522,7 @@
   function admin(){
     rememberPaymentOverview();
     certificateDraft=null;certificatePreviewReady=false;previewSequence++;
-    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Abbate Lernraum</span><h1>Teilnehmerverwaltung</h1><p class="admin-sr-only">Schulungen und Prüfungsergebnisse</p></div><div class="admin-toolbar"><button type="button" class="secondary" data-refresh aria-label="Konten aktualisieren">Aktualisieren</button><button type="button" class="secondary admin-cert-overview-trigger" data-exam-overview-open aria-haspopup="dialog">Prüfungsergebnisse (${examError?'–':examRows.length})</button>${state.me.role==='admin'?'<button type="button" class="secondary admin-cert-overview-trigger" data-cert-overview-open aria-haspopup="dialog">Zertifikate &amp; Abschlüsse</button><button type="button" class="secondary admin-cert-overview-trigger" data-payment-overview-open aria-haspopup="dialog">Zahlungen</button>':''}<details class="admin-tools"><summary>Einstellungen</summary><div class="admin-tools-content">${signaturePanel()}<details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Der QR-Code führt zur Anmeldeseite und kann auf allen Schülerkarten verwendet werden.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code" style="image-rendering:pixelated"></canvas><p class="portal-hint">Der QR-Code enthält keine personenbezogenen Daten.</p><a class="portal-text" href="${AbbateCardQR.target}" target="_blank" rel="noopener noreferrer">Anmeldeseite öffnen ↗</a><button class="secondary" id="download-qr" type="button" disabled>PNG (Druckqualität) herunterladen</button><button class="secondary" id="download-qr-svg" type="button" disabled>SVG (Vektorformat) herunterladen</button></details><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div></details></div></section><section class="portal-stats" aria-label="Kontenübersicht"><div><span>Konten</span><strong>${state.students.filter(p=>p.id!==state.me.id).length}</strong></div><div><span>Wartend</span><strong>${state.students.filter(p=>p.role==='learner'&&p.access==='pending').length}</strong></div><div><span>Aktiv</span><strong>${state.students.filter(p=>p.role==='learner'&&M.access(p)).length}</strong></div><div><span>Inaktiv</span><strong>${state.students.filter(p=>p.role==='learner'&&(p.access==='paused'||(p.access==='active'&&!M.access(p)))).length}</strong></div></section>${annualOverview()}<div class="portal-admin-layout"><aside class="portal-sidebar" id="account-picker"><button type="button" id="account-picker-toggle" class="portal-picker-toggle" aria-expanded="false" aria-controls="account-picker-panel">${pickerLabel()}</button><div id="account-picker-panel" class="portal-picker-panel"><h2 class="admin-list-heading">Teilnehmer</h2><label class="admin-sr-only" for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name, Firma oder E-Mail" value="${safe(search)}"><label class="admin-sr-only" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option><option value="payment:open">Zahlung offen</option><option value="payment:reported">Zahlung gemeldet</option><option value="payment:confirmed">Zahlung bestätigt</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></div></aside><div id="account-detail" class="portal-detail" tabindex="-1">${detail()}</div></div>${certificateOverview()}${examOverview()}${paymentDialog()}`;
+    root.innerHTML=`<section class="portal-admin-heading"><div><span class="portal-eyebrow">Abbate Lernraum</span><h1>Teilnehmerverwaltung</h1><p class="admin-sr-only">Schulungen und Prüfungsergebnisse</p></div><div class="admin-toolbar"><button type="button" class="secondary" data-refresh aria-label="Konten aktualisieren">Aktualisieren</button><button type="button" class="secondary admin-cert-overview-trigger" data-exam-overview-open aria-haspopup="dialog">Prüfungsergebnisse (${examError?'–':examRows.length})</button>${state.me.role==='admin'?'<button type="button" class="secondary admin-cert-overview-trigger" data-cert-overview-open aria-haspopup="dialog">Zertifikate &amp; Abschlüsse</button><button type="button" class="secondary admin-cert-overview-trigger" data-payment-overview-open aria-haspopup="dialog">Zahlungen</button>':''}<details class="admin-tools"><summary>Einstellungen</summary><div class="admin-tools-content">${signaturePanel()}<details class="portal-qr"><summary>QR-Code für alle Karten</summary><p>Der QR-Code führt zur Anmeldeseite und kann auf allen Schülerkarten verwendet werden.</p><canvas id="portal-qr" aria-label="Gemeinsamer Karten-QR-Code" style="image-rendering:pixelated"></canvas><p class="portal-hint">Der QR-Code enthält keine personenbezogenen Daten.</p><a class="portal-text" href="${AbbateCardQR.target}" target="_blank" rel="noopener noreferrer">Anmeldeseite öffnen ↗</a><button class="secondary" id="download-qr" type="button" disabled>PNG (Druckqualität) herunterladen</button><button class="secondary" id="download-qr-svg" type="button" disabled>SVG (Vektorformat) herunterladen</button></details><a class="portal-text" href="./konto.html#einstellungen">Mein Konto</a><button class="portal-text" data-logout>Abmelden</button></div></details></div></section><section class="portal-stats" aria-label="Kontenübersicht">${accountStats()}</section>${annualOverview()}<div class="portal-admin-layout"><aside class="portal-sidebar" id="account-picker"><button type="button" id="account-picker-toggle" class="portal-picker-toggle" aria-expanded="false" aria-controls="account-picker-panel">${pickerLabel()}</button><div id="account-picker-panel" class="portal-picker-panel"><h2 class="admin-list-heading">Teilnehmer</h2><label class="admin-sr-only" for="account-search">Konten suchen</label><input id="account-search" type="search" placeholder="Name, Firma oder E-Mail" value="${safe(search)}"><label class="admin-sr-only" for="account-filter">Zugangsstatus</label><select id="account-filter"><option value="all">Alle Konten</option><option value="pending">Wartet auf Freischaltung</option><option value="active">Aktiviert</option><option value="inactive">Inaktiv (alle)</option><option value="paused">Pausiert</option><option value="expired">Abgelaufen</option><option value="payment:open">Zahlung offen</option><option value="payment:reported">Zahlung gemeldet</option><option value="payment:confirmed">Zahlung bestätigt</option></select><div id="account-list" class="portal-people">${peopleList()}</div><a href="./konto.html#registrieren" class="portal-text">Registrierungsseite öffnen ↗</a></div></aside><div id="account-detail" class="portal-detail" tabindex="-1">${detail()}</div></div>${certificateOverview()}${examOverview()}${paymentDialog()}`;
     document.querySelector('#account-filter').value=filter;
     const canvas=document.querySelector('#portal-qr');
     AbbateCardQR.render(canvas).then(()=>{
@@ -703,10 +732,12 @@
       try{await B.updateRecord(event.target.dataset.result,{outcome:event.target.value});await load();renderDetail();notice('Ergebnis korrigiert. Die Änderung ist auf dem Server protokolliert.');}
       catch(error){notice(B.message(error));event.target.disabled=false;await load();renderDetail();}return;
     }
-    if(event.target.id==='account-filter'){filter=event.target.value;document.querySelector('#account-list').innerHTML=peopleList();}
+    if(event.target.id==='account-filter'){filter=event.target.value;document.querySelector('#account-list').innerHTML=peopleList();syncAccountStats();}
     if(event.target.id==='record-kind'){const title=document.querySelector('#record-form [name="title"]');title.maxLength=event.target.value==='annual_instruction'?176:200;const outcome=document.querySelector('#record-outcome');outcome.querySelector('[value="attended"]').disabled=event.target.value==='exam';if(event.target.value==='exam'&&outcome.value==='attended')outcome.value='passed';}
   });
   root.addEventListener('click',async event=>{
+    const stat=event.target.closest('[data-account-stat]');
+    if(stat&&view==='admin'&&B.isStaff(state?.me)){selectAccountStat(stat.dataset.accountStat);return;}
     if(event.target.closest('[data-payment-overview-open]')){
       if(view==='admin'&&state?.me?.role==='admin'){
         const d=root.querySelector('#payment-overview-dialog');
@@ -759,7 +790,7 @@
       selected=id;search='';filter='all';
       const searchInput=root.querySelector('#account-search'),accessFilter=root.querySelector('#account-filter');
       if(searchInput)searchInput.value='';
-      if(accessFilter)accessFilter.value='all';
+      if(accessFilter)accessFilter.value='all';syncAccountStats();
       root.querySelector('#account-list').innerHTML=peopleList();
       root.querySelector('#account-picker-toggle').innerHTML=pickerLabel();
       renderDetail();
@@ -806,7 +837,7 @@
       if(archiveRecord){
         search='';filter='all';
         const input=document.querySelector('#account-search'),status=document.querySelector('#account-filter');
-        if(input)input.value='';if(status)status.value='all';
+        if(input)input.value='';if(status)status.value='all';syncAccountStats();
       }
       document.querySelector('#account-list').innerHTML=peopleList();
       document.querySelector('#account-picker-toggle').innerHTML=pickerLabel();

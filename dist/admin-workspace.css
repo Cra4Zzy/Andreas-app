@@ -20,7 +20,7 @@ body[data-view=admin] .portal-eyebrow{color:#47645b}
 .admin-tools-content .portal-panel,.admin-tools-content .portal-qr{padding:12px;box-shadow:none;border-radius:8px;margin:0}
 .admin-tools-content .portal-panel form{margin:12px 0}
 body[data-view=admin] .portal-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 18px}
-body[data-view=admin] .portal-stats>div{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--ad-surface);border:1px solid var(--ad-line);border-radius:10px;padding:12px 16px}
+body[data-view=admin] .portal-stats>button{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--ad-surface);border:1px solid var(--ad-line);border-radius:10px;padding:12px 16px}
 body[data-view=admin] .portal-stats span{color:var(--ad-mid);font-size:14px}
 body[data-view=admin] .portal-stats strong{margin:0;font-size:28px;color:var(--ad-ink)}
 body[data-view=admin] .portal-admin-layout{display:grid;grid-template-columns:minmax(235px,290px) minmax(0,1fr);gap:18px;align-items:start}
@@ -91,7 +91,7 @@ body[data-view=admin] #portal-status:not(:empty){background:#e0ede4;color:#1d503
  body[data-view=admin] .portal-primary-nav a{padding:10px 14px;text-align:center;min-height:44px}
  body[data-view=admin] .portal-sidebar{top:18px}
  body[data-view=admin] .portal-admin-layout{grid-template-columns:minmax(250px,310px) minmax(0,1fr);gap:24px}
- body[data-view=admin] .portal-stats>div{padding:16px 20px;border-radius:14px}
+ body[data-view=admin] .portal-stats>button{padding:16px 20px;border-radius:14px}
  body[data-view=admin] .portal-account-heading,body[data-view=admin] .admin-section,body[data-view=admin] .portal-role-panel,body[data-view=admin] .portal-sidebar{border-radius:16px;box-shadow:0 8px 24px #173f4108}
  body[data-view=admin] .admin-section-body{padding:18px 20px}
 }
@@ -112,7 +112,7 @@ body[data-view=admin] #portal-status:not(:empty){background:#e0ede4;color:#1d503
  .admin-toolbar{gap:6px;width:100%;justify-content:flex-end}
  .admin-toolbar .secondary,.admin-tools>summary{min-height:40px;font-size:13px;padding:9px 12px}
  body[data-view=admin] .portal-stats{gap:5px;margin-bottom:12px}
- body[data-view=admin] .portal-stats>div{display:flex;flex-direction:column;align-items:start;gap:1px;padding:8px}
+ body[data-view=admin] .portal-stats>button{display:flex;flex-direction:column;align-items:start;gap:1px;padding:8px}
  body[data-view=admin] .portal-stats span{font-size:12px}
  body[data-view=admin] .portal-stats strong{font-size:25px}
  body[data-view=admin] .portal-admin-layout{grid-template-columns:1fr;gap:10px}
@@ -138,7 +138,7 @@ body[data-view=admin] #portal-status:not(:empty){background:#e0ede4;color:#1d503
  body[data-view=admin] .cert-paper{padding:20px 10px}
  body[data-view=admin] .portal-legal-footer{padding:16px 12px}
 }
-@media(max-width:360px){body[data-view=admin] .portal-stats>div{padding:6px}body[data-view=admin] .portal-stats span{font-size:11px}body[data-view=admin] .portal-account-heading .portal-badge{padding:4px 6px}}
+@media(max-width:360px){body[data-view=admin] .portal-stats>button{padding:6px}body[data-view=admin] .portal-stats span{font-size:11px}body[data-view=admin] .portal-account-heading .portal-badge{padding:4px 6px}}
 
 /* Consistent light workspace at all screen sizes; retain compact signed PDF rendering. */
 body[data-view=admin] .portal-primary-nav a:hover{background:#dce7db;color:var(--ad-ink)}
@@ -287,10 +287,10 @@ body[data-view=admin] .admin-overview-dismiss button{display:grid;place-items:ce
 
 /* Administration: stronger hierarchy with restrained Abbate brand colors. */
 body[data-view=admin]{--ad-bg:#e9ede7;--ad-surface:#fffefa;--ad-line:#98ada2;--ad-mid:#344e4b}
-body[data-view=admin] .portal-stats>div{background:#fffefa;border-color:#a3b5aa;border-top:3px solid #58766e}
-body[data-view=admin] .portal-stats>div:nth-child(2){border-top-color:#b28a29}
-body[data-view=admin] .portal-stats>div:nth-child(3){border-top-color:#327655;background:#f1f8f0}
-body[data-view=admin] .portal-stats>div:nth-child(4){border-top-color:#8e6960;background:#faf5f0}
+body[data-view=admin] .portal-stats>button{background:#fffefa;border-color:#a3b5aa;border-top:3px solid #58766e}
+body[data-view=admin] .portal-stats>button:nth-child(2){border-top-color:#b28a29}
+body[data-view=admin] .portal-stats>button:nth-child(3){border-top-color:#327655;background:#f1f8f0}
+body[data-view=admin] .portal-stats>button:nth-child(4){border-top-color:#8e6960;background:#faf5f0}
 body[data-view=admin] .portal-sidebar{background:#dce5dc;border-color:#98ada2}
 body[data-view=admin] .portal-person{background:#fffefa;border-color:#a7b9ae}
 body[data-view=admin] .portal-person.selected{background:#cde3d4;border-color:#245844}
@@ -414,3 +414,9 @@ body[data-view=admin] .abbate-admin-company form{display:grid;gap:9px;max-width:
 body[data-view=admin] .abbate-admin-company input{width:100%;box-sizing:border-box}
 body[data-view=admin] .abbate-person-company{font-weight:800;color:#286551}
 @media(max-width:700px){body[data-view=admin] #payment-overview-dialog .abbate-payment-overview{padding:0}body[data-view=admin] .abbate-admin-company{padding:12px}}
+
+/* Account summary cards also act as keyboard-accessible filters. */
+body[data-view=admin] .portal-stats>button{cursor:pointer;text-align:left;font:inherit;min-width:0;appearance:none;transition:box-shadow .15s,border-color .15s}
+body[data-view=admin] .portal-stats>button:hover{box-shadow:0 3px 12px #16271d18}
+body[data-view=admin] .portal-stats>button[aria-pressed=true]{outline:2px solid #327655;outline-offset:1px}
+body[data-view=admin] .portal-stats>button:focus-visible{outline:3px solid #327655;outline-offset:3px}
