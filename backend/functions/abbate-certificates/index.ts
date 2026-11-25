@@ -14,6 +14,14 @@ const annualFields=new Map(fields.map(x=>[annualLabel+" · "+x+" · Unterweisung
 const titleOf=(r:any)=>r.abbate_courses?.title||"";
 const isAnnual=(r:any)=>r.kind==="refresher"&&r.outcome==="attended"&&(titleOf(r)===annualTitle||annualFields.has(titleOf(r)));
 const templates:Record<string,any>={"cargo":{"id":"cargo","course":"ladungssicherung","label":"Ladungssicherung","title":"Ladungssicherung nach VDI 2700ff · Teilnahmebescheinigung","outcome":"attended","proof":"Teilnahmebescheinigung","standard":"VDI 2700ff"},"rope":{"id":"rope","course":"abseilen","label":"Abseilen aus Höhen","title":"Abseilen aus Höhen und Tiefen · Ausbildungsnachweis","outcome":"passed","proof":"Ausbildungsnachweis (Theorie & Praxis)","standard":"DGUV Regeln 112-198 und 112-199"},"fire":{"id":"fire","course":"brandschutzhelfer","label":"Brandschutzhelfer","title":"Brandschutzhelfer · Ausbildungsbescheinigung","outcome":"attended","proof":"Ausbildungsbescheinigung (Theorie & Praxis)","standard":"§ 10 ArbSchG · ASR A2.2 · DGUV Information 205-023"}};
+const practiceSuffix=" · Praxisprüfung",theorySuffix=" · Theorieprüfung";
+const isPractice=(r:any)=>r.kind==="exam"&&r.outcome==="passed"&&titleOf(r).endsWith(practiceSuffix)&&fields.includes(titleOf(r).slice(0,-practiceSuffix.length));
+function matchingExamPair(records:any[]){
+ if(records.length!==2)return null;
+ const practice=records.find(isPractice),theory=records.find(r=>r.kind==="exam"&&r.outcome==="passed"&&titleOf(r).endsWith(theorySuffix));
+ if(!practice||!theory||practice.revoked_at||theory.revoked_at||practice.school_id!==theory.school_id||practice.participant_id!==theory.participant_id||titleOf(practice).slice(0,-practiceSuffix.length)!==titleOf(theory).slice(0,-theorySuffix.length))return null;
+ return [theory,practice];
+}
 const specialOf=(r:any)=>r.kind==="training"?Object.values(templates).find(t=>titleOf(r)===t.title&&r.outcome===t.outcome):null;
 function templateDetails(t:any,body:any,date:string){
  if(!t||body.template!==t.id||!body.details||typeof body.details!=="object"||Array.isArray(body.details))throw new Fault("Bitte vollständige Vorlagenangaben bestätigen.");
@@ -31,18 +39,27 @@ const bucket="abbate-certificate-assets";
 const smtp=()=>({host:Deno.env.get("CERT_SMTP_HOST"),user:Deno.env.get("CERT_SMTP_USER"),pass:Deno.env.get("CERT_SMTP_PASSWORD"),from:Deno.env.get("CERT_SMTP_FROM")});
 const mailReady=()=>{const s=smtp();return !!(s.host&&s.user&&s.pass&&s.from);};
 const mailText="Guten Tag,\n\nherzlichen Glückwunsch zur bestandenen Theorieprüfung! Im Anhang findest du dein Zertifikat der Fahrschule Andreas Abbate. Du kannst den Nachweis auch in deinem persönlichen Schulungspass abrufen.\n\nViele Grüße\nFahrschule Andreas Abbate";
-async function sendCertificate(admin:any,r:any,pdf:string,expectedEmail:string){
- if(!mailReady())throw new Fault("Der Zertifikatsversand ist noch nicht eingerichtet.",409);
+async function resolveMailRecipient(admin:any,r:any,expectedEmail:unknown,alternateRecipient:boolean){
+ const requested=typeof expectedEmail==="string"?expectedEmail.trim():"";
+ const valid=(email:string)=>email.length<=254&&/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+ if(!valid(requested))throw new Fault("Bitte eine gültige Empfänger-E-Mail-Adresse eingeben.");
+ // This helper is reached only after the existing school-specific active admin authorization and explicit confirmation.
+ if(alternateRecipient)return requested;
  const {data:recipient,error:userError}=await admin.auth.admin.getUserById(r.participant_id);
  const email=recipient?.user?.email;
- if(userError||!recipient?.user?.email_confirmed_at||!email||!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)||email.toLowerCase()!==String(expectedEmail||"").trim().toLowerCase())throw new Fault("Die bestätigte E-Mail-Adresse stimmt nicht mit der Versandvorschau überein.",409);
+ if(userError||!recipient?.user?.email_confirmed_at||!email||!valid(email)||email.toLowerCase()!==requested.toLowerCase())throw new Fault("Die bestätigte E-Mail-Adresse stimmt nicht mit der Versandvorschau überein.",409);
+ return email;
+}
+async function sendCertificate(admin:any,r:any,pdf:string,expectedEmail:unknown,alternateRecipient=false){
+ if(!mailReady())throw new Fault("Der Zertifikatsversand ist noch nicht eingerichtet.",409);
+ const email=await resolveMailRecipient(admin,r,expectedEmail,alternateRecipient);
  const {data:claim,error:claimError}=await admin.from("abbate_certificates").update({mail_status:"sending",mail_attempted_at:new Date().toISOString(),mail_recipient:email}).eq("completion_id",r.id).eq("mail_status","not_sent").is("invalidated_at",null).select("completion_id").maybeSingle();
  if(claimError)throw new Fault("Versand konnte nicht reserviert werden.",500);
  if(!claim){const {data:current}=await admin.from("abbate_certificates").select("mail_status,invalidated_at").eq("completion_id",r.id).maybeSingle();if(current?.invalidated_at)throw new Fault("Dieses Zertifikat wurde gesperrt.",409);return current?.mail_status||"uncertain";}
  const s=smtp();let status="uncertain",id=null;
  try{
   const transport=nodemailer.createTransport({host:s.host,port:465,secure:true,auth:{user:s.user,pass:s.pass},connectionTimeout:12000,greetingTimeout:12000,socketTimeout:20000,tls:{rejectUnauthorized:true}});
-  const info=await transport.sendMail({from:{name:"Fahrschule Andreas Abbate",address:s.from!},to:{name:"",address:email},subject:specialOf(r)?"Dein Schulungsnachweis":isAnnual(r)?"Dein Nachweis – jährliche Unterweisung":"Dein Zertifikat – bestandene Theorieprüfung",text:specialOf(r)?"Guten Tag,\n\nim Anhang findest du deinen Schulungsnachweis der Fahrschule Andreas Abbate.\n\nViele Grüße\nFahrschule Andreas Abbate":isAnnual(r)?"Guten Tag,\n\nim Anhang findest du deinen Teilnahmenachweis zur jährlichen Unterweisung.\n\nViele Grüße\nFahrschule Andreas Abbate":mailText,attachments:[{filename:"Abbate-"+r.reference+".pdf",content:pdf,encoding:"base64",contentType:"application/pdf"}],disableFileAccess:true,disableUrlAccess:true});
+  const info=await transport.sendMail({from:{name:"Fahrschule Andreas Abbate",address:s.from!},to:{name:"",address:email},subject:alternateRecipient?"Schulungszertifikat – Fahrschule Andreas Abbate":specialOf(r)?"Dein Schulungsnachweis":isAnnual(r)?"Dein Nachweis – jährliche Unterweisung":isPractice(r)?"Dein Zertifikat – bestandene Praxisprüfung":"Dein Zertifikat – bestandene Theorieprüfung",text:alternateRecipient?"Guten Tag,\n\nim Anhang erhalten Sie den ausgestellten Schulungsnachweis der Fahrschule Andreas Abbate.\n\nViele Grüße\nFahrschule Andreas Abbate":specialOf(r)?"Guten Tag,\n\nim Anhang findest du deinen Schulungsnachweis der Fahrschule Andreas Abbate.\n\nViele Grüße\nFahrschule Andreas Abbate":isAnnual(r)?"Guten Tag,\n\nim Anhang findest du deinen Teilnahmenachweis zur jährlichen Unterweisung.\n\nViele Grüße\nFahrschule Andreas Abbate":isPractice(r)?mailText.replace("Theorieprüfung","Praxisprüfung"):mailText,attachments:[{filename:"Abbate-"+r.reference+".pdf",content:pdf,encoding:"base64",contentType:"application/pdf"}],disableFileAccess:true,disableUrlAccess:true});
   if(info.accepted?.length){status="accepted";id=info.messageId||null;}
  }catch(e){console.error("Certificate SMTP result uncertain",e instanceof Error?e.name:"unknown");}
  const {error:finishError}=await admin.from("abbate_certificates").update({mail_status:status,mail_accepted_at:status==="accepted"?new Date().toISOString():null,mail_message_id:id}).eq("completion_id",r.id).eq("mail_status","sending");
@@ -50,7 +67,7 @@ async function sendCertificate(admin:any,r:any,pdf:string,expectedEmail:string){
 }
 const signaturePath=(school:string)=>school+"/signature.png";
 const textDate=(s:string)=>new Intl.DateTimeFormat("de-DE",{dateStyle:"long",timeZone:"Europe/Berlin"}).format(new Date(s+"T12:00:00Z"));
-async function createPDF(name:string,label:string,record:any,signature:ArrayBuffer,draft=false,field:string|null=null,special:any=null,details:Record<string,string>={}){
+async function createPDF(name:string,label:string,record:any,signature:ArrayBuffer,draft=false,field:string|null=null,special:any=null,details:Record<string,string>={},practice=false){
  const pdf=await PDFDocument.create(), p=pdf.addPage([842,595]);
  const serif=await pdf.embedFont(StandardFonts.TimesRoman), bold=await pdf.embedFont(StandardFonts.HelveticaBold), regular=await pdf.embedFont(StandardFonts.Helvetica), italic=await pdf.embedFont(StandardFonts.TimesRomanItalic);
  const ink=rgb(.13,.17,.14), gold=rgb(.63,.53,.30), muted=rgb(.37,.40,.36);
@@ -115,20 +132,21 @@ async function createPDF(name:string,label:string,record:any,signature:ArrayBuff
   pdf.setTitle("Abbate – "+special.proof);pdf.setAuthor("Fahrschule Andreas Abbate");
   return await pdf.saveAsBase64();
  }
- center(annual?"TEILNAHMENACHWEIS":"ERFOLGREICH BESTANDENE THEORIEPRÜFUNG",403,13,bold,gold);
+ center(annual?"TEILNAHMENACHWEIS":practice?"ERFOLGREICH BESTANDENE PRAXISPRÜFUNG":"ERFOLGREICH BESTANDENE THEORIEPRÜFUNG",403,13,bold,gold);
  center("Hiermit bestätigen wir, dass",356,13,regular,muted);
  try{center(name,310,34,serif);}catch(e){if(e instanceof Fault)throw e;throw new Fault("Der Name enthält Zeichen, die die PDF-Schrift noch nicht unterstützt. Kein Zertifikat ausgestellt.");}
- center(annual?"an der folgenden Unterweisung teilgenommen hat:":"die Theorieprüfung im Ausbildungsbereich",281,13,regular,muted);
+ center(annual?"an der folgenden Unterweisung teilgenommen hat:":practice?"die praktische Prüfung im Ausbildungsbereich":"die Theorieprüfung im Ausbildungsbereich",281,13,regular,muted);
  center(annual&&field?annualLabel+" – "+field:label,253,19,bold);
- if(courses[label])center(courses[label],231,12,regular,muted);
+ if(practice&&label===fields[0])center("Fachlicher Bezug: DGUV Grundsatz 308-001",231,12,regular,muted);
+ else if(courses[label])center(courses[label],231,12,regular,muted);
  center("am "+textDate(record.completed_at)+(annual?"":" erfolgreich bestanden hat."),208,13,regular,muted);
  center(annual?"Betriebsspezifische Unterweisungsinhalte sind gesondert zu dokumentieren.":"Herzlichen Glückwunsch zu dieser Leistung.",169,annual?12:17,annual?regular:italic);
  const sig=await pdf.embedPng(signature),s=Math.min(155/sig.width,55/sig.height);
  p.drawImage(sig,{x:600-sig.width*s/2,y:102,width:sig.width*s,height:sig.height*s});
  for(const x of [242,600])p.drawLine({start:{x:x-94,y:99},end:{x:x+94,y:99},color:gold,thickness:.8});
  at(textDate(record.completed_at),242,111);at(annual?"Unterweisungsdatum":"Prüfungsdatum",242,81,bold);at("Andreas Abbate",600,81,bold);at(annual?"Unterweisungsverantwortlicher":"Prüfungsverantwortlicher",600,66,regular,10,muted);
- center(draft?"PDF-Vorschau · Noch nicht ausgestellt":(annual?"Teilnahmenachweis · Kein eigenständiger Fahrausweis · ":"Nur Theorieprüfung · Kein eigenständiger Fahrausweis · ")+record.reference,42,10,bold,muted);
- pdf.setTitle(annual?"Abbate – Jährliche Unterweisung":"Abbate – Nachweis der Theorieprüfung");pdf.setAuthor("Fahrschule Andreas Abbate");
+ center(draft?"PDF-Vorschau · Noch nicht ausgestellt":(annual?"Teilnahmenachweis · Kein eigenständiger Fahrausweis · ":practice?"Nur Praxisprüfung · Kein eigenständiger Fahrausweis · ":"Nur Theorieprüfung · Kein eigenständiger Fahrausweis · ")+record.reference,42,10,bold,muted);
+ pdf.setTitle(annual?"Abbate – Jährliche Unterweisung":practice?"Abbate – Nachweis der Praxisprüfung":"Abbate – Nachweis der Theorieprüfung");pdf.setAuthor("Fahrschule Andreas Abbate");
  return await pdf.saveAsBase64();
 }
 Deno.serve(async req=>{
@@ -145,7 +163,7 @@ Deno.serve(async req=>{
   const body=await req.json();
   if(!body||typeof body!=="object")throw new Fault("Ungültige Anfrage.");
   const action=body.action;
-  if(!["status","signature","issue","download","list","mail","preview"].includes(action))throw new Fault("Unbekannte Aktion.");
+  if(!["status","signature","issue","download","list","mail","preview","mail_batch"].includes(action))throw new Fault("Unbekannte Aktion.");
   // A live membership read is enforced by the existing RLS policy (including live_session).
   const {data:members,error:membershipError}=await caller.from("abbate_memberships").select("school_id,role,access_status,access_until").eq("user_id",auth.user.id);
   if(membershipError||!members?.length)throw new Fault("Kein gültiger Zugang.",403);
@@ -165,7 +183,7 @@ Deno.serve(async req=>{
     return json({signatureReady:true,mailReady:mailReady()});
    }
    const {data:sig}=await admin.storage.from(bucket).download(signaturePath(m.school_id));
-   return json({signatureReady:!!sig,mailReady:mailReady(),templatesV2:true});
+   return json({signatureReady:!!sig,mailReady:mailReady(),templatesV2:true,practiceV1:true});
   }
   if(action==="preview"){
    const m=members.find((m:any)=>m.school_id===body.school&&active(m));
@@ -182,8 +200,10 @@ Deno.serve(async req=>{
    if(sigError||!sig)throw new Fault("Die freigegebene Unterschrift fehlt.",409);
    const field=label===annualLabel?body.field:null;
    if(label===annualLabel&&(typeof field!=="string"||!fields.includes(field)))throw new Fault("Bitte gültigen Fachbereich auswählen.");
+   const practice=body.examType==="practice";
+   if((body.examType!==undefined&&!practice)||(practice&&(special||!fields.includes(label))))throw new Fault("Ungültige Prüfungsart.");
    const details=special?templateDetails(special,body,date):{};
-   const pdf=await createPDF(profile.display_name,label,{completed_at:date,reference:"ENTWURF"},await sig.arrayBuffer(),true,field,special,details);
+   const pdf=await createPDF(profile.display_name,label,{completed_at:date,reference:"ENTWURF"},await sig.arrayBuffer(),true,field,special,details,practice);
    return json({pdf,draft:true});
   }
   if(action==="list"){
@@ -198,6 +218,33 @@ Deno.serve(async req=>{
    if(rowsError)throw new Fault("Zertifikate konnten nicht geprüft werden.",500);
    return json({certificates:rows||[]});
   }
+  if(action==="mail_batch"){
+   if(body.confirmed!==true||!Array.isArray(body.completionIds)||body.completionIds.length!==2||new Set(body.completionIds).size!==2||body.completionIds.some((id:any)=>typeof id!=="string"||!uuid.test(id)))throw new Fault("Bitte zwei Zertifikate ausdrücklich bestätigen.");
+   if(!mailReady())throw new Fault("Der Zertifikatsversand ist noch nicht eingerichtet.",409);
+   const ids=body.completionIds;
+   const {data:records,error:recordError}=await caller.from("abbate_completions").select("id,school_id,participant_id,kind,outcome,completed_at,reference,revoked_at,abbate_courses(title)").in("id",ids).is("revoked_at",null);
+   const pair=recordError?null:matchingExamPair(records||[]);
+   if(!pair||!members.some((m:any)=>m.school_id===pair[0].school_id&&active(m)))throw new Fault("Nur zusammengehörige Prüfungen einer Person durch berechtigte Administration.",403);
+   const email=await resolveMailRecipient(admin,pair[0],body.email,body.alternateRecipient===true);
+   const {data:pdfs,error:pdfError}=await admin.from("abbate_certificates").select("completion_id,pdf_base64,mail_status,mail_recipient,mail_message_id").in("completion_id",ids).is("invalidated_at",null);
+   if(pdfError||pdfs?.length!==2||pdfs.some((x:any)=>!x.pdf_base64))throw new Fault("Beide Zertifikate müssen ausgestellt sein.",409);
+   if(pdfs.every((x:any)=>x.mail_status==="accepted"&&x.mail_recipient?.toLowerCase()===email.toLowerCase()&&x.mail_message_id&&x.mail_message_id===pdfs[0].mail_message_id))return json({mailStatus:"accepted"});
+   if(pdfs.some((x:any)=>x.mail_status!=="not_sent"))throw new Fault("Mindestens ein Zertifikat wurde bereits versendet oder befindet sich im Versand. Bitte Einzelstatus prüfen.",409);
+   const stamp=new Date().toISOString();
+   const {data:claimed,error:claimError}=await admin.from("abbate_certificates").update({mail_status:"sending",mail_attempted_at:stamp,mail_recipient:email}).in("completion_id",ids).eq("mail_status","not_sent").is("invalidated_at",null).select("completion_id");
+   if(claimError||claimed?.length!==2){
+    if(claimed?.length)await admin.from("abbate_certificates").update({mail_status:"not_sent",mail_attempted_at:null,mail_recipient:null}).in("completion_id",claimed.map((x:any)=>x.completion_id)).eq("mail_attempted_at",stamp).eq("mail_status","sending");
+    throw new Fault("Gemeinsamer Versand konnte nicht reserviert werden.",409);
+   }
+   const s=smtp();let status="uncertain",id=null;
+   try{
+    const transport=nodemailer.createTransport({host:s.host,port:465,secure:true,auth:{user:s.user,pass:s.pass},connectionTimeout:12000,greetingTimeout:12000,socketTimeout:20000,tls:{rejectUnauthorized:true}});
+    const info=await transport.sendMail({from:{name:"Fahrschule Andreas Abbate",address:s.from!},to:{name:"",address:email},subject:"Schulungszertifikate – Theorie und Praxis",text:"Guten Tag,\n\nim Anhang erhalten Sie die beiden ausgestellten Prüfungsnachweise der Fahrschule Andreas Abbate.\n\nViele Grüße\nFahrschule Andreas Abbate",attachments:pair.map((r:any)=>({filename:"Abbate-"+r.reference+".pdf",content:pdfs.find((x:any)=>x.completion_id===r.id)!.pdf_base64,encoding:"base64",contentType:"application/pdf"})),disableFileAccess:true,disableUrlAccess:true});
+    if(info.accepted?.length){status="accepted";id=info.messageId||null;}
+   }catch(err){console.error("Batch certificate SMTP result uncertain",err instanceof Error?err.name:"unknown");}
+   const {data:finished,error:finishError}=await admin.from("abbate_certificates").update({mail_status:status,mail_accepted_at:status==="accepted"?new Date().toISOString():null,mail_message_id:id}).in("completion_id",ids).eq("mail_status","sending").eq("mail_attempted_at",stamp).select("completion_id");
+   return json({mailStatus:finishError||finished?.length!==2?"uncertain":status});
+  }
   if(!uuid.test(String(body.completionId||"")))throw new Fault("Ungültige Prüfungsreferenz.");
   // RLS checks school, active account and live session; a learner can only read their own unrevoked record.
   const {data:r,error:recordError}=await caller.from("abbate_completions").select("id,school_id,participant_id,kind,outcome,completed_at,reference,revoked_at,abbate_courses(title)").eq("id",body.completionId).maybeSingle();
@@ -209,7 +256,7 @@ Deno.serve(async req=>{
   if(existing?.invalidated_at)throw new Fault("Dieses Zertifikat wurde gesperrt.",409);
   if(action==="mail"){
    if(body.confirmed!==true||!existing)throw new Fault("Bitte den Versand eines ausgestellten Zertifikats ausdrücklich bestätigen.");
-   const mailStatus=await sendCertificate(admin,r,existing.pdf_base64,body.email);
+   const mailStatus=await sendCertificate(admin,r,existing.pdf_base64,body.email,body.alternateRecipient===true);
    return json({mailStatus,reference:r.reference});
   }
   if(action==="download"){
@@ -218,7 +265,7 @@ Deno.serve(async req=>{
   }
   if(body.confirmed!==true)throw new Fault("Bitte Ausstellung ausdrücklich bestätigen.");
   if(existing)return json({pdf:existing.pdf_base64,reference:r.reference,issuedAt:existing.issued_at,mailStatus:existing.mail_status||"not_sent"});
-  const title=(r.abbate_courses as any)?.title||"",suffix=" · Theorieprüfung";
+  const title=(r.abbate_courses as any)?.title||"",practice=isPractice(r),suffix=practice?practiceSuffix:theorySuffix;
   const special=specialOf(r);
   if(body.template&&!special)throw new Fault("Nachweisart passt nicht zum gespeicherten Abschluss.");
   const label=special?special.label:isAnnual(r)?annualLabel:title.endsWith(suffix)?title.slice(0,-suffix.length):"";
@@ -228,7 +275,7 @@ Deno.serve(async req=>{
   const {data:sig,error:sigError}=await admin.storage.from(bucket).download(signaturePath(r.school_id));
   if(sigError||!sig)throw new Fault("Die freigegebene Unterschrift muss zuerst hinterlegt werden.",409);
   const details=special?templateDetails(special,body,r.completed_at):{};
-  const pdf=await createPDF(profile.display_name,label,r,await sig.arrayBuffer(),false,isAnnual(r)?annualFields.get(title)||null:null,special,details);
+  const pdf=await createPDF(profile.display_name,label,r,await sig.arrayBuffer(),false,isAnnual(r)?annualFields.get(title)||null:null,special,details,practice);
   const {error:saveError}=await admin.from("abbate_certificates").insert({completion_id:r.id,issued_by:auth.user.id,pdf_base64:pdf});
   if(saveError){if(saveError.code==="23505"){const {data:stored}=await admin.from("abbate_certificates").select("pdf_base64,invalidated_at,issued_at,mail_status").eq("completion_id",r.id).maybeSingle();if(stored&&!stored.invalidated_at)return json({pdf:stored.pdf_base64,reference:r.reference,issuedAt:stored.issued_at,mailStatus:stored.mail_status||"not_sent"});}throw new Fault("Zertifikat konnte nicht gespeichert werden.",409);}
   return json({pdf,reference:r.reference,mailStatus:"not_sent"});
