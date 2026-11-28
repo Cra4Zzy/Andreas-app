@@ -606,6 +606,7 @@
         if(state.me){if(!(await B.termsAccepted())){termsGate();return;}if(location.search==='?next=verwaltung'){location.replace('./verwaltung.html');return;}if(location.hash==='#einstellungen'){settings();return;}location.replace('./nachweise.html');return;}
         if(registrationSuccessEmail){registrationComplete(registrationSuccessEmail);return;}
         login();
+        if(new URLSearchParams(location.search).get('session')==='expired')notice("Du wurdest nach 5 Minuten Inaktivität abgemeldet. Bitte melde dich erneut an.");
       }else reader();
     }catch(error){failure(error);}finally{syncShell();root.removeAttribute('aria-busy');}
   }
@@ -918,7 +919,7 @@
       recoveryMode=true;
       setTimeout(render,0);
     }
-    if(event==='SIGNED_OUT'&&!passwordResetCompleted)setTimeout(render,0);
+    if(event==='SIGNED_OUT'&&!passwordResetCompleted&&!B.idleExpired)setTimeout(render,0);
   });
   addEventListener('hashchange',()=>{if(view==='login')render();});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&view!=='admin')render();});

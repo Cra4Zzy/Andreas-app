@@ -27,74 +27,91 @@
    payment:membership.payment_status||'open',paymentReportedAt:membership.payment_reported_at||null,
    paymentConfirmedAt:membership.payment_confirmed_at||null});
  let me=null;
- // Administrators and trainers must reauthenticate after 30 minutes without user input.
- // This is an additional browser safeguard; RLS remains the server authorization layer.
- const STAFF_IDLE_MS=30*60*1000;
- let staffIdle=null,staffIdleWired=false,staffIdleSigningOut=false;
- function staffSessionId(session){
+ // Non-admin accounts are signed out after five minutes of real inactivity.
+ // Keep the deadline across navigation and scope it to the actual auth session.
+ const USER_IDLE_MS=5*60*1000;
+ let idle=null,idleWired=false,idleExpired=false;
+ function idleSessionId(session){
    try{
      const payload=session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
      return JSON.parse(atob(payload)).session_id||null;
    }catch{return null;}
  }
  function idleRecord(){
-   if(!staffIdle)return null;
-   try{return JSON.parse(localStorage.getItem(staffIdle.key)||'null');}catch{return null;}
+   if(!idle)return null;
+   try{return JSON.parse(localStorage.getItem(idle.key)||'null');}catch{return null;}
  }
  function idleWrite(at){
-   if(!staffIdle)return;
-   staffIdle.fallbackAt=at;
-   try{localStorage.setItem(staffIdle.key,JSON.stringify({session:staffIdle.session,at}));}catch{}
+   if(!idle)return;
+   idle.lastAt=at;
+   idle.lastWrite=Date.now();
+   try{localStorage.setItem(idle.key,JSON.stringify({session:idle.session,at}));}catch{}
  }
- async function checkStaffIdle(){
-   if(!staffIdle||staffIdleSigningOut)return false;
+ function idleLast(){
    const record=idleRecord();
-   const last=record?.session===staffIdle.session&&Number.isFinite(record.at)?record.at:staffIdle.fallbackAt;
-   if(!last||Date.now()-last<STAFF_IDLE_MS)return false;
-   staffIdleSigningOut=true;
-   try{await client.auth.signOut({scope:'local'});}
-   finally{location.replace('./konto.html?session=expired');}
+   return Math.max(idle.lastAt,record?.session===idle.session&&Number.isFinite(record.at)?record.at:0);
+ }
+ async function checkUserIdle(){
+   if(idleExpired)return true;
+   if(!idle||Date.now()-idleLast()<USER_IDLE_MS)return false;
+   idleExpired=true;
+   // Save any recoverable examination draft before discarding the credentials.
+   try{window.dispatchEvent(new Event('abbate:idle-expired'));}catch{}
+   if(document.body){document.body.inert=true;document.body.style.visibility='hidden';}
+   let timeout;
+   try{
+     const logout=Promise.resolve().then(()=>client.auth.signOut({scope:'local'}));
+     await Promise.race([logout,new Promise(resolve=>{timeout=setTimeout(resolve,3000);})]);
+   }catch{}finally{
+     clearTimeout(timeout);
+     // Even if offline, remove this window's credentials, never another account.
+     try{globalThis.sessionStorage.removeItem(storageKey);}catch{}
+     try{localStorage.removeItem(idle?.key||'');}catch{}
+     me=null;
+     location.replace('./konto.html?session=expired');
+   }
    return true;
  }
- function staffActivity(){
-   if(!staffIdle||staffIdleSigningOut)return;
-   const now=Date.now(),record=idleRecord();
-   const last=record?.session===staffIdle.session&&Number.isFinite(record.at)?record.at:staffIdle.fallbackAt;
-   // An interaction after a long absence must not revive an expired session.
-   if(last&&now-last>=STAFF_IDLE_MS){void checkStaffIdle();return;}
-   if(now-(staffIdle.lastWrite||0)<5000)return;
-   staffIdle.lastWrite=now;
-   idleWrite(now);
+ function userActivity(event){
+   if(!idle||idleExpired||event?.isTrusted===false)return;
+   const now=Date.now();
+   if(now-idleLast()>=USER_IDLE_MS){void checkUserIdle();return;}
+   idle.lastAt=now;
+   if(now-idle.lastWrite>=1000)idleWrite(now);
  }
- async function monitorStaffIdle(user,session){
-   if(!['admin','trainer'].includes(user.role)){staffIdle=null;return true;}
-   const sid=staffSessionId(session);
-   if(!sid)return true; // Supabase session IDs are present in current access tokens.
-   const key='abbate-staff-idle-v2:'+user.id+':'+sid;
-   if(!staffIdle||staffIdle.session!==sid||staffIdle.key!==key){
-     staffIdle={key,session:sid,fallbackAt:Date.now(),lastWrite:0};
+ async function monitorUserIdle(user,session){
+   if(idleExpired)return false;
+   if(user.role==='admin'){idle=null;return true;}
+   const sid=idleSessionId(session)||windowId;
+   const key='abbate-user-idle-v1:'+user.id+':'+sid;
+   if(!idle||idle.key!==key){
+     idle={key,session:sid,lastAt:Date.now(),lastWrite:0};
      const previous=idleRecord();
-     if(previous?.session!==sid||!Number.isFinite(previous?.at))idleWrite(Date.now());
+     if(previous?.session===sid&&Number.isFinite(previous.at))idle.lastAt=previous.at;
+     else idleWrite(Date.now());
    }
-   if(await checkStaffIdle())return false;
-   if(!staffIdleWired){
-     staffIdleWired=true;
-     for(const event of ['pointerdown','keydown','touchstart','wheel'])
-       document.addEventListener(event,staffActivity,{passive:true});
-     document.addEventListener('visibilitychange',()=>{if(!document.hidden)void checkStaffIdle();});
-     addEventListener('focus',()=>{void checkStaffIdle();});
-     setInterval(()=>{void checkStaffIdle();},15000);
-     client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')staffIdle=null;});
+   if(await checkUserIdle())return false;
+   if(!idleWired){
+     idleWired=true;
+     for(const event of ['pointerdown','pointermove','keydown','touchstart','wheel','scroll','input'])
+       document.addEventListener(event,userActivity,{passive:true,capture:true});
+     document.addEventListener('visibilitychange',()=>{if(!document.hidden)void checkUserIdle();});
+     addEventListener('focus',()=>{void checkUserIdle();});
+     addEventListener('pageshow',()=>{void checkUserIdle();});
+     addEventListener('pagehide',()=>{if(idle&&!idleExpired)idleWrite(idleLast());});
+     setInterval(()=>{void checkUserIdle();},1000);
+     client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')idle=null;});
    }
    return true;
  }
  async function identity(){
-   const {data:{session}}=await client.auth.getSession();if(!session){me=null;return null;}
+   if(idleExpired)return null;
+   const {data:{session}}=await client.auth.getSession();if(!session){me=null;idle=null;return null;}
    const {data:{user},error}=await client.auth.getUser();fail(error);
    const membership=await client.from('abbate_memberships').select('*').eq('user_id',user.id).single();fail(membership.error);
    const profile=await client.from('abbate_profiles').select('*').eq('user_id',user.id).eq('school_id',membership.data.school_id).single();fail(profile.error);
    me=person(membership.data,profile.data);
-   if(!await monitorStaffIdle(me,session)){me=null;return null;}
+   if(!await monitorUserIdle(me,session)){me=null;return null;}
    return me;
  }
  // Read all staff records in bounded, deterministically ordered pages rather than
@@ -223,5 +240,5 @@
  }
  globalThis.ABBATE_BACKEND={client,identity,state,setRole,setAccess,setPayment,setCompany,termsAccepted,acceptTerms,addCompletion,updateRecord,deleteAccount,loadPractice,savePractice,listExams,openExam,startExam,submitExam,cancelExam,reviewExam,examDetail,message,
    isStaff:p=>!!p&&['admin','trainer'].includes(p.role)&&p.access==='active'&&(!p.until||p.until>=globalThis.ABBATE_ACCOUNTS.today()),
-   get me(){return me;}};
+   get idleExpired(){return idleExpired;},get me(){return me;}};
 })();

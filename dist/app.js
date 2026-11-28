@@ -541,7 +541,7 @@ async function checkAccess(){
   const work=(async()=>{
     try{
       const me=await B.identity();
-      if(!me){location.replace('./konto.html');return false;}
+      if(!me){if(!B.idleExpired)location.replace('./konto.html');return false;}
       if(!await B.termsAccepted()){location.replace('./konto.html#bedingungen');return false;}
       if(!active(me)){location.replace('./nachweise.html');return false;}
       data.students=[me];return true;
@@ -572,7 +572,8 @@ async function restoreExam(){
  if(supportedLanguage(a.language))selectedLanguage=a.language;
  route='uebung';location.hash='uebung';
 }
-window.addEventListener('beforeunload',e=>{if(run?.mode==='exam'){stashExam();e.preventDefault();e.returnValue='';}});
+window.addEventListener('abbate:idle-expired',stashExam);
+window.addEventListener('beforeunload',e=>{if(run?.mode==='exam'&&!B.idleExpired){stashExam();e.preventDefault();e.returnValue='';}});
 async function boot(){
   if(!await checkAccess())return;
   data.selected=B.me.id;
@@ -594,6 +595,6 @@ function install(){
   modal('App bereits installiert', '<p>Du verwendest Abbate Lernraum bereits als eigenständige App. Du kannst ganz normal weiterlernen.</p><button class="primary" data-action="close">Weiterlernen</button>');
 } 
 
-B.client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT')location.replace('./konto.html');});
+B.client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'&&!B.idleExpired)location.replace('./konto.html');});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkAccess();if(savedRevision<saveRevision)save();}});
 setInterval(()=>{if(!document.hidden)checkAccess();},30000);
