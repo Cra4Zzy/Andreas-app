@@ -27,7 +27,7 @@
     'Konto erstellen':'Create an account',
     'Die Registrierung ist kostenfrei.':'Registration is free.',
     'Wichtig:':'Important:',
-    'Nach dem Absenden musst du deine E-Mail-Adresse über einen Link in deinem Postfach bestätigen. Erst danach kannst du dich anmelden. Die Fahrschule schaltet deinen Lernzugang anschließend frei. Es entsteht kein Abonnement.':'After submitting, you must confirm your email address using the link sent to your inbox. You can then sign in. Your driving school will activate your learning access afterwards. No subscription is created.',
+    'Nach dem Absenden musst du deine E-Mail-Adresse über einen Link in deinem Postfach bestätigen. Erst danach kannst du dich anmelden. Nach der Bestätigung steht dir der Lernzugang direkt zur Verfügung. Es entsteht kein Abonnement.':'After submitting, you must confirm your email address using the link sent to your inbox. You can then sign in. After confirmation, your learning access is available immediately. No subscription is created.',
     'Vor- und Nachname':'First and last name',
     'Mindestens 12 Zeichen. Verwende ein eigenes, sicheres Passwort.':'At least 12 characters. Use a unique, strong password.',
     'Ich akzeptiere die':'I accept the',
