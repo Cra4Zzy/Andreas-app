@@ -146,7 +146,7 @@
    return r.data;
  }
  async function setAccess(id,action){
-   if(!['activate','extend','pause','resume'].includes(action))throw Error('Ungültige Zugangsaktion.');
+   if(!['activate','pause','resume'].includes(action))throw Error('Ungültige Zugangsaktion.');
    const r=await client.rpc('abbate_manage_access',{p_school:me.school,p_participant:id,p_action:action});
    fail(r.error);
    return r.data;

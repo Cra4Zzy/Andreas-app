@@ -86,6 +86,6 @@ test('successful recovery callback shows a dedicated confirmation instead of exp
 });
 test('success state wins over stale recovery URL while genuine invalid links remain blocked',()=>{
   assert.match(portal,/passwordResetCompleted=true;\s*passwordResetSuccess\(\);/);
-  assert.match(portal,/if\(event==='SIGNED_OUT'&&!passwordResetCompleted\)/);
+  assert.match(portal,/if\(event==='SIGNED_OUT'&&!passwordResetCompleted&&!B\.idleExpired\)/);
   assert.match(portal,/location\.replace\('\.\/konto\.html#passwort-gesetzt'\)/);
 });
