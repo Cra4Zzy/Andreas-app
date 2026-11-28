@@ -6,11 +6,11 @@ const portal=fs.readFileSync('dist/portal.js','utf8');
 const backend=fs.readFileSync('dist/backend.js','utf8');
 const html=fs.readFileSync('dist/konto.html','utf8');
 
-test('successful registration prominently explains both confirmation and approval',()=>{
+test('successful registration prominently explains confirmation and immediate access',()=>{
   assert.match(portal,/function registrationComplete\(email\)/);
   assert.match(portal,/Bestätigungslink/);
   assert.match(portal,/Ohne diese Bestätigung kannst du dich noch nicht anmelden/);
-  assert.match(portal,/Freischaltung durch die Fahrschule/);
+  assert.match(portal,/Direkt mit dem Lernen beginnen/);
   assert.match(portal,/Registriere dich nicht erneut/);
   assert.match(portal,/registrationSuccessEmail=values\.email\.trim\(\)/);
   assert.match(portal,/if\(registrationSuccessEmail\)\{registrationComplete\(registrationSuccessEmail\);return;\}/);

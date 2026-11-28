@@ -39,15 +39,15 @@
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>160)throw Error('Bitte eine gültige E-Mail-Adresse angeben.');
     if(state.students.some(p=>p.email.toLowerCase()===email))throw Error('Diese E-Mail-Adresse ist bereits registriert.');
     if(!id||state.students.some(p=>p.id===id))throw Error('Ungültige Konto-Kennung.');
-    const person={id,name,email,access:'pending',until:today()};state.students.push(person);
+    const person={id,name,email,access:'active',until:null};state.students.push(person);
     state.audit.push({action:'registered',student:id,at:new Date().toISOString()});return person;
   }
   function setAccess(state,id,status,until){
     const person=state.students.find(p=>p.id===id);
     if(!person||!statuses[status])throw Error('Konto oder Zugangsstatus ist ungültig.');
     if(until!==undefined&&!dateOK(until))throw Error('Bitte ein gültiges Ablaufdatum wählen.');
-    if(status==='active'&&((until||person.until)<today()))throw Error('Zum Aktivieren bitte ein heutiges oder zukünftiges Ablaufdatum wählen.');
-    person.access=status;if(until!==undefined)person.until=until;
+    if(status==='active'&&until&&until<today())throw Error('Zum Aktivieren bitte ein heutiges oder zukünftiges Ablaufdatum wählen.');
+    person.access=status;if(until!==undefined)person.until=until;else if(status==='active')person.until=null;
     state.audit.push({action:'access:'+status,student:id,at:new Date().toISOString()});
   }
   function recordsFor(state,id,asOf=today()){

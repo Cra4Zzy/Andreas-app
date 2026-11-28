@@ -1,9 +1,9 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
 const M=require('../dist/konten-model.js');
-test('registration waits for approval and access changes preserve the entire history',()=>{
+test('registration is active immediately and access changes preserve the entire history',()=>{
  const s=M.migrate(),p=M.register(s,{name:'Demo Neu',email:'NEU@example.test'},'new');
- assert.equal(p.access,'pending');assert.equal(M.ownPass(s,p.id),null);
+ assert.equal(p.access,'active');assert.equal(p.until,null);assert.ok(M.ownPass(s,p.id));
  M.addCompletion(s,{student:p.id,title:'Prüfung',kind:'exam',outcome:'failed',completedAt:'2026-01-01'},'failed');
  M.setAccess(s,p.id,'active','2099-01-01');assert.equal(M.ownPass(s,p.id).records[0].outcome,'failed');
  M.setAccess(s,p.id,'paused');assert.equal(M.ownPass(s,p.id),null);assert.equal(M.recordsFor(s,p.id).length,1);

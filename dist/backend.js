@@ -146,7 +146,7 @@
    return r.data;
  }
  async function setAccess(id,action){
-   if(!['activate','extend','pause','resume'].includes(action))throw Error('Ungültige Zugangsaktion.');
+   if(!['activate','pause','resume'].includes(action))throw Error('Ungültige Zugangsaktion.');
    const r=await client.rpc('abbate_manage_access',{p_school:me.school,p_participant:id,p_action:action});
    fail(r.error);
    return r.data;
@@ -171,7 +171,7 @@
    fail(r.error);return r.data===true;
  }
  async function acceptTerms(){
-   const r=await client.rpc('abbate_accept_terms',{p_version:'2026-11-02'});
+   const r=await client.rpc('abbate_accept_terms',{p_version:'2026-11-28'});
    fail(r.error);
  }
   async function addCompletion(input){const r=await client.rpc('abbate_record_completion',{
