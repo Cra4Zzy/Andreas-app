@@ -7,6 +7,8 @@ on:
       - "index.html"
       - "downloads.json"
       - "dist/**"
+      - "android/**"
+      - "capacitor.config.json"
       - "tests/**"
       - "scripts/build-web.cjs"
       - "package.json"
@@ -62,27 +64,52 @@ jobs:
           test -s website/dist/backend-config.js
           test -s website/dist/vendor/supabase.js
 
-      - name: Include the exact tested Android pilot APK
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Build or retain the verified live Android installer
         shell: bash
         env:
-          GH_TOKEN: ${{ github.token }}
-          APK_SHA256: 5ab283f6422e441daaabddf33dba4fac563d3747f07e968ef006a8ef3bfb4645
-          ZIP_SHA256: e3ff6dc4052f26a5bb60407bc97ab7c6404ea493c62c971cca6b2a32f09f99b0
+          KEYSTORE_BASE64: ${{ secrets.ABBATE_ANDROID_KEYSTORE_BASE64 }}
+          ABBATE_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ABBATE_ANDROID_KEYSTORE_PASSWORD }}
+          ABBATE_ANDROID_KEY_ALIAS: ${{ secrets.ABBATE_ANDROID_KEY_ALIAS }}
+          ABBATE_ANDROID_KEY_PASSWORD: ${{ secrets.ABBATE_ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
           mkdir -p website/downloads
           apk='website/downloads/Abbate-Lernraum-Android.apk'
-          url='https://app.gabelstaplerfahrschule-andreas.de/downloads/Abbate-Lernraum-Android.apk'
-          # Reuse only the byte-identical published APK; the CI artifact expires.
-          if curl -fsSL --max-time 60 "$url" -o "$apk" && echo "$APK_SHA256  $apk" | sha256sum -c --status; then
-            echo 'Existing verified APK retained.'
+          meta='website/downloads/android-live.json'
+          base='https://app.gabelstaplerfahrschule-andreas.de/downloads'
+          # Preserve the installed package/signature on ordinary web deployments.
+          if curl -fsSL --max-time 30 "$base/android-live.json" -o "$meta" &&
+             curl -fsSL --max-time 90 "$base/Abbate-Lernraum-Android.apk" -o "$apk" &&
+             node -e 'const fs=require("fs"),c=require("crypto"),m=JSON.parse(fs.readFileSync(process.argv[1]));if(m.versionCode!==2||m.sha256!==c.createHash("sha256").update(fs.readFileSync(process.argv[2])).digest("hex"))process.exit(1)' "$meta" "$apk"; then
+            echo 'Existing verified live Android installer retained.'
           else
-            rm -f "$apk"
-            gh api repos/Cra4Zzy/Andreas-app/actions/artifacts/15259666342/zip > "$RUNNER_TEMP/abbate-android-pilot.zip"
-            echo "$ZIP_SHA256  $RUNNER_TEMP/abbate-android-pilot.zip" | sha256sum -c
-            unzip -p "$RUNNER_TEMP/abbate-android-pilot.zip" app-debug.apk > "$apk"
+            npm exec -- cap sync android
+            chmod +x android/gradlew
+            if [ -n "$KEYSTORE_BASE64" ] && [ -n "$ABBATE_ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ABBATE_ANDROID_KEY_ALIAS" ] && [ -n "$ABBATE_ANDROID_KEY_PASSWORD" ]; then
+              export ABBATE_ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/abbate-upload.jks"
+              printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$ABBATE_ANDROID_KEYSTORE_PATH"
+              chmod 600 "$ABBATE_ANDROID_KEYSTORE_PATH"
+              (cd android && ./gradlew --no-daemon assembleRelease)
+              cp android/app/build/outputs/apk/release/app-release.apk "$apk"
+              rm -f "$ABBATE_ANDROID_KEYSTORE_PATH"
+            else
+              echo '::warning::No permanent Android signing key configured; publishing a debug-signed pilot only.'
+              (cd android && ./gradlew --no-daemon assembleDebug)
+              cp android/app/build/outputs/apk/debug/app-debug.apk "$apk"
+            fi
+            node -e 'const fs=require("fs"),c=require("crypto");fs.writeFileSync(process.argv[1],JSON.stringify({versionCode:2,sha256:c.createHash("sha256").update(fs.readFileSync(process.argv[2])).digest("hex"),liveFrontend:true})+"\\n")' "$meta" "$apk"
           fi
-          echo "$APK_SHA256  $apk" | sha256sum -c
+          sdk="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          signer=$(find "$sdk/build-tools" -name apksigner -type f | sort -V | tail -1)
+          aapt=$(find "$sdk/build-tools" -name aapt -type f | sort -V | tail -1)
+          "$signer" verify --verbose "$apk"
+          "$aapt" dump badging "$apk" | grep -F "package: name='de.abbate.lernraum.preview' versionCode='2'"
+          test -s "$meta"
 
       - name: Stamp every public app page with the exact deployed revision
         shell: bash
@@ -165,6 +192,8 @@ jobs:
           node -e "const j=require('./live-build-info.json');if(j.commit!==process.env.GITHUB_SHA)process.exit(1)"
           curl -fsSL --retry 3 --max-time 90 'https://app.gabelstaplerfahrschule-andreas.de/downloads/Abbate-Lernraum-Android.apk' -o live-android.apk
           cmp -s website/downloads/Abbate-Lernraum-Android.apk live-android.apk
+          curl -fsSL --retry 3 --max-time 20 "https://app.gabelstaplerfahrschule-andreas.de/downloads/android-live.json?sha=$GITHUB_SHA" -o live-android-meta.json
+          cmp -s website/downloads/android-live.json live-android-meta.json
           curl -fsSL --retry 3 --max-time 20 'https://app.gabelstaplerfahrschule-andreas.de/?sha='$GITHUB_SHA -o live-landing.html
           cmp -s website/index.html live-landing.html
           for file in index.html konto.html pruefung.html app.js sw.js verwaltung.html admin-workspace.css nachweise.html portal.js frontend-updates.js; do

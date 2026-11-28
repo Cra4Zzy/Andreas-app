@@ -147,8 +147,24 @@ test('Android pilot has a labeled direct APK download and the deployment verifie
   const landing=read('index.html'), pipeline=read('.github/workflows/deploy-allinkl.yml');
   assert.match(landing,/href="https:\/\/app\.gabelstaplerfahrschule-andreas\.de\/downloads\/Abbate-Lernraum-Android\.apk"/);
   assert.match(landing,/Android-App herunterladen \(\.apk\)/);
-  assert.match(landing,/Testversion · 18,2 MB · Android 7\+/);
-  assert.match(pipeline,/actions\/artifacts\/15259666342\/zip/);
-  assert.match(pipeline,/5ab283f6422e441daaabddf33dba4fac563d3747f07e968ef006a8ef3bfb4645/);
+  assert.match(landing,/Testversion · Live-Updates · Android 7\+/);
+  assert.match(pipeline,/apksigner/);
+  assert.match(pipeline,/android-live\.json/);
+  assert.match(pipeline,/assembleDebug/);
+  assert.match(pipeline,/assembleRelease/);
   assert.match(pipeline,/cmp -s website\/downloads\/Abbate-Lernraum-Android\.apk live-android\.apk/);
+});
+
+test('Android uses first-party HTTPS live frontend with no native JS bridge',()=>{
+  const activity=read('android/app/src/main/java/de/abbate/lernraum/preview/MainActivity.java');
+  assert.match(activity,/app\.gabelstaplerfahrschule-andreas\.de/);
+  assert.match(activity,/web\.loadUrl\(HOME\)/);
+  assert.match(activity,/LOAD_NO_CACHE/);
+  assert.match(activity,/MIXED_CONTENT_NEVER_ALLOW/);
+  assert.match(activity,/setAllowFileAccess\(false\)/);
+  assert.match(activity,/handler\.cancel\(\)/);
+  assert.doesNotMatch(activity,/addJavascriptInterface|extends BridgeActivity|handler\.proceed/);
+  assert.match(read('dist/app.js'),/AbbateAndroid/);
+  assert.match(read('android/app/build.gradle'),/versionCode 2/);
+  assert.match(read('dist/frontend-updates.js'),/#uebung/);
 });
