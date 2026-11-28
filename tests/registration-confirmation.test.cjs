@@ -35,3 +35,13 @@ test('login screen loads updated registration scripts and styling',()=>{
   assert.match(html,/portal\.css\?v=10/);
   assert.match(html,/backend\.js\?v=10/);
 });
+
+ test('spam warning is prominent before registration and before confirmation steps',()=>{
+ const login=portal.slice(portal.indexOf('function login(){'),portal.indexOf('function registrationComplete(email)'));
+ const success=portal.slice(portal.indexOf('function registrationComplete(email)'),portal.indexOf('function recovery(){'));
+ for(const section of [login,success]){assert.match(section,/class="portal-spam-warning"/);assert.match(section,/Wichtig: Spamordner prüfen!/);assert.match(section,/in den Posteingang/);}
+ assert.ok(login.indexOf('portal-spam-warning')<login.indexOf('id="register-form"'));
+ assert.ok(success.indexOf('portal-spam-warning')<success.indexOf('portal-registration-complete__steps'));
+ assert.match(fs.readFileSync('dist/portal.css','utf8'),/\.portal-spam-warning\{[^}]*border-left:/);
+ assert.equal((html.match(/&amp;spam=1/g)||[]).length,3);
+ });
