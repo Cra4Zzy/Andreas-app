@@ -19,7 +19,7 @@ test('three public legal pages are reachable and share navigation',()=>{
 test('registration requires explicit current AGB acceptance and links to customer information',()=>{
  const s=file('dist/portal.js');
  assert.match(s,/name="termsAccepted" value="yes" required/);
- assert.match(s,/abbate_terms_version:'2026-11-02'/);
+ assert.match(s,/abbate_terms_version:'2026-11-28'/);
  assert.match(s,/values\.termsAccepted!=='yes'/);
  assert.match(s,/\.\/agb\.html/);
  assert.match(s,/\.\/datenschutz\.html/);

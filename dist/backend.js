@@ -171,7 +171,7 @@
    fail(r.error);return r.data===true;
  }
  async function acceptTerms(){
-   const r=await client.rpc('abbate_accept_terms',{p_version:'2026-11-02'});
+   const r=await client.rpc('abbate_accept_terms',{p_version:'2026-11-28'});
    fail(r.error);
  }
   async function addCompletion(input){const r=await client.rpc('abbate_record_completion',{

@@ -42,8 +42,8 @@ test('pilot is optional in all learning modes and does not modify answers',()=>{
  assert.match(app,/if\(illustration\)modal\(esc\(I18N\.t\(10\)\),illustration\)/);
  assert.match(css,/\.question-illustration img,\.question-illustration-large img\{[^}]*height:auto/);
  assert.match(app,/event\.target\.closest\('figure'\)\.hidden=true/);
- assert.match(html,/app\.js\?v=58"/);
- assert.match(sw,/"\.\/app\.js\?v=58"/);
+ assert.match(html,/app\.js\?v=60"/);
+ assert.match(sw,/"\.\/app\.js\?v=60"/);
  assert.match(html,/experience\.css\?v=12"/);
  assert.match(sw,/"\.\/experience\.css\?v=12"/);
 });
