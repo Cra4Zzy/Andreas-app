@@ -142,3 +142,13 @@ test('exam disclaimer identifies school responsibility and separate practical qu
   assert.equal(Object.keys(translated).length,25);
   assert.ok(Object.values(translated).every(value=>typeof value==='string'&&value.length>0));
 });
+
+test('Android pilot has a labeled direct APK download and the deployment verifies its bytes',()=>{
+  const landing=read('index.html'), pipeline=read('.github/workflows/deploy-allinkl.yml');
+  assert.match(landing,/href="https:\/\/app\.gabelstaplerfahrschule-andreas\.de\/downloads\/Abbate-Lernraum-Android\.apk"/);
+  assert.match(landing,/Android-App herunterladen \(\.apk\)/);
+  assert.match(landing,/Testversion · 18,2 MB · Android 7\+/);
+  assert.match(pipeline,/actions\/artifacts\/15259666342\/zip/);
+  assert.match(pipeline,/5ab283f6422e441daaabddf33dba4fac563d3747f07e968ef006a8ef3bfb4645/);
+  assert.match(pipeline,/cmp -s website\/downloads\/Abbate-Lernraum-Android\.apk live-android\.apk/);
+});
